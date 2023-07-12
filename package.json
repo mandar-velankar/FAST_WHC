@@ -1,0 +1,65 @@
+{
+    "name": "F_TNDR_CAG_FAST_WHC",
+    "version": "1.0.0",
+    "description": "A simple CAP project.",
+    "repository": "<Add your repository here>",
+    "license": "UNLICENSED",
+    "private": true,
+    "dependencies": {
+        "@cap-js-community/odata-v2-adapter": "^1.11.4",
+        "@sap/cds": "^6.8.2",
+        "express": "^4",
+        "hdb": "^0.19.0"
+    },
+    "devDependencies": {
+        "sqlite3": "^5",
+        "cds-plugin-ui5": "^0.1.4",
+        "rimraf": "^3.0.2"
+    },
+    "scripts": {
+        "start": "cds-serve",
+        "watch": "cds watch",
+        "watch:hybrid": "cds bind --exec npm run watch --profile hybrid",
+        "watch:as": "cds bind --exec npm run watch --profile artiom",
+        "watch:mv": "cds bind --exec npm run watch --profile mandar",
+        "watch:jp": "cds bind --exec npm run watch --profile jorj",
+        "watch:jv": "cds bind --exec npm run watch --profile joris",
+        "watch:nv": "cds bind --exec npm run watch --profile nils",
+        "watch:wl": "cds bind --exec npm run watch --profile wl",
+        "build:cf": "npm run build:cds",
+        "build:cds": "cds build --production",
+        "undeploy": "cf undeploy F_TNDR_CAG_FAST_WHC --delete-services --delete-service-keys --delete-service-brokers",
+        "build": "rimraf resources mta_archives && mbt build --mtar archive",
+        "deploy:sql": "cds deploy --to sqlite",
+        "deploy:hana:as": "cds bind --exec cds deploy --to hana --profile artiom",
+        "deploy:hana:mv": "cds bind --exec cds deploy --to hana --profile mandar",
+        "deploy:hana:jp": "cds bind --exec cds deploy --to hana --profile jorj",
+        "deploy:hana:jv": "cds bind --exec cds deploy --to hana --profile joris",
+        "deploy:hana:nv": "cds bind --exec cds deploy --to hana --profile nils",
+        "deploy:hana:wl": "cds bind --exec cds deploy --to hana --profile wl",
+        "deploy": "cf deploy mta_archives/archive.mtar --retries 1",
+        "watch-whcapp": "cds watch --open com.bayer.tender.whcapp/index.html?sap-ui-xx-viewCache=false --livereload false"
+    },
+    "cds": {
+        "cov2ap": {
+            "plugin": true
+        },
+        "hana": {
+            "deploy-format": "hdbtable"
+        },
+        "requires": {
+            "db": {
+                "kind": "hana-cloud"
+            },
+            "uaa": {
+                "kind": "xsuaa"
+            },
+            "auth": {
+                "kind": "jwt-auth"
+            }
+        }
+    },
+    "workspaces": [
+        "app/*"
+    ]
+}

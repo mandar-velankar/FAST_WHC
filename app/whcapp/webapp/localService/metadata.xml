@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<edmx:Edmx Version="4.0" xmlns:edmx="http://docs.oasis-open.org/odata/ns/edmx">
+    <edmx:Reference Uri="https://sap.github.io/odata-vocabularies/vocabularies/Common.xml">
+        <edmx:Include Alias="Common" Namespace="com.sap.vocabularies.Common.v1"/>
+    </edmx:Reference>
+    <edmx:Reference Uri="https://oasis-tcs.github.io/odata-vocabularies/vocabularies/Org.OData.Core.V1.xml">
+        <edmx:Include Alias="Core" Namespace="Org.OData.Core.V1"/>
+    </edmx:Reference>
+    <edmx:DataServices>
+        <Schema Namespace="CatalogService" xmlns="http://docs.oasis-open.org/odata/ns/edm">
+            <EntityContainer Name="EntityContainer">
+                <EntitySet Name="Contracts" EntityType="CatalogService.Contracts">
+                    <NavigationPropertyBinding Path="ContractCustomers" Target="ContractCustomers"/>
+                </EntitySet>
+                <EntitySet Name="ContractCustomers" EntityType="CatalogService.ContractCustomers">
+                    <NavigationPropertyBinding Path="Contracts" Target="Contracts"/>
+                </EntitySet>
+            </EntityContainer>
+            <EntityType Name="Contracts">
+                <Key>
+                    <PropertyRef Name="ID"/>
+                </Key>
+                <Property Name="ID" Type="Edm.Guid" Nullable="false"/>
+                <Property Name="Name" Type="Edm.String"/>
+                <Property Name="Background" Type="Edm.String"/>
+                <Property Name="Status" Type="Edm.String"/>
+                <Property Name="VistexID" Type="Edm.String"/>
+                <NavigationProperty Name="ContractCustomers" Type="Collection(CatalogService.ContractCustomers)" Partner="Contracts"/>
+            </EntityType>
+            <EntityType Name="ContractCustomers">
+                <Key>
+                    <PropertyRef Name="ID"/>
+                </Key>
+                <Property Name="ID" Type="Edm.Guid" Nullable="false"/>
+                <Property Name="BHOID" Type="Edm.String"/>
+                <Property Name="Name" Type="Edm.String"/>
+                <NavigationProperty Name="Contracts" Type="CatalogService.Contracts" Partner="ContractCustomers">
+                    <ReferentialConstraint Property="Contracts_ID" ReferencedProperty="ID"/>
+                </NavigationProperty>
+                <Property Name="Contracts_ID" Type="Edm.Guid"/>
+            </EntityType>
+        </Schema>
+    </edmx:DataServices>
+</edmx:Edmx>
