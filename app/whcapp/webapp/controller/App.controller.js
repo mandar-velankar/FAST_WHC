@@ -1,19 +1,16 @@
 sap.ui.define([
-    "sap/ui/core/mvc/Controller"
+	"./BaseController",
+    "sap/ui/model/json/JSONModel"
 ],
     /**
      * @param {typeof sap.ui.core.mvc.Controller} Controller
      */
-    function (Controller) {
+    function (BaseController,JSONModel) {
         "use strict";
 
-        return Controller.extend("com.bayer.tender.whcapp.controller.App", {
+        return BaseController.extend("com.bayer.tender.whcapp.controller.App", {
             onInit: function () {
-                var oViewModel,
-                    fnSetAppNotBusy,
-                    iOriginalBusyDelay = this.getView().getBusyIndicatorDelay();
-
-                oViewModel = new JSONModel({
+                const viewModel = new JSONModel({
                     busy: true,
                     delay: 0,
                     layout: "OneColumn",
@@ -24,16 +21,7 @@ sap.ui.define([
                         }
                     }
                 });
-                this.setModel(oViewModel, "appView");
-
-                fnSetAppNotBusy = function () {
-                    oViewModel.setProperty("/busy", false);
-                    oViewModel.setProperty("/delay", iOriginalBusyDelay);
-                };
-
-                // since then() has no "reject"-path attach to the MetadataFailed-Event to disable the busy indicator in case of an error
-                this.getOwnerComponent().getModel().metadataLoaded().then(fnSetAppNotBusy);
-                this.getOwnerComponent().getModel().attachMetadataFailed(fnSetAppNotBusy);
+                this.setModel(viewModel, "appView");
 
                 // apply content density mode to root view
                 this.getView().addStyleClass(this.getOwnerComponent().getContentDensityClass());

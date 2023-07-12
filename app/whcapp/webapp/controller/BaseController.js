@@ -1,27 +1,13 @@
 sap.ui.define([
 	"sap/ui/core/mvc/Controller",
 	"sap/ui/core/routing/History",
-	"../model/formatter",
-	"../model/datatypes/CustomPercentageType",
 	"sap/ui/core/Fragment",
 	"sap/m/MessagePopover",
 	"sap/m/MessageItem"
-], function (Controller, History, formatter, CustomPercentageType, Fragment, MessagePopover, MessageItem) {
+], function (Controller, History,MessagePopover, MessageItem) {
 	"use strict";
 
 	return Controller.extend("com.bayer.tender.whcapp.controller.BaseController", {
-
-		formatter: formatter,
-
-		customTypes: {
-			percentage: CustomPercentageType
-		},
-
-		/**
-		 * Convenience method for accessing the router in every controller of the application.
-		 * @public
-		 * @returns {sap.ui.core.routing.Router} the router for this component
-		 */
 		getRouter : function () {
 			return this.getOwnerComponent().getRouter();
 		},
@@ -107,22 +93,6 @@ sap.ui.define([
 				}
 			})
 		},
-		// _getMessagePopover: function () {
-		// 	const oView = this.getView();
-
-		// 	// create popover lazily (singleton)
-		// 	if (!this._pMessagePopover) {
-		// 		this._pMessagePopover = Fragment.load({
-		// 			id: oView.getId(),
-		// 			name: "com.bayer.tender.statenderapp.view.generic.fragments.MessagePopover"
-		// 		}).then(function (oMessagePopover) {
-		// 			oView.addDependent(oMessagePopover);
-		// 			return oMessagePopover;
-		// 		});
-		// 	}
-		// 	return this._pMessagePopover;
-		// },
-
 		cancelPendingChanges: function(entities, msgPropName){
 			const targets = this.getTargets(entities);
 			const messages = this.getMessages(entities);

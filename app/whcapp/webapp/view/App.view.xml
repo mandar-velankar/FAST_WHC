@@ -3,14 +3,5 @@
 	height="100%"
 	xmlns="sap.m"
 	xmlns:f="sap.f">
-    <App
-		id="app"
-		busy="{appView>/busy}"
-		busyIndicatorDelay="{appView>/delay}">
-		<f:FlexibleColumnLayout
-			id="layout"
-			layout="{appView>/layout}"
-			backgroundDesign="Translucent">
-		</f:FlexibleColumnLayout>
-	</App>
+    	<f:FlexibleColumnLayout id="fcl" layout="{appView>/layout}" backgroundDesign="Translucent"/>
 </mvc:View>

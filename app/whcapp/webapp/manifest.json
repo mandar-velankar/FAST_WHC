@@ -93,7 +93,7 @@
         "async": true,
         "viewPath": "com.bayer.tender.whcapp.view",
 				"controlAggregation": "beginColumnPages",
-        "controlId": "app",
+        "controlId": "fcl",
         "bypassed": {
 					"target": "notFound"
 				},

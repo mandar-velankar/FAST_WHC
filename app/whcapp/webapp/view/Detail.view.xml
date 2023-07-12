@@ -1,0 +1,91 @@
+<mvc:View
+	controllerName="com.bayer.tender.whcapp.controller.Detail"
+	xmlns="sap.m"
+	xmlns:t="sap.ui.table"
+	xmlns:f="sap.f"
+	xmlns:form="sap.ui.layout.form"
+	xmlns:l="sap.ui.layout"
+	xmlns:core="sap.ui.core"
+	xmlns:mvc="sap.ui.core.mvc"
+	xmlns:tnt="sap.tnt">
+	<f:DynamicPage id="detailPage"
+		busy="{detailView>/busy}"
+		busyIndicatorDelay="{detailView>/delay}"
+			stickySubheaderProvider="detailTabBar"
+			class="sapUiNoContentPadding" >
+		<f:title>
+			<f:DynamicPageTitle>
+				<f:heading>
+					<Title text="{Name}" level="H2"/>
+				</f:heading>
+				<f:navigationActions>
+					<Button
+							icon="sap-icon://full-screen"
+							type="Transparent"
+							visible="{= !${device>/system/phone} &amp;&amp; !${appView>/actionButtonsInfo/midColumn/fullScreen}}"
+							press=".toggleFullScreen" />
+					<Button
+							icon="sap-icon://exit-full-screen"
+							type="Transparent"
+							visible="{= !${device>/system/phone} &amp;&amp; ${appView>/actionButtonsInfo/midColumn/fullScreen}}"
+							press=".toggleFullScreen" />
+					<Button
+							icon="sap-icon://decline"
+							type="Transparent" 
+							press=".onCloseDetailPress"/>
+				</f:navigationActions>
+
+				<!-- ACTIONS -->
+				<f:actions>
+				</f:actions>
+			</f:DynamicPageTitle>
+		</f:title>
+		<f:header>
+			<f:DynamicPageHeader >
+				<FlexBox wrap="Wrap" fitContainer="true" alignItems="Stretch">
+
+					<VBox justifyContent="Center" class="sapUiSmallMarginEnd">
+						<Label text="Background"/>
+						<Text text="{Background}"/>
+					</VBox>
+					
+					<VBox justifyContent="Center" class="sapUiSmallMarginEnd">
+						<Label text="Status"/>
+						<Text text="{Status}"/>
+					</VBox>		
+				</FlexBox>
+			</f:DynamicPageHeader>
+		</f:header>
+		<f:content>	
+			<IconTabBar
+				id="detailTabBar"
+				expanded="{device>/isNoPhone}"
+				class="sapUiResponsiveContentPadding">
+				<items>
+					<IconTabFilter text="Customers" key="customers">
+						<Table id="customersTable" 
+                            items="{path:'ContractCustomers'}"
+                            growing="true"
+                            growingThreshold="15"
+                            growingScrollToLoad="false"
+                            busyIndicatorDelay="0"
+                        >
+                            <columns>
+                                <Column>
+                                    <Text text="Name" />
+                                </Column>
+                            </columns>
+                            <items>
+                                <ColumnListItem>
+                                    <cells>
+                                        <Text text="{Name}" />
+                                    </cells>
+                                </ColumnListItem>
+                            </items>
+                        </Table>
+					</IconTabFilter>
+				</items>
+			</IconTabBar>
+		</f:content>
+	</f:DynamicPage>
+</mvc:View>

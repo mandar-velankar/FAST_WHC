@@ -23,25 +23,32 @@
 		</f:title>
 		<f:content>
             <Table id="masterTable" 
-                columns="{path:'/Contracts'}"
+                items="{path:'/Contracts'}"
                 itemPress=".onSelectionChange"
                 class="sapFDynamicPageAlignContent"
                 width="auto"
-                updateFinished=".onUpdateFinished"
                 alternateRowColors="true"
                 contextualWidth="Auto" 
                 autoPopinMode="true"
                 hiddenInPopin="None"
+                mode="SingleSelectMaster"
                 growing="true"
                 growingThreshold="15"
                 growingScrollToLoad="false"
                 busyIndicatorDelay="0"
             >
                 <columns>
-                    <Column >
-                        <Text text="{Name}" />
+                    <Column>
+                        <Text text="Name" />
                     </Column>
                 </columns>
+                <items>
+                    <ColumnListItem type="Active">
+                        <cells>
+                            <Text text="{Name}" />
+                        </cells>
+                    </ColumnListItem>
+                </items>
             </Table>
         </f:content>
 	</f:DynamicPage>
