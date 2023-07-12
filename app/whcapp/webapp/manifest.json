@@ -134,5 +134,9 @@
       "async": true,
       "id": "app"
     }
+  },
+  "sap.cloud": {
+      "public": true,
+      "service": "com-bayer-tender-whcapp"
   }
 }

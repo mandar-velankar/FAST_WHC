@@ -8,11 +8,15 @@ modules:
   path: gen/srv
   requires:
   - name: F_TNDR_CAG_FAST_WHC-db
+  - name: uaa_FAST
+  - name: F_TNDR_CAG_FAST_WHC-destination-service
   provides:
   - name: srv-api
     properties:
       srv-url: ${default-url}
   parameters:
+    memory: 512M
+    disk-quota: 512M
     buildpack: nodejs_buildpack
   build-parameters:
     builder: npm-ci
@@ -61,22 +65,37 @@ resources:
     service-plan: app-host
 - name: F_TNDR_CAG_FAST_WHC-destination-service
   type: org.cloudfoundry.managed-service
+  requires:
+    - name: srv-api
   parameters:
     config:
       HTML5Runtime_enabled: false
       init_data:
-        instance:
+        subaccount:
           destinations:
           - Authentication: NoAuthentication
             Name: ui5
             ProxyType: Internet
             Type: HTTP
             URL: https://ui5.sap.com
+          - Authentication: NoAuthentication
+            Name: fast-whc-api
+            ProxyType: Internet
+            Type: HTTP
+            URL: ~{srv-api/srv-url}
+            HTML5.DynamicDestination: true
+            HTML5.ForwardAuthToken: true
           existing_destinations_policy: update
       version: 1.0.0
     service: destination
     service-name: F_TNDR_CAG_FAST_WHC-destination-service
     service-plan: lite
+- name: uaa_FAST
+  parameters:
+    path: ./xs-security.json
+    service-plan: application
+    service: xsuaa
+  type: org.cloudfoundry.managed-service
 parameters:
   deploy_mode: html5-repo
   enable-parallel-deployments: true

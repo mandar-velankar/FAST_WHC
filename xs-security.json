@@ -1,0 +1,216 @@
+{
+    "xsappname": "FAST",
+    "tenant-mode": "dedicated",
+    "scopes": [
+      {
+        "name": "$XSAPPNAME.f_tndr_cag_admin",
+        "description": "f_tndr_cag_admin"
+      },
+      {
+        "name": "$XSAPPNAME.f_tndr_cag_bankguarantees_user",
+        "description": "f_tndr_cag_bankguarantees_user"
+      },
+      {
+        "name": "$XSAPPNAME.f_tndr_cag_technical_user",
+        "description": "f_tndr_cag_technical_user"
+      },
+      {
+        "name": "$XSAPPNAME.f_tndr_cag_brcontracting_user",
+        "description": "f_tndr_cag_brcontracting_user"
+      },
+      {
+        "name": "$XSAPPNAME.f_tndr_cag_tnd_user",
+        "description": "f_tndr_cag_tnd_user"
+      },
+      {
+        "name": "$XSAPPNAME.f_tndr_cag_createopportunity_user",
+        "description": "f_tndr_cag_createopportunity_user"
+      },
+      {
+        "name": "$XSAPPNAME.f_tndr_cag_epa_user",
+        "description": "f_tndr_cag_epa_user"
+      },
+      {
+        "name": "$XSAPPNAME.f_tndr_cag_ext_user",
+        "description": "f_tndr_cag_ext_user"
+      },
+      {
+        "name": "$XSAPPNAME.f_tndr_cag_mdm_user",
+        "description": "f_tndr_cag_mdm_user"
+      },
+      {
+        "name": "$XSAPPNAME.f_tndr_cag_ppa_user",
+        "description": "f_tndr_cag_ppa_user"
+      },
+      {
+        "name": "$XSAPPNAME.f_tndr_cag_priceagreements_user",
+        "description": "f_tndr_cag_priceagreements_user"
+      },
+      {
+        "name": "$XSAPPNAME.f_tndr_cag_salesopportunity_user",
+        "description": "f_tndr_cag_salesopportunity_user"
+      },
+      {
+        "name": "$XSAPPNAME.f_tndr_cag_ctr_user",
+        "description": "f_tndr_cag_ctr_user"
+      },
+      {
+        "name": "$XSAPPNAME.f_tndr_cag_cpi_user",
+        "description": "f_tndr_cag_cpi_user"
+      },
+      {
+        "name": "$XSAPPNAME.f_tndr_cag_cogs_user",
+        "description": "f_tndr_cag_cogs_user"
+      },
+      {
+        "name": "$XSAPPNAME.f_tndr_cag_spaintenderview_user",
+        "description": "f_tndr_cag_spaintenderview_user"
+      },
+      {
+        "name": "$XSAPPNAME.f_tndr_cag_meatenderview_user",
+        "description": "f_tndr_cag_meatenderview_user"
+      }
+      
+    ],
+    "attributes": [],
+    "role-templates": [
+      {
+        "name": "f_tndr_cag_admin",
+        "description": "generated",
+        "scope-references": [
+          "$XSAPPNAME.f_tndr_cag_admin"
+        ],
+        "attribute-references": []
+      },
+      {
+        "name": "f_tndr_cag_bankguarantees_user",
+        "description": "generated",
+        "scope-references": [
+          "$XSAPPNAME.f_tndr_cag_bankguarantees_user"
+        ],
+        "attribute-references": []
+      },
+      {
+        "name": "f_tndr_cag_technical_user",
+        "description": "generated",
+        "scope-references": [
+          "$XSAPPNAME.f_tndr_cag_technical_user"
+        ],
+        "attribute-references": []
+      },
+      {
+        "name": "f_tndr_cag_brcontracting_user",
+        "description": "generated",
+        "scope-references": [
+          "$XSAPPNAME.f_tndr_cag_brcontracting_user"
+        ],
+        "attribute-references": []
+      },
+      {
+        "name": "f_tndr_cag_tnd_user",
+        "description": "generated",
+        "scope-references": [
+          "$XSAPPNAME.f_tndr_cag_tnd_user"
+        ],
+        "attribute-references": []
+      },
+      {
+        "name": "f_tndr_cag_createopportunity_user",
+        "description": "generated",
+        "scope-references": [
+          "$XSAPPNAME.f_tndr_cag_createopportunity_user"
+        ],
+        "attribute-references": []
+      },
+      {
+        "name": "f_tndr_cag_epa_user",
+        "description": "generated",
+        "scope-references": [
+          "$XSAPPNAME.f_tndr_cag_epa_user"
+        ],
+        "attribute-references": []
+      },
+      {
+        "name": "f_tndr_cag_ext_user",
+        "description": "generated",
+        "scope-references": [
+          "$XSAPPNAME.f_tndr_cag_ext_user"
+        ],
+        "attribute-references": []
+      },
+      {
+        "name": "f_tndr_cag_mdm_user",
+        "description": "generated",
+        "scope-references": [
+          "$XSAPPNAME.f_tndr_cag_mdm_user"
+        ],
+        "attribute-references": []
+      },
+      {
+        "name": "f_tndr_cag_ppa_user",
+        "description": "generated",
+        "scope-references": [
+          "$XSAPPNAME.f_tndr_cag_ppa_user"
+        ],
+        "attribute-references": []
+      },
+      {
+        "name": "f_tndr_cag_priceagreements_user",
+        "description": "generated",
+        "scope-references": [
+          "$XSAPPNAME.f_tndr_cag_priceagreements_user"
+        ],
+        "attribute-references": []
+      },
+      {
+        "name": "f_tndr_cag_salesopportunity_user",
+        "description": "generated",
+        "scope-references": [
+          "$XSAPPNAME.f_tndr_cag_salesopportunity_user"
+        ],
+        "attribute-references": []
+      },
+      {
+        "name": "f_tndr_cag_ctr_user",
+        "description": "generated",
+        "scope-references": [
+          "$XSAPPNAME.f_tndr_cag_ctr_user"
+        ],
+        "attribute-references": []
+      },
+      {
+        "name": "f_tndr_cag_cpi_user",
+        "description": "generated",
+        "scope-references": [
+          "$XSAPPNAME.f_tndr_cag_cpi_user"
+        ],
+        "attribute-references": []
+      },
+      {
+        "name": "f_tndr_cag_cogs_user",
+        "description": "generated",
+        "scope-references": [
+          "$XSAPPNAME.f_tndr_cag_cogs_user"
+        ],
+        "attribute-references": []
+      },
+      {
+        "name": "f_tndr_cag_spaintenderview_user",
+        "description": "generated",
+        "scope-references": [
+          "$XSAPPNAME.f_tndr_cag_spaintenderview_user"
+        ],
+        "attribute-references": []
+      },
+      {
+        "name": "f_tndr_cag_meatenderview_user",
+        "description": "generated",
+        "scope-references": [
+          "$XSAPPNAME.f_tndr_cag_meatenderview_user"
+        ],
+        "attribute-references": []
+      }
+      
+    ]
+  }
+  
