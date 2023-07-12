@@ -17,12 +17,12 @@
     },
     "dataSources": {
       "mainService": {
-        "uri": "/catalog/",
+        "uri": "/v2/catalog/",
         "type": "OData",
         "settings": {
           "annotations": [],
           "localUri": "localService/metadata.xml",
-          "odataVersion": "4.0"
+          "odataVersion": "2.0"
         }
       }
     }
@@ -73,10 +73,9 @@
         "dataSource": "mainService",
         "preload": true,
         "settings": {
-          "synchronizationMode": "None",
-          "operationMode": "Server",
-          "autoExpandSelect": true,
-          "earlyRequests": true
+					"defaultOperationMode": "Server",
+					"defaultBindingMode": "TwoWay",
+					"defaultUpdateMethod": "Put"
         }
       }
     },
@@ -89,38 +88,51 @@
     },
     "routing": {
       "config": {
-        "routerClass": "sap.m.routing.Router",
+        "routerClass": "sap.f.routing.Router",
         "viewType": "XML",
         "async": true,
         "viewPath": "com.bayer.tender.whcapp.view",
-        "controlAggregation": "pages",
+				"controlAggregation": "beginColumnPages",
         "controlId": "app",
+        "bypassed": {
+					"target": "notFound"
+				},
         "clearControlAggregation": false
       },
       "routes": [
-        {
-          "name": "RouteApp",
-          "pattern": ":?query:",
-          "target": [
-            "TargetApp"
-          ]
-        }
+				{
+					"pattern": "",
+					"name": "master",
+					"target": "master"
+				},
+				{
+					"pattern": "detail/{id}",
+					"name": "object",
+					"target": [
+						"master",
+						"object"
+					]
+				}
       ],
       "targets": {
-        "TargetApp": {
-          "viewType": "XML",
-          "transition": "slide",
-          "clearControlAggregation": false,
-          "viewId": "App",
-          "viewName": "App"
-        }
+				"master": {
+					"viewName": "Master",
+					"viewLevel": 1,
+					"viewId": "master"
+				},
+				"object": {
+					"viewName": "Detail",
+					"viewId": "detail",
+					"viewLevel": 1,
+					"controlAggregation": "midColumnPages"
+				}
       }
     },
     "rootView": {
       "viewName": "com.bayer.tender.whcapp.view.App",
       "type": "XML",
       "async": true,
-      "id": "App"
+      "id": "app"
     }
   }
 }

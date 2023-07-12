@@ -1,0 +1,48 @@
+<mvc:View
+	controllerName="com.bayer.tender.whcapp.controller.Master"
+	xmlns="sap.m"
+	xmlns:t="sap.ui.table"
+	xmlns:f="sap.f"
+	xmlns:form="sap.ui.layout.form"
+	xmlns:l="sap.ui.layout"
+	xmlns:core="sap.ui.core"
+	xmlns:mvc="sap.ui.core.mvc"
+	xmlns:tnt="sap.tnt">
+
+	<f:DynamicPage
+		id="masterPage"
+		preserveHeaderStateOnScroll="true"
+		toggleHeaderOnTitleClick="false">
+		
+		<f:title>
+			<f:DynamicPageTitle>
+				<f:heading>
+					<Title text="Contracts"/>
+				</f:heading>
+			</f:DynamicPageTitle>
+		</f:title>
+		<f:content>
+            <Table id="masterTable" 
+                columns="{path:'/Contracts'}"
+                itemPress=".onSelectionChange"
+                class="sapFDynamicPageAlignContent"
+                width="auto"
+                updateFinished=".onUpdateFinished"
+                alternateRowColors="true"
+                contextualWidth="Auto" 
+                autoPopinMode="true"
+                hiddenInPopin="None"
+                growing="true"
+                growingThreshold="15"
+                growingScrollToLoad="false"
+                busyIndicatorDelay="0"
+            >
+                <columns>
+                    <Column >
+                        <Text text="{Name}" />
+                    </Column>
+                </columns>
+            </Table>
+        </f:content>
+	</f:DynamicPage>
+</mvc:View>
