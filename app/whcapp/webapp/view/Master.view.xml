@@ -17,39 +17,109 @@
 		<f:title>
 			<f:DynamicPageTitle>
 				<f:heading>
-					<Title text="Contracts"/>
+					<Title text="Proposals"/>
 				</f:heading>
 			</f:DynamicPageTitle>
 		</f:title>
+
 		<f:content>
-            <Table id="masterTable" 
-                items="{path:'/Contracts'}"
-                itemPress=".onSelectionChange"
-                class="sapFDynamicPageAlignContent"
-                width="auto"
-                alternateRowColors="true"
-                contextualWidth="Auto" 
-                autoPopinMode="true"
-                hiddenInPopin="None"
-                mode="SingleSelectMaster"
-                growing="true"
-                growingThreshold="15"
-                growingScrollToLoad="false"
-                busyIndicatorDelay="0"
-            >
-                <columns>
-                    <Column>
-                        <Text text="Name" />
-                    </Column>
-                </columns>
-                <items>
-                    <ColumnListItem type="Active">
-                        <cells>
-                            <Text text="{Name}" />
-                        </cells>
-                    </ColumnListItem>
-                </items>
-            </Table>
+            <VBox>
+                <OverflowToolbar class="sapFDynamicPageAlignContent">
+                        <Label
+                            text="Status"
+                            labelFor="idSlctStatus"
+                        />
+                        <Select 
+                            id="idSlctStatus" 
+                            change=".setFilter" 
+                        >
+                            <!-- items binding see controller -->
+                            <core:Item key="All" text="All"/>
+                            <core:Item key="Approved" text="Approved"/>
+                            <core:Item key="Rejected" text="Rejected"/>
+                            <core:Item key="In Workshop" text="In Workshop"/>
+                            <core:Item key="Draft" text="Draft"/>
+                            <core:Item key="Cancelled" text="Cancelled"/>
+                            <core:Item key="Archived" text="Archived"/>
+                        </Select>
+
+                        <Label
+                            text="Type"
+                            labelFor="idSlctType"
+                        />
+                        <Select 
+                            id="idSlctType" 
+                            change=".setFilter" 
+                        >
+                            <!-- items binding see controller -->
+                            <core:Item key="All" text="All"/>
+                            <core:Item key="New Proposal" text="New Proposal"/>
+                            <core:Item key="Amendment" text="Amendment"/>
+                            <core:Item key="Renewal" text="Renewal"/>
+                        </Select>
+                        <ToolbarSpacer/>
+
+                        <SearchField id="idSearch" search=".setFilter" width="17.5rem"/>
+                        <Button text = "New Proposal" icon = "sap-icon://add" press=".onOpenCreateProposalDialog"/>
+                        <Button icon="sap-icon://sort" text="" press=".onOpenViewSettings"/>
+                </OverflowToolbar>
+                <Table id="masterTable" 
+                    items="{path:'/Contracts'}"
+                    itemPress=".onSelectionChange"
+                    class="sapFDynamicPageAlignContent"
+                    width="auto"
+                    alternateRowColors="true"
+                    contextualWidth="Auto" 
+                    autoPopinMode="true"
+                    hiddenInPopin="None"
+                    mode="SingleSelectMaster"
+                    growing="true"
+                    growingThreshold="15"
+                    growingScrollToLoad="false"
+                    busyIndicatorDelay="0"
+                >
+                    <columns>
+                        <Column>
+                            <Text text="Proposal Name" />
+                        </Column>
+                        <Column>
+                            <Text text="Proposal Type" />
+                        </Column>
+                        <Column>
+                            <Text text="Status" />
+                        </Column>
+                        <Column>
+                            <Text text="Modified By" />
+                        </Column>
+                        <Column>
+                            <Text text="Modified At" />
+                        </Column>
+                        <Column>
+                            <Text text="Parent Account Name" />
+                        </Column>
+                        <Column>
+                            <Text text="Created By" />
+                        </Column>
+                        <Column>
+                            <Text text="Created At" />
+                        </Column>
+                    </columns>
+                    <items>
+                        <ColumnListItem type="Active">
+                            <cells>
+                                <Text text="{Name}" />
+                                <Text text="{Type}" />
+                                <Text text="{Status}" />
+                                <Text text="{ModifiedBy}" />
+                                <Text text="{ModifiedAt}" />
+                                <Text text="{ParentAccountName}" />
+                                <Text text="{CreatedBy}" />
+                                <Text text="{CreatedAt}" />
+                            </cells>
+                        </ColumnListItem>
+                    </items>
+                </Table>
+            </VBox>
         </f:content>
 	</f:DynamicPage>
 </mvc:View>
