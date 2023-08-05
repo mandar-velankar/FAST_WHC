@@ -92,7 +92,7 @@
                             <Text text="Modified By" />
                         </Column>
                         <Column>
-                            <Text text="Modified At" />
+                            <Text text="Modified Date" />
                         </Column>
                         <Column>
                             <Text text="Parent Account Name" />
@@ -101,7 +101,7 @@
                             <Text text="Created By" />
                         </Column>
                         <Column>
-                            <Text text="Created At" />
+                            <Text text="Creation Date" />
                         </Column>
                     </columns>
                     <items>
