@@ -93,10 +93,12 @@ sap.ui.define([
 			}
 		},
 		onAddMainCustomerButtonPress:function(event){
-			const searchWidgetEl = document.getElementById("searchWidget").start();
+			const searchWidgetEl = document.getElementById("searchWidget");
+			searchWidgetEl.start();
 			searchWidgetEl.addEventListener(`veeva-network:CT_SEARCH:select`, (ev) => {
-				const id = ev.detail.entity.entityId;
-				MessageToast.show(`ID of selected customer: ${id}`)
+				const entity = ev.detail.entity;
+				MessageToast.show(`ID of selected customer: ${entity.entityId} - ${entity.entity.whc_legal_name__c}`);//or corporate_name__v instead of whc_legal...
+				searchWidgetEl.close();
 			},{once:true});
 			
 		},
