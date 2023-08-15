@@ -64,7 +64,7 @@
                         <Button icon="sap-icon://sort" text="" press=".onOpenViewSettings"/>
                 </OverflowToolbar>
                 <Table id="masterTable" 
-                    items="{path:'/Contracts'}"
+                    items="{path:'/ContractsView'}"
                     itemPress=".onSelectionChange"
                     class="sapFDynamicPageAlignContent"
                     width="auto"
@@ -110,11 +110,27 @@
                                 <Text text="{Name}" />
                                 <Text text="{Type}" />
                                 <Text text="{Status}" />
-                                <Text text="{ModifiedBy}" />
-                                <Text text="{ModifiedAt}" />
+                                <Text text="{modifiedBy}" />
+                                <Text text="{
+                                        path: 'modifiedAt',
+                                        type: 'sap.ui.model.type.Date',
+                                        formatOptions: { 
+                                            pattern: 'dd.MM.yyyy', 
+                                            UTC: true 
+                                        }
+                                    }"  
+                                />
                                 <Text text="{ParentAccountName}" />
-                                <Text text="{CreatedBy}" />
-                                <Text text="{CreatedAt}" />
+                                <Text text="{createdBy}" />
+                                <Text text = "{
+                                        path: 'createdAt',
+                                        type: 'sap.ui.model.type.Date',
+                                        formatOptions: { 
+                                            pattern: 'dd.MM.yyyy', 
+                                            UTC: true 
+                                        }
+                                    }"  
+                                />
                             </cells>
                         </ColumnListItem>
                     </items>
