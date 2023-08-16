@@ -41,7 +41,7 @@
 					<Button id="deleteContractButtonId" icon="sap-icon://delete" text="Delete" type="Reject" press="onDeleteContractPress" enabled="true" />
 					<Button id="refreshButtonId" icon="sap-icon://refresh" type="Emphasized" press="onRefresh" enabled="true"/>
 					<Button id="printButtonId" text="Print" type="Emphasized" press=".onPrintButtonPress" enabled="true"/>
-					<MenuButton id="idButtonAction" text="Action" buttonMode="Split" useDefaultActionOnly="false" visible="true" type="Emphasized">
+					<MenuButton id="idButtonAction" text="Set Status" buttonMode="Split" useDefaultActionOnly="false" visible="true" type="Emphasized">
 							<menu>
 								<Menu itemSelected="onMenuAction">
 									<MenuItem text="Save Draft" visible="true" />
@@ -72,7 +72,7 @@
 				expanded="{device>/isNoPhone}"
 				class="sapUiResponsiveContentPadding">
 				<items>
-					<IconTabFilter text="Customers" key="customers">
+					<IconTabFilter text="Proposal Data" key="proposal">
 
 						<Panel expandable="true" width="auto" class="sapUiResponsiveMargin" expanded="true">
 							<headerToolbar>
@@ -107,100 +107,93 @@
 									<Button id="wacButtonId" text="WAC" type="Emphasized" press=".onShowWacButtonPress" />
 								</form:content>
 							</form:SimpleForm>
-						</Panel>
-					
-					<Panel expandable="true" width="auto" class="sapUiResponsiveMargin" expanded="true">
-					<headerToolbar>
-						<OverflowToolbar style="Clear">
-							<Title text="BHO" />
-						</OverflowToolbar>
-					</headerToolbar>
-					<l:ResponsiveSplitter height="100%">
-						<l:PaneContainer>
-						<l:SplitPane requiredParentWidth="200">
-								<Table id="mainCustomersTable" 
-									items="{path:'ContractCustomers'}"
-									growing="true"
-									growingThreshold="15"
-									growingScrollToLoad="false"
-									busyIndicatorDelay="0"
-								>
-								<headerToolbar>
-									<OverflowToolbar>
-										<content>
-											<Title text="Parent BHO ID" level="H2"/>
-											<Button text="+" type="Emphasized" press=".onAddMainCustomerButtonPress" enabled="true"/>
-											<MultiInput width="70%"
-												showClearIcon="true"
-												id="multiInput2"
-												suggestionItems="{
-													path: '/ContractCustomers',
-													sorter: { path: 'Name' }
-												}"
-												showValueHelp="false">
-												<core:Item key="{Name}" text="{Name}" />
-											</MultiInput>
-										</content>
-									</OverflowToolbar>
-								</headerToolbar>
-									<columns>
-										<Column>
-											<Text text="Name" />
-										</Column>
-									</columns>
-									<items>
-										<ColumnListItem>
-											<cells>
-												<Text text="{Name}" />
-											</cells>
-										</ColumnListItem>
-									</items>
-								</Table>
-							</l:SplitPane>
-							<l:SplitPane requiredParentWidth="700">
-								<Table id="customersTable" 
-									items="{path:'ContractCustomers'}"
-									growing="true"
-									growingThreshold="15"
-									growingScrollToLoad="false"
-									busyIndicatorDelay="0"
-								>
-								<headerToolbar>
-									<OverflowToolbar>
-										<content>
-											<Title text="Member BHO ID" level="H2"/>
-											<Button text="+" type="Emphasized" press=".onAddCustomerButtonPress" enabled="true"/>
-											<MultiInput width="70%"
-												showClearIcon="true"
-												id="multiInputMemberBHO"
-												suggestionItems="{
-													path: '/ContractCustomers',
-													sorter: { path: 'Name' }
-												}"
-												showValueHelp="false">
-												<core:Item key="{Name}" text="{Name}" />
-											</MultiInput>
-										</content>
-									</OverflowToolbar>
-								</headerToolbar>
-								<MultiInput id="multiId" showValueHelp="false">
-								</MultiInput>
-									<columns>
-										<Column>
-											<Text text="Name" />
-										</Column>
-									</columns>
-									<items>
-										<ColumnListItem>
-											<cells>
-												<Text text="{Name}" />
-											</cells>
-										</ColumnListItem>
-									</items>
-								</Table>
-							</l:SplitPane>
-						</l:PaneContainer>
-					</l:ResponsiveSplitter>
+						
+							<l:ResponsiveSplitter height="100%">
+								<l:PaneContainer>
+								<l:SplitPane requiredParentWidth="200">
+										<Table id="mainCustomersTable" 
+											items="{path:'ContractCustomers'}"
+											growing="true"
+											growingThreshold="15"
+											growingScrollToLoad="false"
+											busyIndicatorDelay="0"
+										>
+										<headerToolbar>
+											<OverflowToolbar>
+												<content>
+													<Title text="Parent BHO ID" level="H2"/>
+													<Button text="+" type="Emphasized" press=".onAddMainCustomerButtonPress" enabled="true"/>
+													<MultiInput width="70%"
+														showClearIcon="true"
+														id="multiInput2"
+														suggestionItems="{
+															path: '/ContractCustomers',
+															sorter: { path: 'Name' }
+														}"
+														showValueHelp="false">
+														<core:Item key="{Name}" text="{Name}" />
+													</MultiInput>
+												</content>
+											</OverflowToolbar>
+										</headerToolbar>
+											<columns>
+												<Column>
+													<Text text="Name" />
+												</Column>
+											</columns>
+											<items>
+												<ColumnListItem>
+													<cells>
+														<Text text="{Name}" />
+													</cells>
+												</ColumnListItem>
+											</items>
+										</Table>
+									</l:SplitPane>
+									<l:SplitPane requiredParentWidth="700">
+										<Table id="customersTable" 
+											items="{path:'ContractCustomers'}"
+											growing="true"
+											growingThreshold="15"
+											growingScrollToLoad="false"
+											busyIndicatorDelay="0"
+										>
+										<headerToolbar>
+											<OverflowToolbar>
+												<content>
+													<Title text="Member BHO ID" level="H2"/>
+													<Button text="+" type="Emphasized" press=".onAddCustomerButtonPress" enabled="true"/>
+													<MultiInput width="70%"
+														showClearIcon="true"
+														id="multiInputMemberBHO"
+														suggestionItems="{
+															path: '/ContractCustomers',
+															sorter: { path: 'Name' }
+														}"
+														showValueHelp="false">
+														<core:Item key="{Name}" text="{Name}" />
+													</MultiInput>
+												</content>
+											</OverflowToolbar>
+										</headerToolbar>
+										<MultiInput id="multiId" showValueHelp="false">
+										</MultiInput>
+											<columns>
+												<Column>
+													<Text text="Name" />
+												</Column>
+											</columns>
+											<items>
+												<ColumnListItem>
+													<cells>
+														<Text text="{Name}" />
+													</cells>
+												</ColumnListItem>
+											</items>
+										</Table>
+									</l:SplitPane>
+								</l:PaneContainer>
+							</l:ResponsiveSplitter>
 					</Panel>
 
 					<Panel expandable="true" width="auto" class="sapUiResponsiveMargin" expanded="true">
@@ -228,7 +221,8 @@
 							showExceededText="true" 
 							width="100%"
 							growing="true"
-							enabled="false"/>
+							enabled="false"
+							rows="7"/>
 					</Panel>
 
 
@@ -369,10 +363,11 @@
 							</OverflowToolbar>
 						</headerToolbar>
 						<TextArea value="{Remarks}" 
-						showExceededText="true" 
-						width="100%"
-						growing="true"
-						enabled="false"/>
+								  showExceededText="true" 
+								  width="100%"
+								  growing="true"
+								  enabled="false"
+								  rows="7"/>
 					</Panel>
 
 					<Panel expandable="true" width="auto" class="sapUiResponsiveMargin" expanded="true">
