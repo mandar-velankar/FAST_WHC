@@ -7,6 +7,7 @@
 	xmlns:l="sap.ui.layout"
 	xmlns:core="sap.ui.core"
 	xmlns:mvc="sap.ui.core.mvc"
+	xmlns:custom="com.bayer.tender.whcapp.control"
 	xmlns:tnt="sap.tnt">
 	<f:DynamicPage id="detailPage"
 		busy="{detailView>/busy}"
@@ -194,26 +195,26 @@
 									</l:SplitPane>
 								</l:PaneContainer>
 							</l:ResponsiveSplitter>
-					</Panel>
+						</Panel>
 
-					<Panel expandable="true" width="auto" class="sapUiResponsiveMargin" expanded="true">
-					<headerToolbar>
-						<OverflowToolbar style="Clear">
-							<Title text="Base Line &amp; Background info" />
-						</OverflowToolbar>
-					</headerToolbar>
-					<form:SimpleForm
-						layout="ResponsiveGridLayout"
-						editable="true">
-						<Label text='Base Line Units '/>
-						<Input id="idBaseLineUnitsInput" value="{BaseLineUnits}"  enabled="false" width='20%'/>
+						<Panel expandable="true" width="auto" class="sapUiResponsiveMargin" expanded="true">
+						<headerToolbar>
+							<OverflowToolbar style="Clear">
+								<Title text="Base Line &amp; Background info" />
+							</OverflowToolbar>
+						</headerToolbar>
+						<form:SimpleForm
+							layout="ResponsiveGridLayout"
+							editable="true">
+							<Label text='Base Line Units '/>
+							<Input id="idBaseLineUnitsInput" value="{BaseLineUnits}"  enabled="false" width='20%'/>
 
-						<Label text='Base Line Discount '/>
-						<Input id="idBaseLineDiscountInput" value="{BaseLineDiscount}"  enabled="false" width='20%'/>
+							<Label text='Base Line Discount '/>
+							<Input id="idBaseLineDiscountInput" value="{BaseLineDiscount}"  enabled="false" width='20%'/>
 
-						<Label text='Proposed Contract Length '/>
-						<Input id="idProposedContractLengthInput" value="{ProposedContractLength}"  enabled="false" width='20%'/>
-					</form:SimpleForm>
+							<Label text='Proposed Contract Length '/>
+							<Input id="idProposedContractLengthInput" value="{ProposedContractLength}"  enabled="false" width='20%'/>
+						</form:SimpleForm>
 						
 					
 						<Label text='Background Info:'/>
@@ -400,7 +401,9 @@
 							</NotificationListGroup>
 						</NotificationList>
 					</Panel>
-
+					<Panel headerText="Tableau test" expandable="true" width="auto" class="sapUiResponsiveMargin" expanded="true">
+						<custom:Tableau src='https://tableau-ncsa.aws.cnb/t/CPROD/views/WHCContractProposal/ContractProposal?ORIGINAL_ORDERING_ACCOUNT_NUM=BHO3064937' width="500px" heigth="500px"/>
+					</Panel>
 				</IconTabFilter>
 				</items>
 			</IconTabBar>
