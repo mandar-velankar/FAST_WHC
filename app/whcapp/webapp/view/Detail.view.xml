@@ -8,6 +8,7 @@
 	xmlns:core="sap.ui.core"
 	xmlns:mvc="sap.ui.core.mvc"
 	xmlns:custom="com.bayer.tender.whcapp.control"
+	xmlns:upload="sap.m.upload"
 	xmlns:tnt="sap.tnt">
 	<f:DynamicPage id="detailPage"
 		busy="{detailView>/busy}"
@@ -45,7 +46,7 @@
 					<MenuButton id="idButtonAction" text="Set Status" buttonMode="Split" useDefaultActionOnly="false" visible="true" type="Emphasized">
 							<menu>
 								<Menu itemSelected="onMenuAction">
-									<MenuItem text="Save Draft" visible="true" />
+									<MenuItem text="Save Draft" visible="true" press=".onSave"/>
 									<MenuItem text="Submit to Workshop" visible="true" />
 									<MenuItem text="Approve" visible="true" />
 									<MenuItem text="Reject" visible="true" />
@@ -400,6 +401,26 @@
 							
 							</NotificationListGroup>
 						</NotificationList>
+						<upload:UploadSet
+								id="UploadSet"
+								instantUpload="false"
+								showIcons="false"
+								uploadEnabled="true"
+								terminationEnabled="false"
+								maxFileNameLength="30"
+								httpRequestMethod="Put"
+								uploadCompleted="onUploadCompleted"
+								items="{path: 'Attachments', templateShareable: false}">
+							<upload:items>
+								<upload:UploadSetItem
+										fileName="{FileName}"
+										mediaType="{MediaType}"
+										visibleEdit="false"
+										url="/catalog/Attachments({ID})/Content"
+										uploadState="Complete">
+								</upload:UploadSetItem>
+							</upload:items>
+						</upload:UploadSet>
 					</Panel>
 					<Panel headerText="Tableau test" expandable="true" width="auto" class="sapUiResponsiveMargin" expanded="true">
 						<custom:Tableau src='https://tableau-ncsa.aws.cnb/t/CPROD/views/WHCContractProposal/ContractProposal?ORIGINAL_ORDERING_ACCOUNT_NUM=BHO3064937' width="500px" heigth="500px"/>

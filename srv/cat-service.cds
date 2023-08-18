@@ -2,6 +2,7 @@ using com.bayer.SXTENDER.whc as whc from '../db/data-model';
 
 service CatalogService {
     entity Contracts as projection on whc.Contracts;
+    entity Attachments as projection on whc.Attachments;
     entity ContractCustomers as projection on whc.ContractCustomers;
 
     entity ContractsView as select from Contracts as contract {
