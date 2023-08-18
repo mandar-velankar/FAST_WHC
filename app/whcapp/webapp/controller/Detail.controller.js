@@ -1,7 +1,9 @@
 sap.ui.define([
 	"./BaseController",
-	"sap/ui/model/json/JSONModel"
-], function (BaseController, JSONModel) {
+	"sap/ui/model/json/JSONModel",
+	"sap/m/Token",
+	"sap/ui/core/Fragment",
+], function (BaseController, JSONModel, Token, Fragment) {
 	"use strict";
 
 	return BaseController.extend("com.bayer.tender.whcapp.controller.Detail", {
@@ -21,6 +23,18 @@ sap.ui.define([
 
 			// activate automatic message generation for complete view
 			this.oMessageManager.registerObject(this.getView(), true);
+
+			let oMultiInput1 = this.byId("multiInputMemberBHO");
+			oMultiInput1.setTokens([
+				new Token({text: "Contract customer 11", key: "Contract customer 11"}),
+				new Token({text: "Contract customer 12", key: "Contract customer 12"})
+			]);
+
+			let oMultiInput2 = this.byId("multiInput2");
+			oMultiInput2.setTokens([
+				new Token({text: "Contract customer 11", key: "Contract customer 11"}),
+				new Token({text: "Contract customer 12", key: "Contract customer 12"})
+			]);
 		},
 		_onObjectMatched: async function (oEvent) {
 			this.id = oEvent.getParameter("arguments").id;
@@ -76,6 +90,29 @@ sap.ui.define([
 				// reset to previous layout
 				this.getModel("appView").setProperty("/layout", this.getModel("appView").getProperty("/previousLayout"));
 			}
+		},
+
+		onShowWacButtonPress: async function (){
+			let that = this;
+
+			if (!this.byId("idProductWacPopup")) {
+				this.approvalsDialog = await Fragment.load({
+					id: that.getView().getId(),
+					name: "com.bayer.tender.whcapp.view.fragments.WACPopup",
+					controller: that,
+				}).then(function (oDialog) {
+					oDialog.setResizable(true);
+					oDialog.setStretch(true);
+					that.getView().addDependent(oDialog);
+					oDialog.open();
+				});
+			}else {
+				this.byId("idProductWacPopup").open();
+			}
+		},
+
+		onCloseWACPopup: function(){
+			this.byId("idProductWacPopup").close();
 		}
 	});
 

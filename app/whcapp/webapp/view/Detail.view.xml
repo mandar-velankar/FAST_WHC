@@ -7,6 +7,7 @@
 	xmlns:l="sap.ui.layout"
 	xmlns:core="sap.ui.core"
 	xmlns:mvc="sap.ui.core.mvc"
+	xmlns:custom="com.bayer.tender.whcapp.control"
 	xmlns:tnt="sap.tnt">
 	<f:DynamicPage id="detailPage"
 		busy="{detailView>/busy}"
@@ -37,22 +38,32 @@
 
 				<!-- ACTIONS -->
 				<f:actions>
+					<Button id="editButtonId" text="Edit" type="Emphasized" press=".onEditButtonPress" enabled="true"/>
+					<Button id="deleteContractButtonId" icon="sap-icon://delete" text="Delete" type="Reject" press="onDeleteContractPress" enabled="true" />
+					<Button id="refreshButtonId" icon="sap-icon://refresh" type="Emphasized" press="onRefresh" enabled="true"/>
+					<Button id="printButtonId" text="Print" type="Emphasized" press=".onPrintButtonPress" enabled="true"/>
+					<MenuButton id="idButtonAction" text="Set Status" buttonMode="Split" useDefaultActionOnly="false" visible="true" type="Emphasized">
+							<menu>
+								<Menu itemSelected="onMenuAction">
+									<MenuItem text="Save Draft" visible="true" />
+									<MenuItem text="Submit to Workshop" visible="true" />
+									<MenuItem text="Approve" visible="true" />
+									<MenuItem text="Reject" visible="true" />
+									<MenuItem text="Cancel Proposal" visible="true" />
+									<MenuItem text="Archive" visible="true" />
+								</Menu>
+							</menu>
+						</MenuButton>
 				</f:actions>
 			</f:DynamicPageTitle>
 		</f:title>
 		<f:header>
 			<f:DynamicPageHeader >
-				<FlexBox wrap="Wrap" fitContainer="true" alignItems="Stretch">
+				<FlexBox alignItems="Start">
 
-					<VBox justifyContent="Center" class="sapUiSmallMarginEnd">
-						<Label text="Background"/>
-						<Text text="{Background}"/>
-					</VBox>
-					
-					<VBox justifyContent="Center" class="sapUiSmallMarginEnd">
-						<Label text="Status"/>
-						<Text text="{Status}"/>
-					</VBox>		
+					<!--<VBox justifyContent="Center" class="sapUiSmallMarginEnd">-->
+						<Text text="Status: Draft"/>
+					<!--</VBox>-->
 				</FlexBox>
 			</f:DynamicPageHeader>
 		</f:header>
@@ -62,28 +73,338 @@
 				expanded="{device>/isNoPhone}"
 				class="sapUiResponsiveContentPadding">
 				<items>
-					<IconTabFilter text="Customers" key="customers">
-						<Table id="customersTable" 
-                            items="{path:'ContractCustomers'}"
-                            growing="true"
-                            growingThreshold="15"
-                            growingScrollToLoad="false"
-                            busyIndicatorDelay="0"
-                        >
-                            <columns>
-                                <Column>
-                                    <Text text="Name" />
-                                </Column>
-                            </columns>
-                            <items>
-                                <ColumnListItem>
-                                    <cells>
-                                        <Text text="{Name}" />
-                                    </cells>
-                                </ColumnListItem>
-                            </items>
-                        </Table>
-					</IconTabFilter>
+					<IconTabFilter text="Proposal Data" key="proposal">
+
+						<Panel expandable="true" width="auto" class="sapUiResponsiveMargin" expanded="true">
+							<headerToolbar>
+								<OverflowToolbar style="Clear">
+									<Title text="General Info" />
+								</OverflowToolbar>
+							</headerToolbar>
+							<form:SimpleForm
+								editable="false"
+								layout="ResponsiveGridLayout"
+								labelSpanXL="4"
+								labelSpanL="4"
+								labelSpanM="4"
+								labelSpanS="12"
+								adjustLabelSpan="false"
+								emptySpanXL="0"
+								emptySpanL="0"
+								emptySpanM="0"
+								emptySpanS="0"
+								columnsXL="3"
+								columnsL="2"
+								columnsM="2"
+								singleContainerFullSize="false" >
+								<form:content>
+
+									<Label text='Vistex ID '/>
+									<Input id="idVistexInput" value="{VistexID}"  enabled="false"/>
+
+									<Label text='Proposal Name '/>
+									<Input id="idProposalName" value="{Name}"  enabled="false"/>
+
+									<Button id="wacButtonId" text="WAC" type="Emphasized" press=".onShowWacButtonPress" />
+								</form:content>
+							</form:SimpleForm>
+						
+							<l:ResponsiveSplitter height="100%">
+								<l:PaneContainer>
+								<l:SplitPane requiredParentWidth="200">
+										<Table id="mainCustomersTable" 
+											items="{path:'ContractCustomers'}"
+											growing="true"
+											growingThreshold="15"
+											growingScrollToLoad="false"
+											busyIndicatorDelay="0"
+										>
+										<headerToolbar>
+											<OverflowToolbar>
+												<content>
+													<Title text="Parent BHO ID" level="H2"/>
+													<Button text="+" type="Emphasized" press=".onAddMainCustomerButtonPress" enabled="true"/>
+													<MultiInput width="70%"
+														showClearIcon="true"
+														id="multiInput2"
+														suggestionItems="{
+															path: '/ContractCustomers',
+															sorter: { path: 'Name' }
+														}"
+														showValueHelp="false">
+														<core:Item key="{Name}" text="{Name}" />
+													</MultiInput>
+												</content>
+											</OverflowToolbar>
+										</headerToolbar>
+											<columns>
+												<Column>
+													<Text text="Name" />
+												</Column>
+											</columns>
+											<items>
+												<ColumnListItem>
+													<cells>
+														<Text text="{Name}" />
+													</cells>
+												</ColumnListItem>
+											</items>
+										</Table>
+									</l:SplitPane>
+									<l:SplitPane requiredParentWidth="700">
+										<Table id="customersTable" 
+											items="{path:'ContractCustomers'}"
+											growing="true"
+											growingThreshold="15"
+											growingScrollToLoad="false"
+											busyIndicatorDelay="0"
+										>
+										<headerToolbar>
+											<OverflowToolbar>
+												<content>
+													<Title text="Member BHO ID" level="H2"/>
+													<Button text="+" type="Emphasized" press=".onAddCustomerButtonPress" enabled="true"/>
+													<MultiInput width="70%"
+														showClearIcon="true"
+														id="multiInputMemberBHO"
+														suggestionItems="{
+															path: '/ContractCustomers',
+															sorter: { path: 'Name' }
+														}"
+														showValueHelp="false">
+														<core:Item key="{Name}" text="{Name}" />
+													</MultiInput>
+												</content>
+											</OverflowToolbar>
+										</headerToolbar>
+										<MultiInput id="multiId" showValueHelp="false">
+										</MultiInput>
+											<columns>
+												<Column>
+													<Text text="Name" />
+												</Column>
+											</columns>
+											<items>
+												<ColumnListItem>
+													<cells>
+														<Text text="{Name}" />
+													</cells>
+												</ColumnListItem>
+											</items>
+										</Table>
+									</l:SplitPane>
+								</l:PaneContainer>
+							</l:ResponsiveSplitter>
+						</Panel>
+
+						<Panel expandable="true" width="auto" class="sapUiResponsiveMargin" expanded="true">
+						<headerToolbar>
+							<OverflowToolbar style="Clear">
+								<Title text="Base Line &amp; Background info" />
+							</OverflowToolbar>
+						</headerToolbar>
+						<form:SimpleForm
+							layout="ResponsiveGridLayout"
+							editable="true">
+							<Label text='Base Line Units '/>
+							<Input id="idBaseLineUnitsInput" value="{BaseLineUnits}"  enabled="false" width='20%'/>
+
+							<Label text='Base Line Discount '/>
+							<Input id="idBaseLineDiscountInput" value="{BaseLineDiscount}"  enabled="false" width='20%'/>
+
+							<Label text='Proposed Contract Length '/>
+							<Input id="idProposedContractLengthInput" value="{ProposedContractLength}"  enabled="false" width='20%'/>
+						</form:SimpleForm>
+						
+					
+						<Label text='Background Info:'/>
+						<TextArea value="{BackgroundInfo}" 
+							showExceededText="true" 
+							width="100%"
+							growing="true"
+							enabled="false"
+							rows="7"/>
+					</Panel>
+
+
+					<Panel expandable="true" width="auto" class="sapUiResponsiveMargin" expanded="true">
+					<headerToolbar>
+						<OverflowToolbar style="Clear">
+							<Title text="Discounts" />
+						</OverflowToolbar>
+					</headerToolbar>
+					<Table id="discountsTable" 
+						growing="true"
+						growingThreshold="15"
+						growingScrollToLoad="false"
+						busyIndicatorDelay="0">
+						<columns>
+							<Column>
+								<Text text="Year" />
+							</Column>
+							<Column>
+								<Text text="Units" />
+							</Column>
+							<Column>
+								<Text text="Mirena" />
+							</Column>
+							<Column>
+								<Text text="Kyleena" />
+							</Column>
+							<Column>
+								<Text text="Skyla" />
+							</Column>
+						</columns>
+						<items>
+							<ColumnListItem>
+								<cells>
+									<Text text="Y1" />
+									<Input value="{Unit}" enabled='false'/>
+									<Input value="{Mirena}" enabled='false'/>
+									<Input value="{Kyleena}" enabled='false'/>
+									<Input value="{Skyla}" enabled='false'/>
+								</cells>
+							</ColumnListItem>
+						</items>
+					</Table>
+					</Panel>
+
+					<Panel expandable="true" width="auto" class="sapUiResponsiveMargin" expanded="true">
+						<headerToolbar>
+							<OverflowToolbar style="Clear">
+								<Title text="Rebates" />
+							</OverflowToolbar>
+						</headerToolbar>
+
+						<t:Table id="rebatesTable"
+								busyIndicatorDelay="0"
+								selectionMode='None'>
+							<t:columns>
+								<t:Column  sortProperty="year"
+										filterProperty="year">
+									<Label text="Year" textAlign="Center" width="100%"/>
+									<t:template>
+										<Text text="{year}"/>
+									</t:template>
+								</t:Column>
+								<t:Column sortProperty="unit"
+										filterProperty="unit"
+										headerSpan="2,1">
+									<t:multiLabels>
+										<Label text="L1" textAlign="Center" width="100%"/>
+										<Label text="Unit" textAlign="Center" width="100%"/>
+									</t:multiLabels>
+									<t:template>
+										<Text text="{unit}" wrapping="false"/>
+									</t:template>
+								</t:Column>
+								<t:Column sortProperty="discount"
+										headerSpan="2">
+									<t:multiLabels>
+										<Label text="Discount"/>
+										<Label text="Discount" textAlign="Center" width="100%"/>
+									</t:multiLabels>
+									<t:template>
+										<Input value="{discount}" enabled='false'/>
+									</t:template>
+								</t:Column>
+
+								<t:Column sortProperty="unit"
+										filterProperty="unit"
+										headerSpan="2,1">
+									<t:multiLabels>
+										<Label text="L2" textAlign="Center" width="100%"/>
+										<Label text="Unit" textAlign="Center" width="100%"/>
+									</t:multiLabels>
+									<t:template>
+										<Text text="{unit}" wrapping="false"/>
+									</t:template>
+								</t:Column>
+								<t:Column sortProperty="discount"
+										headerSpan="2">
+									<t:multiLabels>
+										<Label text="Discount"/>
+										<Label text="Discount" textAlign="Center" width="100%"/>
+									</t:multiLabels>
+									<t:template>
+										<Input value="{discount}" enabled='false'/>
+									</t:template>
+								</t:Column>
+
+								<t:Column sortProperty="unit"
+										filterProperty="unit"
+										headerSpan="2,1">
+									<t:multiLabels>
+										<Label text="L3" textAlign="Center" width="100%"/>
+										<Label text="Unit" textAlign="Center" width="100%"/>
+									</t:multiLabels>
+									<t:template>
+										<Text text="{unit}" wrapping="false"/>
+									</t:template>
+								</t:Column>
+								<t:Column sortProperty="discount"
+										headerSpan="2">
+									<t:multiLabels>
+										<Label text="Discount"/>
+										<Label text="Discount" textAlign="Center" width="100%"/>
+									</t:multiLabels>
+									<t:template>
+										<Input value="{discount}"/>
+									</t:template>
+								</t:Column>
+							</t:columns>
+						</t:Table>
+
+					</Panel>
+
+					<Panel expandable="true" width="auto" class="sapUiResponsiveMargin" expanded="true">
+						<headerToolbar>
+							<OverflowToolbar style="Clear">
+								<Title text="Remarks" />
+							</OverflowToolbar>
+						</headerToolbar>
+						<TextArea value="{Remarks}" 
+								  showExceededText="true" 
+								  width="100%"
+								  growing="true"
+								  enabled="false"
+								  rows="7"/>
+					</Panel>
+
+					<Panel expandable="true" width="auto" class="sapUiResponsiveMargin" expanded="true">
+					<headerToolbar>
+						<OverflowToolbar style="Clear">
+							<Title text="Uploaded Files" />
+						</OverflowToolbar>
+					</headerToolbar>
+						<NotificationList>
+							<layoutData>
+								<FlexItemData />
+							</layoutData>
+
+							<NotificationListGroup
+								title="Uploaded Files"
+								showCloseButton="false"
+								close=".onItemClose">
+
+								<NotificationListItem
+									title="North Shore University Health System_Bayer Contracting Value"
+									description="Calc_Weighted_Avg_Template(4).xlsx"
+									showCloseButton="true"
+									unread="false"
+									priority="None"
+									close=".onItemClose"
+									press=".onListItemPress"
+									authorPicture="sap-icon://excel-attachment"
+									authorAvatarColor="Accent8" />
+							
+							</NotificationListGroup>
+						</NotificationList>
+					</Panel>
+					<Panel headerText="Tableau test" expandable="true" width="auto" class="sapUiResponsiveMargin" expanded="true">
+						<custom:Tableau src='https://tableau-ncsa.aws.cnb/t/CPROD/views/WHCContractProposal/ContractProposal?ORIGINAL_ORDERING_ACCOUNT_NUM=BHO3064937' width="500px" heigth="500px"/>
+					</Panel>
+				</IconTabFilter>
 				</items>
 			</IconTabBar>
 		</f:content>
