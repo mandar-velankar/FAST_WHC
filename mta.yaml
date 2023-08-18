@@ -1,15 +1,15 @@
 _schema-version: "3.1"
-ID: F_TNDR_CAG_FAST_WHC
+ID: com-bayer-tender-whcapp
 description: A simple CAP project.
 version: 1.0.0
 modules:
-- name: F_TNDR_CAG_FAST_WHC-srv
+- name: com-bayer-tender-whcapp-srv
   type: nodejs
   path: gen/srv
   requires:
-  - name: F_TNDR_CAG_FAST_WHC-db
+  - name: com-bayer-tender-whcapp-db
   - name: uaa_FAST
-  - name: F_TNDR_CAG_FAST_WHC-destination-service
+  - name: com-bayer-tender-whcapp-destination-service
   provides:
   - name: srv-api
     properties:
@@ -20,18 +20,18 @@ modules:
     buildpack: nodejs_buildpack
   build-parameters:
     builder: npm-ci
-- name: F_TNDR_CAG_FAST_WHC-db-deployer
+- name: com-bayer-tender-whcapp-deployer
   type: hdb
   path: gen/db
   requires:
-  - name: F_TNDR_CAG_FAST_WHC-db
+  - name: com-bayer-tender-whcapp-db
   parameters:
     buildpack: nodejs_buildpack
-- name: F_TNDR_CAG_FAST_WHC-app-content
+- name: com-bayer-tender-whcapp-app-content
   type: com.sap.application.content
   path: .
   requires:
-  - name: F_TNDR_CAG_FAST_WHC-repo-host
+  - name: com-bayer-tender-whcapp-repo-host
     parameters:
       content-target: true
   build-parameters:
@@ -52,18 +52,18 @@ modules:
     - npm run build:cf
     supported-platforms: []
 resources:
-- name: F_TNDR_CAG_FAST_WHC-db
+- name: com-bayer-tender-whcapp-db
   type: com.sap.xs.hdi-container
   parameters:
     service: hana
     service-plan: hdi-shared
-- name: F_TNDR_CAG_FAST_WHC-repo-host
+- name: com-bayer-tender-whcapp-repo-host
   type: org.cloudfoundry.managed-service
   parameters:
     service: html5-apps-repo
-    service-name: F_TNDR_CAG_FAST_WHC-html5-srv
+    service-name: com-bayer-tender-whcapp-html5-srv
     service-plan: app-host
-- name: F_TNDR_CAG_FAST_WHC-destination-service
+- name: com-bayer-tender-whcapp-destination-service
   type: org.cloudfoundry.managed-service
   requires:
     - name: srv-api
@@ -88,7 +88,7 @@ resources:
           existing_destinations_policy: update
       version: 1.0.0
     service: destination
-    service-name: F_TNDR_CAG_FAST_WHC-destination-service
+    service-name: com-bayer-tender-whcapp-destination-service
     service-plan: lite
 - name: uaa_FAST
   parameters:
