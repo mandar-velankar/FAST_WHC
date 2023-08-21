@@ -99,11 +99,11 @@
 								singleContainerFullSize="false" >
 								<form:content>
 
-									<Label text='Vistex ID '/>
-									<Input id="idVistexInput" value="{VistexID}"  enabled="false"/>
-
 									<Label text='Proposal Name '/>
 									<Input id="idProposalName" value="{Name}"  enabled="false"/>
+
+									<Label text='Vistex ID '/>
+									<Input id="idVistexInput" value="{VistexID}"  enabled="false"/>
 
 									<Button id="wacButtonId" text="WAC" type="Emphasized" press=".onShowWacButtonPress" />
 								</form:content>
