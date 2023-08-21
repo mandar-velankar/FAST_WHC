@@ -12,6 +12,7 @@ modules:
   - name: com-bayer-tender-whcapp-destination-service
   provides:
   - name: srv-api
+    public: true
     properties:
       srv-url: ${default-url}
   parameters:
