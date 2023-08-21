@@ -60,7 +60,7 @@
                         <ToolbarSpacer/>
 
                         <SearchField id="idSearch" search=".setFilter" width="17.5rem"/>
-                        <Button text = "New Proposal" icon = "sap-icon://add" press=".onOpenCreateProposalDialog"/>
+                        <Button text = "New Proposal" icon = "sap-icon://add" press="onOpenCreateProposalDialog"/>
                         <Button icon="sap-icon://sort" text="" press=".onOpenViewSettings"/>
                 </OverflowToolbar>
                 <Table id="masterTable" 
