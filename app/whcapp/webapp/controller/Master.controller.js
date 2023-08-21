@@ -1,8 +1,9 @@
 sap.ui.define([
 	"./BaseController",
 	"sap/ui/model/json/JSONModel",
-	"sap/ui/Device"
-], function (BaseController, JSONModel, Device) {
+	"sap/ui/Device",
+	"sap/ui/core/Fragment",
+], function (BaseController, JSONModel, Device, Fragment) {
 	"use strict";
 
 	return BaseController.extend("com.bayer.tender.whcapp.controller.Master", {
@@ -35,6 +36,29 @@ sap.ui.define([
 		_showDetail: function (id) {
 			var bReplace = !Device.system.phone;
 			this.getRouter().navTo("object", { id: id }, bReplace);
+		},
+
+		onOpenCreateProposalDialog: async function(event){
+			let that = this;
+
+			if (!this.byId('idCreateProposalPopup')){
+				this.createProposalDialog = await Fragment.load({
+					id: that.getView().getId(),
+					name: "com.bayer.tender.whcapp.view.fragments.CreateProposal",
+					controller: that,
+				}).then(function (oDialog){
+					oDialog.setResizable(false);
+					oDialog.setStretch(false);
+					that.getView().addDependent(oDialog);
+					oDialog.open();
+				});
+			} else {
+				this.byId("idCreateProposalPopup").open();
+			}
+		},
+
+		onCloseCreateProposalPopup: function(){
+			this.byId("idCreateProposalPopup").close();
 		}
 	});
 
