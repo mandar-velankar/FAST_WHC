@@ -3,7 +3,8 @@ sap.ui.define([
 	"sap/ui/model/json/JSONModel",
 	"sap/m/Token",
 	"sap/ui/core/Fragment",
-], function (BaseController, JSONModel, Token, Fragment) {
+	"sap/m/MessageToast"
+], function (BaseController, JSONModel, Token, Fragment,MessageToast) {
 	"use strict";
 
 	return BaseController.extend("com.bayer.tender.whcapp.controller.Detail", {
@@ -91,7 +92,16 @@ sap.ui.define([
 				this.getModel("appView").setProperty("/layout", this.getModel("appView").getProperty("/previousLayout"));
 			}
 		},
-
+		onAddMainCustomerButtonPress:function(event){
+			const searchWidgetEl = document.getElementById("searchWidget");
+			searchWidgetEl.start();
+			searchWidgetEl.addEventListener(`veeva-network:CT_SEARCH:select`, (ev) => {
+				const entity = ev.detail.entity;
+				MessageToast.show(`ID of selected customer: ${entity.entityId} - ${entity.entity.whc_legal_name__c}`);//or corporate_name__v instead of whc_legal...
+				searchWidgetEl.close();
+			},{once:true});
+			
+		},
 		onShowWacButtonPress: async function (){
 			let that = this;
 
