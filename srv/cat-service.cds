@@ -10,5 +10,7 @@ service CatalogService {
         contract.Status.Status,
         contract.ContractCustomers.Name as ParentAccountName: String,
         contract.ContractCustomers.IsParent
-    }
+    };
+
+    entity WHCProducts as projection on whc.WHCProducts;
 }

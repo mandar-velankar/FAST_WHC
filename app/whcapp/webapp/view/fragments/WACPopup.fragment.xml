@@ -8,17 +8,13 @@
 	xmlns:l="sap.ui.layout"
 	xmlns:mvc="sap.ui.core.mvc">
 	
-    <Dialog id = "idProductWacPopup" title="Product WAC Info" contentWidth="800px" contentHeight="400px">
+    <Dialog id = "idProductWacPopup" title="Product WAC Info" contentWidth="400px" contentHeight="200px">
 
 		<content>
             <Table
                 id="idWHCProductWacInfo"
-                mode="None">
-                <headerToolbar>
-                    <OverflowToolbar>
-                        <Title text="Product Information" />
-                    </OverflowToolbar>
-                </headerToolbar>
+                mode="None"
+                items="{/WHCProducts}">
                 <columns>
                     <Column>
                         <Label

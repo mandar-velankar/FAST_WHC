@@ -38,7 +38,7 @@
 
 				<!-- ACTIONS -->
 				<f:actions>
-					<Button id="editButtonId" text="Edit" type="Emphasized" press=".onEditButtonPress" enabled="true"/>
+					<Button id="editButtonId" text="Edit" type="Emphasized" press=".onEdit" enabled="{= !${appView>/editmode}}"/>
 					<Button id="deleteContractButtonId" icon="sap-icon://delete" text="Delete" type="Reject" press="onDeleteContractPress" enabled="true" />
 					<Button id="refreshButtonId" icon="sap-icon://refresh" type="Emphasized" press="onRefresh" enabled="true"/>
 					<Button id="printButtonId" text="Print" type="Emphasized" press=".onPrintButtonPress" enabled="true"/>
@@ -82,7 +82,7 @@
 								</OverflowToolbar>
 							</headerToolbar>
 							<form:SimpleForm
-								editable="false"
+								editable="true"
 								layout="ResponsiveGridLayout"
 								labelSpanXL="4"
 								labelSpanL="4"
@@ -100,10 +100,10 @@
 								<form:content>
 
 									<Label text='Proposal Name '/>
-									<Input id="idProposalName" value="{Name}"  enabled="false"/>
+									<Input id="idProposalName" value="{Name}"  enabled="{= ${appView>/editmode}}"/>
 
-									<Label text='Vistex ID '/>
-									<Input id="idVistexInput" value="{VistexID}"  enabled="false"/>
+									<Label text='Vistex ID ' visible="{= ${ContractType/Type} === 'Amendment' || ${ContractType/Type} === 'Renewal Contract' }"/>
+									<Input id="idVistexInput" value="{VistexID}"  enabled="{= ${appView>/editmode}}" visible="{= ${ContractType/Type} === 'Amendment' || ${ContractType/Type} === 'Renewal Contract' }"/>
 
 									<Button id="wacButtonId" text="WAC" type="Emphasized" press=".onShowWacButtonPress" />
 								</form:content>
@@ -131,7 +131,8 @@
 															path: '/ContractCustomers',
 															sorter: { path: 'Name' }
 														}"
-														showValueHelp="false">
+														showValueHelp="false"
+														enabled="{= ${appView>/editmode}}">
 														<core:Item key="{Name}" text="{Name}" />
 													</MultiInput>
 												</content>
@@ -171,7 +172,8 @@
 															path: '/ContractCustomers',
 															sorter: { path: 'Name' }
 														}"
-														showValueHelp="false">
+														showValueHelp="false"
+														enabled="{= ${appView>/editmode}}">
 														<core:Item key="{Name}" text="{Name}" />
 													</MultiInput>
 												</content>
@@ -207,13 +209,13 @@
 							layout="ResponsiveGridLayout"
 							editable="true">
 							<Label text='Base Line Units '/>
-							<Input id="idBaseLineUnitsInput" value="{BaseLineUnits}"  enabled="false" width='20%'/>
+							<Input id="idBaseLineUnitsInput" value="{BaseLineUnits}"  enabled="{= ${appView>/editmode}}" width='20%' liveChange="onBaseLineUnitChange" type="Number"/>
 
 							<Label text='Base Line Discount '/>
-							<Input id="idBaseLineDiscountInput" value="{BaseLineDiscount}"  enabled="false" width='20%'/>
+							<Input id="idBaseLineDiscountInput" value="{BaseLineDiscount}"  enabled="{= ${appView>/editmode}}" type="Number" description="%" width='40%'/>
 
 							<Label text='Proposed Contract Length '/>
-							<Input id="idProposedContractLengthInput" value="{ProposedContractLength}"  enabled="false" width='20%'/>
+							<Input id="idProposedContractLengthInput" value="{ProposedContractLength}"  enabled="{= ${appView>/editmode}}" width='20%' liveChange="onBaseLineUnitChange" type="Number"/>
 						</form:SimpleForm>
 						
 					
@@ -222,7 +224,7 @@
 							showExceededText="true" 
 							width="100%"
 							growing="true"
-							enabled="false"
+							enabled="{= ${appView>/editmode}}"
 							rows="7"/>
 					</Panel>
 
@@ -408,5 +410,12 @@
 				</items>
 			</IconTabBar>
 		</f:content>
+		<f:footer>
+			<OverflowToolbar>
+				<ToolbarSpacer />
+				<Button type="Accept" text="Save" press="onFooterSavePress()"/>
+				<Button type="Reject" text="Cancel" press="onFooterCancelPress()"/>
+			</OverflowToolbar>
+		</f:footer>
 	</f:DynamicPage>
 </mvc:View>
