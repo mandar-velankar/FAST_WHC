@@ -12,5 +12,9 @@ service CatalogService {
         contract.ContractCustomers.IsParent
     };
 
+    entity ContractFormView as select from Contracts as contract {
+        *
+    };
+
     entity WHCProducts as projection on whc.WHCProducts;
 }

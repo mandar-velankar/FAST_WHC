@@ -7,7 +7,8 @@ sap.ui.define([
     "sap/ui/model/FilterType",
 	"sap/ui/model/Sorter",
     "sap/ui/model/FilterOperator",
-], function (BaseController, JSONModel, Device, Fragment, Filter, FilterType, Sorter, FilterOperator) {
+	"sap/m/MessageToast",
+], function (BaseController, JSONModel, Device, Fragment, Filter, FilterType, Sorter, FilterOperator,MessageToast) {
 	"use strict";
 
 	return BaseController.extend("com.bayer.tender.whcapp.controller.Master", {
@@ -56,14 +57,31 @@ sap.ui.define([
 					oDialog.setStretch(false);
 					that.getView().addDependent(oDialog);
 					oDialog.open();
+					that._bindCreateProposalForm();
 				});
 			} else {
 				this.byId("idCreateProposalPopup").open();
 			}
 		},
 
+		_bindCreateProposalForm: async function () {
+			const entity = "ContractFormView";
+			const form = this.byId("idNewProposalForm");
+			const newEntryContext = this.getOwnerComponent().getModel().createEntry(`/${entity}`, {
+				groupId: "NewProposal"
+			});
+			const path = newEntryContext.getPath();
+			form?.bindElement({
+				path: path,
+				groupId: "NewProposal"
+			});
+		},
+
 		onCloseCreateProposalPopup: function(){
-			this.byId("idCreateProposalPopup").close();
+			const bindingPath = this.byId("idNewProposalForm").getBindingContext().getPath().replace("/", "");
+			//this.cancelPendingChanges([bindingPath], "newProposalMsg");
+			this.byId("idCreateProposalPopup").close();			
+			this.byId("idCreateProposalPopup").destroy();
 		},
 
         /**
@@ -224,7 +242,51 @@ sap.ui.define([
             }else {
                 list.filter();
             }
-        }
+        },
+
+		onSaveProposal: async function () {
+			
+			const oNewProposalForm = this.byId("idNewProposalForm");
+			this.setNewProposalPendingChanges(oNewProposalForm);
+			this.getModel().submitChanges({
+				success: this._onSubmitChangesSuccess.bind(this),
+				error: this._onSubmitChangesFail.bind(this),
+				groupId: "NewProposal"
+			});
+		},
+		_onSubmitChangesFail: function (error) {
+			// not implemented
+		},
+
+		_onSubmitChangesSuccess: function (res) {
+			const newTenderCtx = this.byId("idNewProposalForm").getElementBinding().getBoundContext();
+			const ctxPath = newTenderCtx.getPath().replace("/", "");
+			const hasErrorMessages = this.getMessages([ctxPath]).length > 0;
+			//this.setMessageSection([ctxPath], "newProposalMsg");
+			if (!hasErrorMessages) {
+				MessageToast.show("Proposal has been created successfully");
+				this.onCloseCreateProposalPopup();
+				this.byId("masterTable")?.getBinding("items")?.refresh();
+			}
+		},
+		setNewProposalPendingChanges: function (oForm) {
+			const oDefaultModel = oForm.getModel();
+			const oBoundContext = oForm.getElementBinding().getBoundContext();
+			const newProposalObj = oBoundContext.getObject();
+
+			newProposalObj.ValidFrom = new Date();
+			newProposalObj.ValidTo = new Date(9999, 11, 31);
+			newProposalObj.TypeID = this.byId('idGroupType').getSelectedButton().getText();
+			const oNewBindingCtx = oDefaultModel.createEntry("/ContractFormView", {
+				properties: newProposalObj,
+				groupId: "NewProposal"
+			});
+			oForm?.bindElement({
+				path: oNewBindingCtx.getPath(),
+				groupId: "NewProposal"
+			});
+			oDefaultModel.resetChanges([oBoundContext.getPath()]);
+		},
 	});
 
 });

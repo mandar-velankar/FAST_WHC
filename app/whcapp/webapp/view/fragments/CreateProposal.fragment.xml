@@ -12,7 +12,7 @@
     <Dialog id = "idCreateProposalPopup" title="Create Proposal" contentWidth="600px" contentHeight="150px">
 
 		<content>
-            <form:SimpleForm layout="ResponsiveGridLayout" editable="true">
+            <form:SimpleForm layout="ResponsiveGridLayout" editable="true" id="idNewProposalForm">
                 <VBox>
                     <HBox>
                         <VBox>
@@ -29,7 +29,7 @@
 
                     <HBox>
                         <Label text='Proposal Name:' class="sapUiTinyMarginTop sapUiSmallMargin"/>
-                        <Input id="idNewProposalName" value="{ProposalName}"  enabled="true" width="100%" />
+                        <Input id="idNewProposalName" value="{Name}"  enabled="true" width="100%" />
                     </HBox>
                 </VBox>
                 
