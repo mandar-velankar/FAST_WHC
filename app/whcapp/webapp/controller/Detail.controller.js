@@ -3,7 +3,8 @@ sap.ui.define([
 	"sap/ui/model/json/JSONModel",
 	"sap/m/Token",
 	"sap/ui/core/Fragment",
-], function (BaseController, JSONModel, Token, Fragment) {
+	"sap/m/MessageToast"
+], function (BaseController, JSONModel, Token, Fragment,MessageToast) {
 	"use strict";
 
 	return BaseController.extend("com.bayer.tender.whcapp.controller.Detail", {
@@ -22,7 +23,8 @@ sap.ui.define([
 			this.getView().setModel(this.oMessageManager.getMessageModel(), "message");
 
 			// activate automatic message generation for complete view
-			this.oMessageManager.registerObject(this.getView(), true);
+			this.oMessageManager.registerObject(this.getView(), true);			
+			this.oDynamicPage = this.byId("detailPage");
 
 			let oMultiInput1 = this.byId("multiInputMemberBHO");
 			oMultiInput1.setTokens([
@@ -73,6 +75,12 @@ sap.ui.define([
 		onEdit: function () {
 			const editmode = this.getModel("appView").getProperty("/editmode");
 			this.getModel("appView").setProperty("/editmode", !editmode);
+			this.oDynamicPage.setShowFooter(true);
+		},
+		onFooterCancelPress: function (){
+			const editmode = this.getModel("appView").getProperty("/editmode");
+			this.getModel("appView").setProperty("/editmode", !editmode);
+			this.oDynamicPage.setShowFooter(false);
 		},
 		onCloseDetailPress: function () {
 			this.getModel("appView").setProperty("/actionButtonsInfo/midColumn/fullScreen", false);
@@ -91,7 +99,16 @@ sap.ui.define([
 				this.getModel("appView").setProperty("/layout", this.getModel("appView").getProperty("/previousLayout"));
 			}
 		},
-
+		onAddMainCustomerButtonPress:function(event){
+			const searchWidgetEl = document.getElementById("searchWidget");
+			searchWidgetEl.start();
+			searchWidgetEl.addEventListener(`veeva-network:CT_SEARCH:select`, (ev) => {
+				const entity = ev.detail.entity;
+				MessageToast.show(`ID of selected customer: ${entity.entityId} - ${entity.entity.whc_legal_name__c}`);//or corporate_name__v instead of whc_legal...
+				searchWidgetEl.close();
+			},{once:true});
+			
+		},
 		onShowWacButtonPress: async function (){
 			let that = this;
 
@@ -101,8 +118,8 @@ sap.ui.define([
 					name: "com.bayer.tender.whcapp.view.fragments.WACPopup",
 					controller: that,
 				}).then(function (oDialog) {
-					oDialog.setResizable(true);
-					oDialog.setStretch(true);
+					oDialog.setResizable(false);
+					oDialog.setStretch(false);
 					that.getView().addDependent(oDialog);
 					oDialog.open();
 				});
@@ -113,6 +130,18 @@ sap.ui.define([
 
 		onCloseWACPopup: function(){
 			this.byId("idProductWacPopup").close();
+		},
+
+		onBaseLineUnitChange: function(oEvent){
+			let input = oEvent.getSource(),
+				value = oEvent.getSource()?.getValue();
+			if(isNaN(value)){
+				input.setValue(value.substring(0,value.length-1));
+			}
+
+			if(value.indexOf('.')!=-1){
+				input.setValue(value.substring(0,value.length-1));
+			}
 		}
 	});
 
