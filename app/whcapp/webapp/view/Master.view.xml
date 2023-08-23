@@ -26,7 +26,7 @@
             <VBox>
                 <OverflowToolbar class="sapFDynamicPageAlignContent">
                         <Label
-                            text="Status"
+                            text="{i18n>StatusLabel}"
                             labelFor="idSlctStatus"
                         />
                         <Select 
@@ -44,7 +44,7 @@
                         </Select>
 
                         <Label
-                            text="Type"
+                            text="{i18n>TypeLabel}"
                             labelFor="idSlctType"
                         />
                         <Select 
@@ -87,28 +87,28 @@
                 >
                     <columns>
                         <Column>
-                            <Text text="Proposal Name" />
+                            <Text text="{i18n>ProposalName}" />
                         </Column>
                         <Column>
-                            <Text text="Proposal Type" />
+                            <Text text="{i18n>ProposalType}" />
                         </Column>
                         <Column>
-                            <Text text="Status" />
+                            <Text text="{i18n>Status}" />
                         </Column>
                         <Column>
-                            <Text text="Modified By" />
+                            <Text text="{i18n>ModifiedBy}" />
                         </Column>
                         <Column>
-                            <Text text="Modified Date" />
+                            <Text text="{i18n>ModifiedAt}" />
                         </Column>
                         <Column>
-                            <Text text="Parent Account Name" />
+                            <Text text="{i18n>ParentAccountName}" />
                         </Column>
                         <Column>
-                            <Text text="Created By" />
+                            <Text text="{i18n>CreatedBy}" />
                         </Column>
                         <Column>
-                            <Text text="Creation Date" />
+                            <Text text="{i18n>CreatedAt}" />
                         </Column>
                     </columns>
                     <items>
