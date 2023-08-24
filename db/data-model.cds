@@ -28,6 +28,7 @@ entity Contracts : cuid, managed {
                         on Rebates.Contracts = $self;
   Discounts         : Association to Discounts  
                         on Discounts.Contracts = $self;
+  Attachments : Composition of many Attachments on Attachments.Contract = $self;
 }
 
 entity Contracts_History : managed {
@@ -53,6 +54,13 @@ entity Contracts_History : managed {
                         on Rebates.Contracts = $self;
   Discounts         : Association to Discounts_History
                         on Discounts.Contracts = $self;
+}
+
+entity Attachments:cuid,managed{
+  Contract: Association to Contracts;
+  Content : LargeBinary @Core.MediaType: MediaType @Core.ContentDisposition.Filename: FileName @Core.ContentDisposition.Type: 'inline';
+  MediaType : String  @Core.IsMediaType;
+  FileName : String;
 }
 
 entity ContractCustomers : cuid, managed {
