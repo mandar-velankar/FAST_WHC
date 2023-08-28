@@ -18,4 +18,7 @@ service CatalogService {
     };
 
     entity WHCProducts as projection on whc.WHCProducts;
+
+    entity Discounts as projection on whc.Discounts;
+    entity Rebates as projection on whc.Rebates;
 }
