@@ -234,9 +234,18 @@
 					<headerToolbar>
 						<OverflowToolbar style="Clear">
 							<Title text="Discounts" />
+							<ToolbarSpacer />
+							<Label text='Type:'/>
+							<Select id = "idDiscountType" change="onFormatDiscountTableValues">
+								<items>
+									<core:Item key = "Value" text="Value"></core:Item>
+									<core:Item key = "Percentage" text="Percentage"></core:Item>
+								</items>
+							</Select>
 						</OverflowToolbar>
 					</headerToolbar>
 					<Table id="discountsTable" 
+						items="{path:'/Discounts'}"
 						growing="true"
 						growingThreshold="15"
 						growingScrollToLoad="false"
@@ -261,11 +270,11 @@
 						<items>
 							<ColumnListItem>
 								<cells>
-									<Text text="Y1" />
-									<Input value="{Unit}" enabled='false'/>
-									<Input value="{Mirena}" enabled='false'/>
-									<Input value="{Kyleena}" enabled='false'/>
-									<Input value="{Skyla}" enabled='false'/>
+									<Text text="Y{Year}" />
+									<Input value="{Units}" enabled="{= ${appView>/editmode}}"/>
+									<Input value="{Mirena}" enabled="{= ${appView>/editmode}}"/>
+									<Input value="{Kyleena}" enabled="{= ${appView>/editmode}}"/>
+									<Input value="{Skyla}" enabled="{= ${appView>/editmode}}"/>
 								</cells>
 							</ColumnListItem>
 						</items>
@@ -280,79 +289,116 @@
 						</headerToolbar>
 
 						<t:Table id="rebatesTable"
+								rows="{/Rebates}"
 								busyIndicatorDelay="0"
 								selectionMode='None'>
 							<t:columns>
-								<t:Column  sortProperty="year"
-										filterProperty="year">
+								<t:Column  sortProperty="Year"
+										filterProperty="Year">
 									<Label text="Year" textAlign="Center" width="100%"/>
 									<t:template>
-										<Text text="{year}"/>
+										<Text text="Y{Year}"/>
 									</t:template>
 								</t:Column>
-								<t:Column sortProperty="unit"
-										filterProperty="unit"
+								<t:Column sortProperty="Unit"
+										filterProperty="Unit"
 										headerSpan="2,1">
 									<t:multiLabels>
 										<Label text="L1" textAlign="Center" width="100%"/>
 										<Label text="Unit" textAlign="Center" width="100%"/>
 									</t:multiLabels>
 									<t:template>
-										<Text text="{unit}" wrapping="false"/>
+										<Input value="{
+											path: 'Unit',
+											type: 'sap.ui.model.type.Integer',
+											formatOptions: {
+												maxFractionDigits: 0,
+												minFractionDigits: 0,
+												groupingEnabled:true,
+												groupingSeparator: ','
+											}
+										}" enabled="{= ${appView>/editmode}}"/>
 									</t:template>
 								</t:Column>
-								<t:Column sortProperty="discount"
+								<t:Column sortProperty="Discount"
 										headerSpan="2">
 									<t:multiLabels>
 										<Label text="Discount"/>
 										<Label text="Discount" textAlign="Center" width="100%"/>
 									</t:multiLabels>
 									<t:template>
-										<Input value="{discount}" enabled='false'/>
+										<Input value="{
+											path: 'Discount',
+											formatter: '.formatter.formatPercentage'
+										}" enabled="{= ${appView>/editmode}}"/>
 									</t:template>
 								</t:Column>
 
-								<t:Column sortProperty="unit"
-										filterProperty="unit"
+								<t:Column sortProperty="Unit"
+										filterProperty="Unit"
 										headerSpan="2,1">
 									<t:multiLabels>
 										<Label text="L2" textAlign="Center" width="100%"/>
 										<Label text="Unit" textAlign="Center" width="100%"/>
 									</t:multiLabels>
 									<t:template>
-										<Text text="{unit}" wrapping="false"/>
+										<Input value="{
+											path: 'Unit',
+											type: 'sap.ui.model.type.Integer',
+											formatOptions: {
+												maxFractionDigits: 0,
+												minFractionDigits: 0,
+												groupingEnabled:true,
+												groupingSeparator: ','
+											}
+										}" enabled="{= ${appView>/editmode}}"/>
 									</t:template>
 								</t:Column>
-								<t:Column sortProperty="discount"
+								<t:Column sortProperty="Discount"
 										headerSpan="2">
 									<t:multiLabels>
 										<Label text="Discount"/>
 										<Label text="Discount" textAlign="Center" width="100%"/>
 									</t:multiLabels>
 									<t:template>
-										<Input value="{discount}" enabled='false'/>
+										<Input value="{
+											path: 'Discount',
+											formatter: '.formatter.formatPercentage'
+										}" enabled="{= ${appView>/editmode}}"/>
 									</t:template>
 								</t:Column>
 
-								<t:Column sortProperty="unit"
-										filterProperty="unit"
+								<t:Column sortProperty="Unit"
+										filterProperty="Unit"
 										headerSpan="2,1">
 									<t:multiLabels>
 										<Label text="L3" textAlign="Center" width="100%"/>
 										<Label text="Unit" textAlign="Center" width="100%"/>
 									</t:multiLabels>
 									<t:template>
-										<Text text="{unit}" wrapping="false"/>
+										<Input value="{
+											path: 'Unit',
+											type: 'sap.ui.model.type.Integer',
+											formatOptions: {
+												maxFractionDigits: 0,
+												minFractionDigits: 0,
+												groupingEnabled:true,
+												groupingSeparator: ','
+											}
+										}" enabled="{= ${appView>/editmode}}"/>
 									</t:template>
 								</t:Column>
-								<t:Column sortProperty="discount"
+								<t:Column sortProperty="Discount"
 										headerSpan="2">
 									<t:multiLabels>
 										<Label text="Discount"/>
 										<Label text="Discount" textAlign="Center" width="100%"/>
 									</t:multiLabels>
 									<t:template>
-										<Input value="{discount}"/>
+										<Input value="{
+											path: 'Discount',
+											formatter: '.formatter.formatPercentage'
+										}" enabled="{= ${appView>/editmode}}"/>
 									</t:template>
 								</t:Column>
 							</t:columns>
@@ -370,8 +416,9 @@
 								  showExceededText="true" 
 								  width="100%"
 								  growing="true"
-								  enabled="false"
-								  rows="7"/>
+								  enabled="{= ${appView>/editmode}}"
+								  rows="7"
+								  />
 					</Panel>
 
 					<Panel expandable="true" width="auto" class="sapUiResponsiveMargin" expanded="true">

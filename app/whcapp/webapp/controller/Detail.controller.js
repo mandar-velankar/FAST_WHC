@@ -4,12 +4,16 @@ sap.ui.define([
 	"sap/m/Token",
 	"sap/ui/core/Fragment",
 	"sap/m/MessageToast",
-	"sap/m/MessageBox"
-], function (BaseController, JSONModel, Token, Fragment, MessageToast, MessageBox) {
+	"sap/m/MessageBox",
+	"sap/ui/model/Filter",
+	"sap/ui/model/FilterOperator",
+	"../model/formatter"
+], function (BaseController, JSONModel, Token, Fragment,MessageToast, MessageBox, Filter, FilterOperator, formatter) {
 	"use strict";
 
 	return BaseController.extend("com.bayer.tender.whcapp.controller.Detail", {
-		views: {},
+		views:{},
+		formatter: formatter,
 
 		onInit: function () {
 			var oViewModel = new JSONModel({
@@ -43,7 +47,11 @@ sap.ui.define([
 			this.id = oEvent.getParameter("arguments").id;
 			this.getModel("appView").setProperty("/layout", "TwoColumnsMidExpanded");
 
-			this.getModel().metadataLoaded().then(() => this._bindView());
+			this.getModel().metadataLoaded().then(()=>{
+				this._bindView()
+				this.bindDiscountsTable();
+				this.bindRebatesTable();
+			});
 		},
 		_bindView: async function () {
 			const path = this.getModel().createKey("/Contracts", {
@@ -73,6 +81,53 @@ sap.ui.define([
 				}
 			});
 		},
+
+		bindDiscountsTable: async function () {
+			const discountTable = this.byId("discountsTable");
+			const template = discountTable.getBindingInfo("items").template;
+			const contract = await this.getContractById();
+
+			discountTable.bindItems({
+				path: "/Discounts",
+				filters: [
+					new Filter("Contracts_ID", "EQ", this.id),
+					new Filter("Year", "EQ", contract?.ProposedContractLength),
+				],
+				template: template,
+			});
+
+		},
+
+		bindRebatesTable: async function () {
+			const rebatesTable = this.byId("rebatesTable");
+			const contract = await this.getContractById();
+
+			rebatesTable.bindRows({
+				path: "/Rebates",
+				filters: [
+					new Filter("Contracts_ID", "EQ", this.id),
+					new Filter("Year", "EQ", contract?.ProposedContractLength),
+				],
+			});
+
+		},
+
+		getContractById: function () {
+			return new Promise((resolve, reject) => {
+				this.getModel().read("/Contracts", {
+					filters: [
+						new Filter("ID", "EQ", this.id)
+					],
+					success: function (res) {
+						resolve(res?.results[0]);
+					},
+					error: function (error) {
+						reject(error);
+					}
+				})
+			});
+		},
+
 		onEdit: function () {
 			const editmode = this.getModel("appView").getProperty("/editmode");
 			this.getModel("appView").setProperty("/editmode", !editmode);
@@ -185,6 +240,39 @@ sap.ui.define([
 				if (files === 0) {
 					MessageBox.success("Contract created: " + id);
 				}
+			}
+
+			if (value > 6) {
+				oEvent.getSource().setValueState("Error");
+                oEvent.getSource().setValueStateText("Proposed Contract Length should not be greater than 6 years");
+                oEvent.getSource().openValueStateMessage();
+			}
+		},
+
+		onFormatDiscountTableValues: function (event) {
+			const discountTable = this.byId("discountsTable");
+			const items = discountTable.getItems();
+			const selectedType = event.getParameter("selectedItem").getProperty("text");
+
+			switch (selectedType) {
+				case "Value":
+					items.map(item => {
+						const obj = item.getBindingContext().getObject();
+						const path = item.getBindingContext().getPath();
+						const parsedValue = formatter.parsePercentage(obj.Units);
+						this.getModel().setProperty(`${path}/Units`, (parsedValue * 100));
+					})
+					break;
+				case "Percentage":
+					items.map(item => {
+						const obj = item.getBindingContext().getObject();
+						const path = item.getBindingContext().getPath();
+						const formattedValue = formatter.formatPercentage(obj.Units / 100);
+						this.getModel().setProperty(`${path}/Units`, formattedValue);
+					})
+					break;
+				default:
+					break;
 			}
 		}
 	});
