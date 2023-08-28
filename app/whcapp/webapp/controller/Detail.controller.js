@@ -3,12 +3,13 @@ sap.ui.define([
 	"sap/ui/model/json/JSONModel",
 	"sap/m/Token",
 	"sap/ui/core/Fragment",
-	"sap/m/MessageToast"
-], function (BaseController, JSONModel, Token, Fragment,MessageToast) {
+	"sap/m/MessageToast",
+	"sap/m/MessageBox"
+], function (BaseController, JSONModel, Token, Fragment, MessageToast, MessageBox) {
 	"use strict";
 
 	return BaseController.extend("com.bayer.tender.whcapp.controller.Detail", {
-		views:{},
+		views: {},
 
 		onInit: function () {
 			var oViewModel = new JSONModel({
@@ -17,37 +18,37 @@ sap.ui.define([
 			});
 			this.getRouter().getRoute("object").attachPatternMatched(this._onObjectMatched, this);
 			this.setModel(oViewModel, "detailView");
-            
+
 			// set message model
 			this.oMessageManager = sap.ui.getCore().getMessageManager();
 			this.getView().setModel(this.oMessageManager.getMessageModel(), "message");
 
 			// activate automatic message generation for complete view
-			this.oMessageManager.registerObject(this.getView(), true);			
+			this.oMessageManager.registerObject(this.getView(), true);
 			this.oDynamicPage = this.byId("detailPage");
 
 			let oMultiInput1 = this.byId("multiInputMemberBHO");
 			oMultiInput1.setTokens([
-				new Token({text: "Contract customer 11", key: "Contract customer 11"}),
-				new Token({text: "Contract customer 12", key: "Contract customer 12"})
+				new Token({ text: "Contract customer 11", key: "Contract customer 11" }),
+				new Token({ text: "Contract customer 12", key: "Contract customer 12" })
 			]);
 
 			let oMultiInput2 = this.byId("multiInput2");
 			oMultiInput2.setTokens([
-				new Token({text: "Contract customer 11", key: "Contract customer 11"}),
-				new Token({text: "Contract customer 12", key: "Contract customer 12"})
+				new Token({ text: "Contract customer 11", key: "Contract customer 11" }),
+				new Token({ text: "Contract customer 12", key: "Contract customer 12" })
 			]);
 		},
 		_onObjectMatched: async function (oEvent) {
 			this.id = oEvent.getParameter("arguments").id;
 			this.getModel("appView").setProperty("/layout", "TwoColumnsMidExpanded");
 
-			this.getModel().metadataLoaded().then(()=>this._bindView());
+			this.getModel().metadataLoaded().then(() => this._bindView());
 		},
 		_bindView: async function () {
 			const path = this.getModel().createKey("/Contracts", {
-					ID :  this.id
-				});
+				ID: this.id
+			});
 
 			// Set busy indicator during view binding
 			var oViewModel = this.getModel("detailView");
@@ -57,12 +58,12 @@ sap.ui.define([
 			this.getModel("appView").setProperty("/editmode", false);
 
 			this.getView().bindElement({
-				path:path,
+				path: path,
 				parameters: {
 					expand: "ContractCustomers"
 				},
 				events: {
-				// 	change: this._onBindingChange.bind(this),
+					// 	change: this._onBindingChange.bind(this),
 					dataRequested: function () {
 						oViewModel.setProperty("/busy", true);
 					},
@@ -77,7 +78,7 @@ sap.ui.define([
 			this.getModel("appView").setProperty("/editmode", !editmode);
 			this.oDynamicPage.setShowFooter(true);
 		},
-		onFooterCancelPress: function (){
+		onFooterCancelPress: function () {
 			const editmode = this.getModel("appView").getProperty("/editmode");
 			this.getModel("appView").setProperty("/editmode", !editmode);
 			this.oDynamicPage.setShowFooter(false);
@@ -99,17 +100,17 @@ sap.ui.define([
 				this.getModel("appView").setProperty("/layout", this.getModel("appView").getProperty("/previousLayout"));
 			}
 		},
-		onAddMainCustomerButtonPress:function(event){
+		onAddMainCustomerButtonPress: function (event) {
 			const searchWidgetEl = document.getElementById("searchWidget");
 			searchWidgetEl.start();
 			searchWidgetEl.addEventListener(`veeva-network:CT_SEARCH:select`, (ev) => {
 				const entity = ev.detail.entity;
 				MessageToast.show(`ID of selected customer: ${entity.entityId} - ${entity.entity.whc_legal_name__c}`);//or corporate_name__v instead of whc_legal...
 				searchWidgetEl.close();
-			},{once:true});
-			
+			}, { once: true });
+
 		},
-		onShowWacButtonPress: async function (){
+		onShowWacButtonPress: async function () {
 			let that = this;
 
 			if (!this.byId("idProductWacPopup")) {
@@ -123,24 +124,67 @@ sap.ui.define([
 					that.getView().addDependent(oDialog);
 					oDialog.open();
 				});
-			}else {
+			} else {
 				this.byId("idProductWacPopup").open();
 			}
 		},
 
-		onCloseWACPopup: function(){
+		onCloseWACPopup: function () {
 			this.byId("idProductWacPopup").close();
 		},
 
-		onBaseLineUnitChange: function(oEvent){
+		onBaseLineUnitChange: function (oEvent) {
 			let input = oEvent.getSource(),
 				value = oEvent.getSource()?.getValue();
-			if(isNaN(value)){
-				input.setValue(value.substring(0,value.length-1));
+			if (isNaN(value)) {
+				input.setValue(value.substring(0, value.length - 1));
 			}
 
-			if(value.indexOf('.')!=-1){
-				input.setValue(value.substring(0,value.length-1));
+			if (value.indexOf('.') != -1) {
+				input.setValue(value.substring(0, value.length - 1));
+			}
+		},
+		onUploadCompleted: function (event) {
+			MessageBox.success("Contract created: " + this.getView().getBindingContext().getProperty("ID"));
+			this.getModel().refresh();
+		},
+		createAttachmentEntry: async function (id, file) {
+			return new Promise((resolve, reject) => {
+				this.getModel().create("/Attachments", {
+					Contract_ID: id,
+					FileName: file.getFileName()
+				}, {
+					success: (response) => {
+						file.setUploadUrl(`/catalog/Attachments(${response.ID})/Content`)
+						resolve(response);
+					}
+				});
+
+			})
+		},
+		submitChanges: function () {
+			return new Promise((resolve, reject) => {
+				this.getModel().submitChanges({
+					success: () => resolve(),
+					error: () => reject()
+				});
+			})
+		},
+		onSave: async function () {
+			await this.submitChanges();
+			// (this.getModel() as ODataModel).changeHttpHeaders({captcha:""});
+			const id = this.getView().getBindingContext().getProperty("ID");
+			if (id) {
+				const uploader = this.byId("UploadSet");
+				const files = uploader.getIncompleteItems().length;
+				Promise.all(uploader.getIncompleteItems().map((item) => this.createAttachmentEntry(id, item))).then(() => {
+					uploader.upload();
+					this.id = id;
+				});
+				await this.submitChanges();
+				if (files === 0) {
+					MessageBox.success("Contract created: " + id);
+				}
 			}
 		}
 	});
