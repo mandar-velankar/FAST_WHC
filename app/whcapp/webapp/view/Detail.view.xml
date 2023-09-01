@@ -245,7 +245,9 @@
 						</OverflowToolbar>
 					</headerToolbar>
 					<Table id="discountsTable" 
-						items="{path:'/Discounts'}"
+						items="{
+							path:'/Discounts'
+						}"
 						growing="true"
 						growingThreshold="15"
 						growingScrollToLoad="false"
@@ -272,7 +274,7 @@
 								<cells>
 									<Text text="Y{Year}" />
 									<Input value="{Units}" enabled="{= ${appView>/editmode}}"/>
-									<Input value="{Mirena}" enabled="{= ${appView>/editmode}}"/>
+									<Input value="{WAC}" enabled="{= ${appView>/editmode}}"/>
 									<Input value="{Kyleena}" enabled="{= ${appView>/editmode}}"/>
 									<Input value="{Skyla}" enabled="{= ${appView>/editmode}}"/>
 								</cells>
@@ -481,7 +483,7 @@
 		<f:footer>
 			<OverflowToolbar>
 				<ToolbarSpacer />
-				<Button type="Accept" text="Save" press="onFooterSavePress()"/>
+				<Button type="Accept" text="Save" press="onSave"/>
 				<Button type="Reject" text="Cancel" press="onFooterCancelPress()"/>
 			</OverflowToolbar>
 		</f:footer>

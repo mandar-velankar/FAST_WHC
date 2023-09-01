@@ -89,11 +89,14 @@ sap.ui.define([
 
 			discountTable.bindItems({
 				path: "/Discounts",
+				parameters: {
+					expand: "Product"
+				},
 				filters: [
 					new Filter("Contracts_ID", "EQ", this.id),
-					new Filter("Year", "EQ", contract?.ProposedContractLength),
+					new Filter("Year", "LE", contract?.ProposedContractLength),
 				],
-				template: template,
+				template: template
 			});
 
 		},
@@ -106,7 +109,7 @@ sap.ui.define([
 				path: "/Rebates",
 				filters: [
 					new Filter("Contracts_ID", "EQ", this.id),
-					new Filter("Year", "EQ", contract?.ProposedContractLength),
+					new Filter("Year", "LE", contract?.ProposedContractLength),
 				],
 			});
 
@@ -198,6 +201,12 @@ sap.ui.define([
 			if (value.indexOf('.') != -1) {
 				input.setValue(value.substring(0, value.length - 1));
 			}
+
+			if (value > 6) {
+				oEvent.getSource().setValueState("Error");
+                oEvent.getSource().setValueStateText("Proposed Contract Length should not be greater than 6 years");
+                oEvent.getSource().openValueStateMessage();
+			}
 		},
 		onUploadCompleted: function (event) {
 			MessageBox.success("Contract created: " + this.getView().getBindingContext().getProperty("ID"));
@@ -242,11 +251,6 @@ sap.ui.define([
 				}
 			}
 
-			if (value > 6) {
-				oEvent.getSource().setValueState("Error");
-                oEvent.getSource().setValueStateText("Proposed Contract Length should not be greater than 6 years");
-                oEvent.getSource().openValueStateMessage();
-			}
 		},
 
 		onFormatDiscountTableValues: function (event) {
@@ -259,16 +263,16 @@ sap.ui.define([
 					items.map(item => {
 						const obj = item.getBindingContext().getObject();
 						const path = item.getBindingContext().getPath();
-						const parsedValue = formatter.parsePercentage(obj.Units);
-						this.getModel().setProperty(`${path}/Units`, (parsedValue * 100));
+						const parsedValue = formatter.parsePercentage(obj.WAC);
+						this.getModel().setProperty(`${path}/WAC`, (parsedValue * 100));
 					})
 					break;
 				case "Percentage":
 					items.map(item => {
 						const obj = item.getBindingContext().getObject();
 						const path = item.getBindingContext().getPath();
-						const formattedValue = formatter.formatPercentage(obj.Units / 100);
-						this.getModel().setProperty(`${path}/Units`, formattedValue);
+						const formattedValue = formatter.formatPercentage(obj.WAC / 100);
+						this.getModel().setProperty(`${path}/WAC`, formattedValue);
 					})
 					break;
 				default:
