@@ -19,6 +19,10 @@ service CatalogService {
 
     entity WHCProducts as projection on whc.WHCProducts;
 
-    entity Discounts as projection on whc.Discounts;
+    entity Discounts as projection on whc.Discounts as discounts {
+        *,
+        discounts.Product.WAC,
+        discounts.Product.ProductName
+    };
     entity Rebates as projection on whc.Rebates;
 }

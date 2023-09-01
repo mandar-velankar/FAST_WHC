@@ -162,7 +162,7 @@ sap.ui.define([
             // Proposal Type filter
             const selectedItemKeyOfContractType = this.byId("idSlctType").getSelectedItem()?.getKey();
             if (selectedItemKeyOfContractType && !selectedItemKeyOfContractType.toLowerCase().includes('all')) {
-                andFilters.push(new Filter("Type", FilterOperator.Contains, selectedItemKeyOfContractType, false));
+                andFilters.push(new Filter("TypeID", FilterOperator.Contains, selectedItemKeyOfContractType, false));
             }
             // Searching 
             let sSearch = oEvent?.getParameter("query");
@@ -174,7 +174,7 @@ sap.ui.define([
                     caseSensitive: false
                 }));
                 orFilters.push(new Filter({
-                    path: "Type",
+                    path: "TypeID",
                     operator: FilterOperator.Contains,
                     value1: sSearch,
                     caseSensitive: false
