@@ -29,6 +29,9 @@ sap.ui.define([
                 // enable routing
                 this.getRouter().initialize();
 
+                //set all change groups application wide
+			    this.setModelChangeGroups(this.getModel());
+
                 // set the device model
                 this.setModel(models.createDeviceModel(), "device");
             },
@@ -50,6 +53,17 @@ sap.ui.define([
                     }
                 }
                 return this._sContentDensityClass;
+            },
+
+            setModelChangeGroups: function(oModel){
+                oModel.setDeferredGroups(oModel.getDeferredGroups().concat([
+                    "NewProposal",
+                ]));
+                oModel.setChangeGroups({
+                    "ProposalFormView": {
+                        groupId: "NewProposal",  
+                    },
+                });
             }
         });
     }
