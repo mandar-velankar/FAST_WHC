@@ -429,29 +429,6 @@
 							<Title text="Uploaded Files" />
 						</OverflowToolbar>
 					</headerToolbar>
-						<NotificationList>
-							<layoutData>
-								<FlexItemData />
-							</layoutData>
-
-							<NotificationListGroup
-								title="Uploaded Files"
-								showCloseButton="false"
-								close=".onItemClose">
-
-								<NotificationListItem
-									title="North Shore University Health System_Bayer Contracting Value"
-									description="Calc_Weighted_Avg_Template(4).xlsx"
-									showCloseButton="true"
-									unread="false"
-									priority="None"
-									close=".onItemClose"
-									press=".onListItemPress"
-									authorPicture="sap-icon://excel-attachment"
-									authorAvatarColor="Accent8" />
-							
-							</NotificationListGroup>
-						</NotificationList>
 						<upload:UploadSet
 								id="UploadSet"
 								instantUpload="false"
