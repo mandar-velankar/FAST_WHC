@@ -429,34 +429,11 @@
 							<Title text="Uploaded Files" />
 						</OverflowToolbar>
 					</headerToolbar>
-						<NotificationList>
-							<layoutData>
-								<FlexItemData />
-							</layoutData>
-
-							<NotificationListGroup
-								title="Uploaded Files"
-								showCloseButton="false"
-								close=".onItemClose">
-
-								<NotificationListItem
-									title="North Shore University Health System_Bayer Contracting Value"
-									description="Calc_Weighted_Avg_Template(4).xlsx"
-									showCloseButton="true"
-									unread="false"
-									priority="None"
-									close=".onItemClose"
-									press=".onListItemPress"
-									authorPicture="sap-icon://excel-attachment"
-									authorAvatarColor="Accent8" />
-							
-							</NotificationListGroup>
-						</NotificationList>
 						<upload:UploadSet
 								id="UploadSet"
 								instantUpload="false"
 								showIcons="false"
-								uploadEnabled="true"
+								uploadEnabled="{= ${appView>/editmode}}"
 								terminationEnabled="false"
 								maxFileNameLength="30"
 								httpRequestMethod="Put"
@@ -474,7 +451,7 @@
 						</upload:UploadSet>
 					</Panel>
 					<Panel headerText="Tableau test" expandable="true" width="auto" class="sapUiResponsiveMargin" expanded="true">
-						<custom:Tableau src='https://tableau-ncsa.aws.cnb/t/CPROD/views/WHCContractProposal/ContractProposal?ORIGINAL_ORDERING_ACCOUNT_NUM=BHO3064937' width="500px" heigth="500px"/>
+						<custom:Tableau src='https://tableau-ncsa.aws.cnb/t/CPROD/views/WHCContractProposal/ContractProposal?:origin=card_share_link&amp;:embed=y' width="500px" heigth="500px"/>
 					</Panel>
 				</IconTabFilter>
 				</items>
