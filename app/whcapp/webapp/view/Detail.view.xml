@@ -451,7 +451,7 @@
 						</upload:UploadSet>
 					</Panel>
 					<Panel headerText="Tableau test" expandable="true" width="auto" class="sapUiResponsiveMargin" expanded="true">
-						<custom:Tableau src='https://tableau-ncsa.aws.cnb/t/CPROD/views/WHCContractProposal/ContractProposal?ORIGINAL_ORDERING_ACCOUNT_NUM=BHO3064937' width="500px" heigth="500px"/>
+						<custom:Tableau src='https://tableau-ncsa.aws.cnb/t/CPROD/views/WHCContractProposal/ContractProposal?:origin=card_share_link&amp;:embed=y' width="500px" heigth="500px"/>
 					</Panel>
 				</IconTabFilter>
 				</items>
