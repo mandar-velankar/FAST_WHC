@@ -433,7 +433,7 @@
 								id="UploadSet"
 								instantUpload="false"
 								showIcons="false"
-								uploadEnabled="true"
+								uploadEnabled="{= ${appView>/editmode}}"
 								terminationEnabled="false"
 								maxFileNameLength="30"
 								httpRequestMethod="Put"
