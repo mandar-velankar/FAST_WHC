@@ -7,8 +7,9 @@ sap.ui.define([
 	"sap/m/MessageBox",
 	"sap/ui/model/Filter",
 	"sap/ui/model/FilterOperator",
+	"sap/ui/model/Sorter",
 	"../model/formatter"
-], function (BaseController, JSONModel, Token, Fragment,MessageToast, MessageBox, Filter, FilterOperator, formatter) {
+], function (BaseController, JSONModel, Token, Fragment,MessageToast, MessageBox, Filter, FilterOperator, Sorter, formatter) {
 	"use strict";
 
 	return BaseController.extend("com.bayer.tender.whcapp.controller.Detail", {
@@ -49,7 +50,7 @@ sap.ui.define([
 
 			this.getModel().metadataLoaded().then(()=>{
 				this._bindView()
-				this.bindDiscountsTable();
+				this.filterDiscountsTable();
 				this.bindRebatesTable();
 			});
 		},
@@ -82,23 +83,16 @@ sap.ui.define([
 			});
 		},
 
-		bindDiscountsTable: async function () {
+		filterDiscountsTable: async function () {
 			const discountTable = this.byId("discountsTable");
 			const template = discountTable.getBindingInfo("items").template;
 			const contract = await this.getContractById();
+			const filter = [
+				new Filter("Contracts_ID", FilterOperator.EQ, this.id),
+				new Filter("Year", FilterOperator.LE, contract?.ProposedContractLength),
+			]
 
-			discountTable.bindItems({
-				path: "/Discounts",
-				parameters: {
-					expand: "Product"
-				},
-				filters: [
-					new Filter("Contracts_ID", "EQ", this.id),
-					new Filter("Year", "LE", contract?.ProposedContractLength),
-				],
-				template: template
-			});
-
+			discountTable.getBinding("items").filter(filter);
 		},
 
 		bindRebatesTable: async function () {
@@ -110,6 +104,12 @@ sap.ui.define([
 				filters: [
 					new Filter("Contracts_ID", "EQ", this.id),
 					new Filter("Year", "LE", contract?.ProposedContractLength),
+				],
+				sorter: [ 
+					new Sorter({
+						path: "Year",
+						descending: false
+					})
 				],
 			});
 

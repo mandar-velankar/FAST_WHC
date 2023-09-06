@@ -246,7 +246,7 @@
 					</headerToolbar>
 					<Table id="discountsTable" 
 						items="{
-							path:'/Discounts'
+							path:'/DiscountTableView'
 						}"
 						growing="true"
 						growingThreshold="15"
@@ -274,7 +274,7 @@
 								<cells>
 									<Text text="Y{Year}" />
 									<Input value="{Units}" enabled="{= ${appView>/editmode}}"/>
-									<Input value="{WAC}" enabled="{= ${appView>/editmode}}"/>
+									<Input value="{Mirena}" enabled="{= ${appView>/editmode}}"/>
 									<Input value="{Kyleena}" enabled="{= ${appView>/editmode}}"/>
 									<Input value="{Skyla}" enabled="{= ${appView>/editmode}}"/>
 								</cells>
@@ -311,7 +311,7 @@
 									</t:multiLabels>
 									<t:template>
 										<Input value="{
-											path: 'Unit',
+											path: 'RebateLevels_Unit_Level_1',
 											type: 'sap.ui.model.type.Integer',
 											formatOptions: {
 												maxFractionDigits: 0,
@@ -330,7 +330,7 @@
 									</t:multiLabels>
 									<t:template>
 										<Input value="{
-											path: 'Discount',
+											path: 'RebateLevels_Discount_Level_1',
 											formatter: '.formatter.formatPercentage'
 										}" enabled="{= ${appView>/editmode}}"/>
 									</t:template>
@@ -345,7 +345,7 @@
 									</t:multiLabels>
 									<t:template>
 										<Input value="{
-											path: 'Unit',
+											path: 'RebateLevels_Unit_Level_2',
 											type: 'sap.ui.model.type.Integer',
 											formatOptions: {
 												maxFractionDigits: 0,
@@ -364,7 +364,7 @@
 									</t:multiLabels>
 									<t:template>
 										<Input value="{
-											path: 'Discount',
+											path: 'RebateLevels_Discount_Level_2',
 											formatter: '.formatter.formatPercentage'
 										}" enabled="{= ${appView>/editmode}}"/>
 									</t:template>
@@ -379,7 +379,7 @@
 									</t:multiLabels>
 									<t:template>
 										<Input value="{
-											path: 'Unit',
+											path: 'RebateLevels_Unit_Level_3',
 											type: 'sap.ui.model.type.Integer',
 											formatOptions: {
 												maxFractionDigits: 0,
@@ -398,7 +398,7 @@
 									</t:multiLabels>
 									<t:template>
 										<Input value="{
-											path: 'Discount',
+											path: 'RebateLevels_Discount_Level_3',
 											formatter: '.formatter.formatPercentage'
 										}" enabled="{= ${appView>/editmode}}"/>
 									</t:template>
