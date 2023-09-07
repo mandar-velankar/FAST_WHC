@@ -46,12 +46,12 @@
 					<MenuButton id="idButtonAction" text="Set Status" buttonMode="Split" useDefaultActionOnly="false" visible="true" type="Emphasized">
 							<menu>
 								<Menu itemSelected="onMenuAction">
-									<MenuItem text="Save Draft" visible="true" press=".onSave"/>
-									<MenuItem text="Submit to Workshop" visible="true" />
-									<MenuItem text="Approve" visible="true" />
-									<MenuItem text="Reject" visible="true" />
-									<MenuItem text="Cancel Proposal" visible="true" />
-									<MenuItem text="Archive" visible="true" />
+									<MenuItem text="Save Draft" visible="{accessControl>/whcproposalcreator}" press=".onSave"/>
+									<MenuItem text="Submit to Workshop" visible="{accessControl>/whcproposalcreator}" />
+									<MenuItem text="Approve" visible="{accessControl>/whcapprover}" />
+									<MenuItem text="Reject" visible="{accessControl>/whcapprover}" />
+									<MenuItem text="Cancel Proposal" visible="{accessControl>/whcproposalcreator}" />
+									<MenuItem text="Archive" visible="{accessControl>/whcproposalcreator}" />
 								</Menu>
 							</menu>
 						</MenuButton>
