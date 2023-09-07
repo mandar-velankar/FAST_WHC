@@ -433,10 +433,11 @@
 								id="UploadSet"
 								instantUpload="false"
 								showIcons="false"
-								uploadEnabled="{= ${appView>/editmode}}"
+								uploadEnabled="{appView>/editmode}"
 								terminationEnabled="false"
 								maxFileNameLength="30"
 								httpRequestMethod="Put"
+								afterItemAdded="onAfterItemAdded"
 								uploadCompleted="onUploadCompleted"
 								items="{path: 'Attachments', templateShareable: false}">
 							<upload:items>
@@ -445,6 +446,8 @@
 										mediaType="{MediaType}"
 										visibleEdit="false"
 										url="/catalog/Attachments({ID})/Content"
+										enabledRemove="{appView>/editmode}"
+										removePressed=".onAttachmentDelete"
 										uploadState="Complete">
 								</upload:UploadSetItem>
 							</upload:items>
