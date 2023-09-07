@@ -414,7 +414,7 @@
 								<Title text="Remarks" />
 							</OverflowToolbar>
 						</headerToolbar>
-						<TextArea value="{Remarks}" 
+						<TextArea id="idRemarksTextArea" value="{Remarks}" 
 								  showExceededText="true" 
 								  width="100%"
 								  growing="true"
@@ -451,7 +451,7 @@
 						</upload:UploadSet>
 					</Panel>
 					<Panel headerText="Tableau test" expandable="true" width="auto" class="sapUiResponsiveMargin" expanded="true">
-						<custom:Tableau src='https://tableau-ncsa.aws.cnb/t/CPROD/views/WHCContractProposal/ContractProposal?:origin=card_share_link&amp;:embed=y' width="500px" heigth="500px"/>
+						<custom:Tableau id="idTableauChart" src='https://tableau-ncsa.aws.cnb/t/CPROD/views/WHCContractProposal/ContractProposal?:origin=card_share_link&amp;:embed=y' width="500px" heigth="500px"/>
 					</Panel>
 				</IconTabFilter>
 				</items>

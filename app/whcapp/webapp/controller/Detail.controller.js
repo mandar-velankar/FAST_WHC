@@ -280,11 +280,90 @@ sap.ui.define([
 			}
 		},
 
-		onPrintButtonPress: function(event){
+		onPrintButtonPress: async function(event){
 			const doc = new jspdf.jsPDF();
+			let pageHeight = doc.internal.pageSize.getHeight(); // default height is 297
+			const marginTop = 15;
+			const marginLeft = 15;
+			const marginBottom = 10;
 
-			doc.text("Hello world!", 10, 10);
-			doc.save("a4.pdf");
+			const discountsTableHtml = this.byId("discountsTable").getDomRef().cloneNode(true);
+			const rebatesTableHtml = this.byId("rebatesTable").getDomRef().cloneNode(true);
+			const tableauChartHtml = this.byId("idTableauChart").getDomRef().cloneNode(true);
+			const remarksTextAreaHtml = this.byId("idRemarksTextArea").getDomRef().cloneNode(true);
+			const mainCustomersTableHtml = this.byId("mainCustomersTable").getDomRef().cloneNode(true);
+
+			// doc.setFontSize(14);
+			// doc.text("Proposal XXX", marginLeft, 20);
+
+			const textContent = 'Proposal XXX';
+			doc.text(textContent, marginLeft, marginTop);
+
+			// Calculate the dimensions of the added text
+			const textDimensions = doc.getTextDimensions(textContent);
+
+			// Calculate the Y position for the autoTable
+			const autoTableY = marginTop + textDimensions.h; 		
+			
+
+			doc.autoTable({
+				head: [['Proposal Name', 'Proposal Type', 'Vistex ID']],
+				body: [
+					['David', 'david@example.com', 'Sweden'],
+					['Castille', 'castille@example.com', 'Spain'],
+				],
+				startY: autoTableY, // Position the table below the text
+			});
+
+			doc.autoTable({
+				head: [['Parent BHO ID', 'Member BHO IDs']],
+				body: [
+					['David', 'david@example.com'],
+					['Castille', 'castille@example.com'],
+				],
+			});
+			
+			// Calculate the height of the table
+			const tableHeight = doc.previousAutoTable.finalY;
+
+
+			const pGeneralInfo = document.createElement("p");
+			pGeneralInfo.textContent = "General Information ";
+			const pBaselineInfo = document.createElement("p");
+			pBaselineInfo.textContent = "Baseline & Background Information ";
+			const pDiscount = document.createElement("p");
+			pDiscount.textContent = "Discount ";
+			const pRebates = document.createElement("p");
+			pRebates.textContent = "Rebates";
+			const pRemarks = document.createElement("p");
+			pRemarks.textContent = "Remarks";
+			const pTableau = document.createElement("p");
+			pTableau.textContent = "Tableau";
+			
+			const body = document.createElement("div");
+			body.appendChild(pGeneralInfo);
+			body.appendChild(mainCustomersTableHtml);
+			body.appendChild(pBaselineInfo);
+			body.appendChild(pDiscount);
+			body.appendChild(discountsTableHtml);
+			body.appendChild(pRebates);
+			body.appendChild(rebatesTableHtml);
+			body.appendChild(pRemarks);
+			body.appendChild(remarksTextAreaHtml);
+			body.appendChild(pTableau);
+			body.appendChild(tableauChartHtml);
+
+			doc.html(body, {
+				callback: () => {
+					doc.save("proposal-xxx.pdf");
+				},
+				x: marginLeft,
+				y: marginTop + tableHeight,
+				width: 170, //target width in the PDF document
+				windowWidth: 800 //window width in CSS pixels
+			});
+
+
 		}
 	});
 
