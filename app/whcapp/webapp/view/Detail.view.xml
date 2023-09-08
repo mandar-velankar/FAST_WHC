@@ -415,7 +415,7 @@
 								<Title text="Remarks" />
 							</OverflowToolbar>
 						</headerToolbar>
-						<TextArea value="{Remarks}" 
+						<TextArea id="idRemarksTextArea" value="{Remarks}" 
 								  showExceededText="true" 
 								  width="100%"
 								  growing="true"
