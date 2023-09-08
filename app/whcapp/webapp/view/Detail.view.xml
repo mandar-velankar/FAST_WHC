@@ -61,11 +61,11 @@
 		<f:header>
 			<f:DynamicPageHeader >
 				<FlexBox justifyContent="Start">
-					<HBox justifyContent="Center">
-						<Label text="Status:" textAlign="Center" width="100%"/>
+					<VBox justifyContent="Center">
+						<Label text="Status" textAlign="Center" width="100%"/>
 						<Text id="idStatus" text="{Status/Status}"/>
 						<Text id="idStatusId" text="{StatusID}" visible="false"/>
-                    </HBox>
+                    </VBox>
 				</FlexBox>
 			</f:DynamicPageHeader>
 		</f:header>

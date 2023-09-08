@@ -299,7 +299,28 @@ sap.ui.define([
 		  
 			// Update the "Status" Text element's text property based on the selected menu item
 			let statusText = this.getView().byId("idStatus");
-			statusText.setText(selectedText);
+			switch (selectedText) {
+				case "Save Draft":
+					statusText.setText("Draft");
+				  	break;
+				case "Submit to Workshop":
+					statusText.setText("In Workshop");
+				  	break;
+				case "Approve":
+					statusText.setText("Approved");
+				  	break;
+				case "Reject":
+					statusText.setText("Rejected");
+				  	break;
+				case "Cancel Proposal":
+					statusText.setText("Cancelled");
+				  	break;
+				case "Archive":
+					statusText.setText("Archived");
+				  	break;
+				default:
+				  	break;
+			  }
 		},
 
 		onFormatDiscountTableValues: function (event) {
