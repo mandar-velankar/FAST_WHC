@@ -60,11 +60,12 @@
 		</f:title>
 		<f:header>
 			<f:DynamicPageHeader >
-				<FlexBox alignItems="Start">
-
-					<!--<VBox justifyContent="Center" class="sapUiSmallMarginEnd">-->
-						<Text text="Status: Draft"/>
-					<!--</VBox>-->
+				<FlexBox justifyContent="Start">
+					<HBox justifyContent="Center">
+						<Label text="Status:" textAlign="Center" width="100%"/>
+						<Text id="idStatus" text="{Status/Status}"/>
+						<Text id="idStatusId" text="{StatusID}" visible="false"/>
+                    </HBox>
 				</FlexBox>
 			</f:DynamicPageHeader>
 		</f:header>
@@ -216,7 +217,7 @@
 							<Input id="idBaseLineDiscountInput" value="{BaseLineDiscount}"  enabled="{= ${appView>/editmode}}" type="Number" description="%" width='40%'/>
 
 							<Label text='Proposed Contract Length '/>
-							<Input id="idProposedContractLengthInput" value="{ProposedContractLength}"  enabled="{= ${appView>/editmode}}" width='20%' liveChange="onBaseLineUnitChange" type="Number"/>
+							<Input id="idProposedContractLengthInput" value="{ProposedContractLength}"  enabled="{= ${appView>/editmode}}" width='20%' liveChange="onProposedContractLengthChange" type="Number"/>
 						</form:SimpleForm>
 						
 					
@@ -433,10 +434,11 @@
 								id="UploadSet"
 								instantUpload="false"
 								showIcons="false"
-								uploadEnabled="{= ${appView>/editmode}}"
+								uploadEnabled="{appView>/editmode}"
 								terminationEnabled="false"
 								maxFileNameLength="30"
 								httpRequestMethod="Put"
+								afterItemAdded="onAfterItemAdded"
 								uploadCompleted="onUploadCompleted"
 								items="{path: 'Attachments', templateShareable: false}">
 							<upload:items>
@@ -445,13 +447,18 @@
 										mediaType="{MediaType}"
 										visibleEdit="false"
 										url="/catalog/Attachments({ID})/Content"
+										enabledRemove="{appView>/editmode}"
+										removePressed=".onAttachmentDelete"
 										uploadState="Complete">
 								</upload:UploadSetItem>
 							</upload:items>
 						</upload:UploadSet>
 					</Panel>
 					<Panel headerText="Tableau test" expandable="true" width="auto" class="sapUiResponsiveMargin" expanded="true">
-						<custom:Tableau src='https://tableau-ncsa.aws.cnb/t/CPROD/views/WHCContractProposal/ContractProposal?:origin=card_share_link&amp;:embed=y' width="500px" heigth="500px"/>
+						<custom:Tableau src="{= ${TypeID} === 'New Proposal' ? 'https://tableau-ncsa.aws.cnb/t/CPROD/views/WHCContractProposal/ContractProposal?ORIGINAL_ORDERING_ACCOUNT_NUM=BHO3064937&amp;:embed=y&amp;:showVizHome=n&amp;:tabs=n&amp;:toolbar=n&amp;:apiID=host1#navType=0&amp;navSrc=Parse%22' :
+						 													   'https://tableau-ncsa.aws.cnb/t/CPROD/views/WHCContractRenewalV1/WHCContractRenewal?Vistex%20ID=0060062019&amp;:embed=y&amp;:showVizHome=n&amp;:tabs=n&amp;:toolbar=n&amp;:apiID=host20#navType=0&amp;navSrc=Parse' }" 
+										width="auto" 
+										heigth="auto"/>
 					</Panel>
 				</IconTabFilter>
 				</items>

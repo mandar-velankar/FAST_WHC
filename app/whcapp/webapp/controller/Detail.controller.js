@@ -195,22 +195,56 @@ sap.ui.define([
 			let input = oEvent.getSource(),
 				value = oEvent.getSource()?.getValue();
 			if (isNaN(value)) {
-				input.setValue(value.substring(0, value.length - 1));
+				input.setValue(value.substring(0, value.length - 2));
 			}
 
 			if (value.indexOf('.') != -1) {
-				input.setValue(value.substring(0, value.length - 1));
-			}
-
-			if (value > 6) {
-				oEvent.getSource().setValueState("Error");
-                oEvent.getSource().setValueStateText("Proposed Contract Length should not be greater than 6 years");
-                oEvent.getSource().openValueStateMessage();
+				input.setValue(value.substring(0, value.length - 2));
 			}
 		},
+
+		onProposedContractLengthChange: function (event) {
+			let input = event.getSource(),
+			value = input?.getValue();
+
+			if (value > 6) {
+				input.setValueState("Error");
+                input.setValueStateText("Proposed Contract Length should not be greater than 6 years");
+                input.openValueStateMessage();
+			}else {
+				input.setValueState("None");
+                input.setValueStateText("");
+                input.closeValueStateMessage();
+			}
+		},
+
+		onAfterItemAdded:async function(event){
+			const uploader = this.byId("UploadSet");
+			const item = event.getParameter("item")
+			const id = await this.createAttachmentEntry(this.id,item);
+			item.setUploadUrl(`/catalog/Attachments(${id})/Content`);
+			uploader.uploadItem(item);
+		},
 		onUploadCompleted: function (event) {
-			MessageBox.success("Contract created: " + this.getView().getBindingContext().getProperty("ID"));
-			this.getModel().refresh();
+			const uploader = this.byId("UploadSet");
+			uploader.removeAllIncompleteItems();
+			uploader.getBinding("items").refresh();
+		},
+		onAttachmentDelete: function (event) {
+			const deleteItem = event.getParameter("item").getBindingContext();
+			const attaPath = this.getModel().createKey("/Attachments", deleteItem.getObject());
+	
+			MessageBox.warning("Are you sure?", {
+				actions: [MessageBox.Action.OK, MessageBox.Action.CANCEL],
+				emphasizedAction: MessageBox.Action.OK,
+				onClose: (action) => {
+					if (action === MessageBox.Action.OK) {
+						this.getModel().remove(attaPath);
+					}
+				}
+			});
+	
+			event.preventDefault();
 		},
 		createAttachmentEntry: async function (id, file) {
 			return new Promise((resolve, reject) => {
@@ -219,8 +253,7 @@ sap.ui.define([
 					FileName: file.getFileName()
 				}, {
 					success: (response) => {
-						file.setUploadUrl(`/catalog/Attachments(${response.ID})/Content`)
-						resolve(response);
+						resolve(response.ID);
 					}
 				});
 
@@ -235,22 +268,38 @@ sap.ui.define([
 			})
 		},
 		onSave: async function () {
-			await this.submitChanges();
-			// (this.getModel() as ODataModel).changeHttpHeaders({captcha:""});
-			const id = this.getView().getBindingContext().getProperty("ID");
-			if (id) {
-				const uploader = this.byId("UploadSet");
-				const files = uploader.getIncompleteItems().length;
-				Promise.all(uploader.getIncompleteItems().map((item) => this.createAttachmentEntry(id, item))).then(() => {
-					uploader.upload();
-					this.id = id;
-				});
+			try {
 				await this.submitChanges();
-				if (files === 0) {
-					MessageBox.success("Contract created: " + id);
-				}
+				
+				MessageBox.success("Contract created: " + this.getView().getBindingContext().getProperty("ID"));
+				this.getModel().refresh();
+			} catch (error) {
+				console.error(error);
 			}
+			// (this.getModel() as ODataModel).changeHttpHeaders({captcha:""});
+			// const id = this.getView().getBindingContext().getProperty("ID");
+			// if (id) {
+			// 	const uploader = this.byId("UploadSet");
+			// 	const files = uploader.getIncompleteItems().length;
+			// 	Promise.all(uploader.getIncompleteItems().map((item) => this.createAttachmentEntry(id, item))).then(() => {
+			// 		uploader.upload();
+			// 		this.id = id;
+			// 	});
+			// 	await this.submitChanges();
+			// 	if (files === 0) {
+			// 		MessageBox.success("Contract created: " + id);
+			// 	}
+			// }
 
+		},
+
+		onMenuAction: function (event) {
+			let selectedItem = event.getParameter("item");
+			let selectedText = selectedItem.getText();
+		  
+			// Update the "Status" Text element's text property based on the selected menu item
+			let statusText = this.getView().byId("idStatus");
+			statusText.setText(selectedText);
 		},
 
 		onFormatDiscountTableValues: function (event) {
