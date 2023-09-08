@@ -287,14 +287,31 @@ sap.ui.define([
 			const marginLeft = 15;
 			const marginBottom = 10;
 
-			const discountsTableHtml = this.byId("discountsTable").getDomRef().cloneNode(true);
-			const rebatesTableHtml = this.byId("rebatesTable").getDomRef().cloneNode(true);
-			const tableauChartHtml = this.byId("idTableauChart").getDomRef().cloneNode(true);
-			const remarksTextAreaHtml = this.byId("idRemarksTextArea").getDomRef().cloneNode(true);
-			const mainCustomersTableHtml = this.byId("mainCustomersTable").getDomRef().cloneNode(true);
+			// Get DATA
+			const contract = await this.getContract(this.id);
+			const discounts = await this.getDiscounts(this.id, contract.ProposedContractLength);
+			const discountItems = discounts.results.map(item => ["Y"+item.Year, item.Units, item.Myrena, item.Kyleena, item.Skyla]);
+			const rebates = await this.getRebates(this.id, contract.ProposedContractLength);
+			const sortedRebates = rebates.results.sort((a, b) => {
+				if (a.Year < b.Year) {
+					return -1;
+				}
+				if (a.Year > b.Year) {
+					return 1;
+				}
+				
+				// year must be equal
+				return 0;
+			});
+			const rebateItems = sortedRebates.map(item => ["Y"+item.Year, item.RebateLevels_Unit_Level_1, item.RebateLevels_Discount_Level_1, item.RebateLevels_Unit_Level_2, item.RebateLevels_Discount_Level_2, item.RebateLevels_Unit_Level_3, item.RebateLevels_Discount_Level_3]);
+			const mainCustomersTable = this.byId("mainCustomersTable");
+			const mainCustomersTableItemNames = mainCustomersTable.getItems().map(item => [item.getBindingContext().getObject().Name]);
+			const customersTable = this.byId("customersTable");
+			const customersTableItemNames = customersTable.getItems().map(item => [item.getBindingContext().getObject().Name]);
+			const whcProducts = await this.getWHCProducts();
+			const wacItems = whcProducts.results.map(item => [item.ProductName, item.WAC]);
 
-			// doc.setFontSize(14);
-			// doc.text("Proposal XXX", marginLeft, 20);
+			const tableauChartHtml = this.byId("idTableauChart").getDomRef().cloneNode(true);
 
 			const textContent = 'Proposal XXX';
 			doc.text(textContent, marginLeft, marginTop);
@@ -304,52 +321,76 @@ sap.ui.define([
 
 			// Calculate the Y position for the autoTable
 			const autoTableY = marginTop + textDimensions.h; 		
-			
 
 			doc.autoTable({
 				head: [['Proposal Name', 'Proposal Type', 'Vistex ID']],
 				body: [
-					['David', 'david@example.com', 'Sweden'],
-					['Castille', 'castille@example.com', 'Spain'],
+					[contract.Name, contract.Type, contract.VistexID],
 				],
 				startY: autoTableY, // Position the table below the text
+			});	
+
+			doc.autoTable({
+				head: [['Parent BHO IDs']],
+				body: mainCustomersTableItemNames,
 			});
 
 			doc.autoTable({
-				head: [['Parent BHO ID', 'Member BHO IDs']],
-				body: [
-					['David', 'david@example.com'],
-					['Castille', 'castille@example.com'],
-				],
+				head: [['Member BHO IDs']],
+				body: customersTableItemNames,
 			});
+
+			doc.autoTable({
+				head: [['Product Name', 'WAC']],
+				body: wacItems,
+			});
+
+			doc.autoTable({
+				head: [['Baseline unit', 'Baseline Discount', 'Proposed Contract Length', 'Background Information']],
+				body: [
+					[contract.BaseLineUnits, `${contract.BaseLineDiscount*100}%`, contract.ProposedContractLength, contract.BackgroundInfo],
+				]
+			});
+
+			doc.autoTable({
+				head: [['Year', 'Units', 'Mirena', 'Kyleena', 'Skyla']],
+				body: discountItems
+			});	
+
+			doc.autoTable({
+				head: [['Year', [['L1'],['Units', 'Discount']], [['L2'],['Units', 'Discount']], [['L3'],['Units', 'Discount']]]],
+				body: rebateItems
+			});	
+
 			
 			// Calculate the height of the table
 			const tableHeight = doc.previousAutoTable.finalY;
 
 
-			const pGeneralInfo = document.createElement("p");
-			pGeneralInfo.textContent = "General Information ";
-			const pBaselineInfo = document.createElement("p");
-			pBaselineInfo.textContent = "Baseline & Background Information ";
-			const pDiscount = document.createElement("p");
-			pDiscount.textContent = "Discount ";
-			const pRebates = document.createElement("p");
-			pRebates.textContent = "Rebates";
-			const pRemarks = document.createElement("p");
-			pRemarks.textContent = "Remarks";
+			// const pGeneralInfo = document.createElement("p");
+			// pGeneralInfo.textContent = "General Information ";
+			// const pBaselineInfo = document.createElement("p");
+			// pBaselineInfo.textContent = "Baseline & Background Information ";
+			// const pDiscount = document.createElement("p");
+			// pDiscount.textContent = "Discount ";
+			// const pRebates = document.createElement("p");
+			// pRebates.textContent = "Rebates";
+			// const pRemarks = document.createElement("p");
+			// pRemarks.textContent = "Remarks";
 			const pTableau = document.createElement("p");
 			pTableau.textContent = "Tableau";
 			
 			const body = document.createElement("div");
-			body.appendChild(pGeneralInfo);
-			body.appendChild(mainCustomersTableHtml);
-			body.appendChild(pBaselineInfo);
-			body.appendChild(pDiscount);
-			body.appendChild(discountsTableHtml);
-			body.appendChild(pRebates);
-			body.appendChild(rebatesTableHtml);
-			body.appendChild(pRemarks);
-			body.appendChild(remarksTextAreaHtml);
+			// body.appendChild(pGeneralInfo);
+			// body.appendChild(mainCustomersTableHtml);
+			// // body.appendChild(customersTableHtml);
+			// body.appendChild(pBaselineInfo);
+			// body.appendChild(pDiscount);
+			// body.appendChild(discountsTableHtml);
+			// body.appendChild(pRebates);
+			// body.appendChild(rebatesTableHtml);
+			// body.appendChild(pRemarks);
+			// body.appendChild(remarksTextAreaHtml);
 			body.appendChild(pTableau);
 			body.appendChild(tableauChartHtml);
 
@@ -358,13 +399,87 @@ sap.ui.define([
 					doc.save("proposal-xxx.pdf");
 				},
 				x: marginLeft,
-				y: marginTop + tableHeight,
+				y: tableHeight,
 				width: 170, //target width in the PDF document
 				windowWidth: 800 //window width in CSS pixels
 			});
 
 
-		}
+		},
+
+
+		getWHCProducts: async function () {
+			// const path = this.getView().getModel().createKey("/WHCProducts", {}); 
+			return new Promise((resolve, reject) => {
+				this.getModel().read("/WHCProducts", {
+					success: function (res) {
+						resolve(res)
+					},
+					error: function (err) {
+						reject(err)
+					}
+				});
+			});
+		},
+
+
+		getContract: async function (contractId) {
+			const path =this.getModel().createKey("/ContractsView", {
+				ID: contractId
+            });
+            let context = this.getModel().getContext(path);
+			if(!context.getObject()){
+				await new Promise((resolve, reject) => {
+					this.getModel().read(path, {
+						success: function (res) {
+							resolve(res)
+						},
+						error: function (err) {
+							reject(err)
+						}
+					});
+				});
+				context = this.getModel().getContext(path);
+			}
+
+
+			return context.getObject();
+		},
+
+		getDiscounts: async function (contractId, contractLength) {
+		
+            return new Promise((resolve, reject) => {
+				this.getModel().read("/DiscountTableView", {
+					filters: [
+						new Filter("Contracts_ID", "EQ", contractId),
+						new Filter("Year", "LE", contractLength),
+					],
+					success: function (res) {
+						resolve(res)
+					},
+					error: function (err) {
+						reject(err)
+					}
+				});
+			});
+		},
+
+		getRebates: async function (contractId, contractLength) {
+			return new Promise((resolve, reject) => {
+				this.getModel().read("/Rebates", {
+					filters: [
+						new Filter("Contracts_ID", "EQ", contractId),
+						new Filter("Year", "LE", contractLength),
+					],
+					success: function (res) {
+						resolve(res)
+					},
+					error: function (err) {
+						reject(err)
+					}
+				});
+			});
+		},
 	});
 
 });
