@@ -442,47 +442,57 @@ sap.ui.define([
 				headStyles: { halign: 'center', fillColor: [98, 73, 99] }
 			});	
 
+
+			html2canvas(tableauChartHtml).then((canvasImage) => {
+				
+				// Add the canvas image to the PDF
+				doc.addImage(canvasImage, "PNG", 10, 10, 190, 100); // Adjust the coordinates and size as needed
+
+				// Save or open the PDF
+				doc.save("chart.pdf");
+			});
+
 			
 			// Calculate the height of the table
-			const tableHeight = doc.previousAutoTable.finalY;
+			// const tableHeight = doc.previousAutoTable.finalY;
 
 
-			// const pGeneralInfo = document.createElement("p");
-			// pGeneralInfo.textContent = "General Information ";
-			// const pBaselineInfo = document.createElement("p");
-			// pBaselineInfo.textContent = "Baseline & Background Information ";
-			// const pDiscount = document.createElement("p");
-			// pDiscount.textContent = "Discount ";
-			// const pRebates = document.createElement("p");
-			// pRebates.textContent = "Rebates";
-			// const pRemarks = document.createElement("p");
-			// pRemarks.textContent = "Remarks";
-			const pTableau = document.createElement("p");
-			pTableau.textContent = "Tableau";
+			// // const pGeneralInfo = document.createElement("p");
+			// // pGeneralInfo.textContent = "General Information ";
+			// // const pBaselineInfo = document.createElement("p");
+			// // pBaselineInfo.textContent = "Baseline & Background Information ";
+			// // const pDiscount = document.createElement("p");
+			// // pDiscount.textContent = "Discount ";
+			// // const pRebates = document.createElement("p");
+			// // pRebates.textContent = "Rebates";
+			// // const pRemarks = document.createElement("p");
+			// // pRemarks.textContent = "Remarks";
+			// const pTableau = document.createElement("p");
+			// pTableau.textContent = "Tableau";
 			
-			const body = document.createElement("div");
-			// body.appendChild(pGeneralInfo);
-			// body.appendChild(mainCustomersTableHtml);
-			// // body.appendChild(customersTableHtml);
-			// body.appendChild(pBaselineInfo);
-			// body.appendChild(pDiscount);
-			// body.appendChild(discountsTableHtml);
-			// body.appendChild(pRebates);
-			// body.appendChild(rebatesTableHtml);
-			// body.appendChild(pRemarks);
-			// body.appendChild(remarksTextAreaHtml);
-			body.appendChild(pTableau);
-			body.appendChild(tableauChartHtml);
+			// const body = document.createElement("div");
+			// // body.appendChild(pGeneralInfo);
+			// // body.appendChild(mainCustomersTableHtml);
+			// // // body.appendChild(customersTableHtml);
+			// // body.appendChild(pBaselineInfo);
+			// // body.appendChild(pDiscount);
+			// // body.appendChild(discountsTableHtml);
+			// // body.appendChild(pRebates);
+			// // body.appendChild(rebatesTableHtml);
+			// // body.appendChild(pRemarks);
+			// // body.appendChild(remarksTextAreaHtml);
+			// body.appendChild(pTableau);
+			// body.appendChild(tableauChartHtml);
 
-			doc.html(body, {
-				callback: () => {
-					doc.save("proposal-xxx.pdf");
-				},
-				x: marginLeft,
-				y: tableHeight,
-				width: 170, //target width in the PDF document
-				windowWidth: 800 //window width in CSS pixels
-			});
+			// doc.html(body, {
+			// 	callback: () => {
+			// 		doc.save("proposal-xxx.pdf");
+			// 	},
+			// 	x: marginLeft,
+			// 	y: tableHeight,
+			// 	width: 170, //target width in the PDF document
+			// 	windowWidth: 800 //window width in CSS pixels
+			// });
 
 
 		},
