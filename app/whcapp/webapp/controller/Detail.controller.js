@@ -282,10 +282,9 @@ sap.ui.define([
 
 		onPrintButtonPress: async function(event){
 			const doc = new jspdf.jsPDF();
-			let pageHeight = doc.internal.pageSize.getHeight(); // default height is 297
+			const fileName = "proposal-xxx.pdf";
 			const marginTop = 15;
 			const marginLeft = 15;
-			const marginBottom = 10;
 
 			// Get DATA
 			const contract = await this.getContract(this.id);
@@ -299,8 +298,6 @@ sap.ui.define([
 				if (a.Year > b.Year) {
 					return 1;
 				}
-				
-				// year must be equal
 				return 0;
 			});
 			const rebateItems = sortedRebates.map(item => ["Y"+item.Year, item.RebateLevels_Unit_Level_1, item.RebateLevels_Discount_Level_1, item.RebateLevels_Unit_Level_2, item.RebateLevels_Discount_Level_2, item.RebateLevels_Unit_Level_3, item.RebateLevels_Discount_Level_3]);
@@ -310,8 +307,6 @@ sap.ui.define([
 			const customersTableItemNames = customersTable.getItems().map(item => [item.getBindingContext().getObject().Name]);
 			const whcProducts = await this.getWHCProducts();
 			const wacItems = whcProducts.results.map(item => [item.ProductName, item.WAC]);
-
-			const tableauChartHtml = this.byId("idTableauChart").getDomRef().cloneNode(true);
 
 			const textContent = 'Proposal XXX';
 			doc.text(textContent, marginLeft, marginTop);
@@ -443,56 +438,28 @@ sap.ui.define([
 			});	
 
 
-			html2canvas(tableauChartHtml).then((canvasImage) => {
-				
-				// Add the canvas image to the PDF
-				doc.addImage(canvasImage, "PNG", 10, 10, 190, 100); // Adjust the coordinates and size as needed
+			doc.autoTable({
+				head: [
+					[
+						{content: "Tableau", styles: { fillColor: [211, 15, 75], textColor: [255, 255, 255] }},
+					]
+				],
+				body: [],
+				theme: 'grid',
+				headStyles: { halign: 'center', fillColor: [98, 73, 99] }
+			});	
 
-				// Save or open the PDF
-				doc.save("chart.pdf");
-			});
-
-			
 			// Calculate the height of the table
-			// const tableHeight = doc.previousAutoTable.finalY;
+			const tableHeight = doc.previousAutoTable.finalY;
 
 
-			// // const pGeneralInfo = document.createElement("p");
-			// // pGeneralInfo.textContent = "General Information ";
-			// // const pBaselineInfo = document.createElement("p");
-			// // pBaselineInfo.textContent = "Baseline & Background Information ";
-			// // const pDiscount = document.createElement("p");
-			// // pDiscount.textContent = "Discount ";
-			// // const pRebates = document.createElement("p");
-			// // pRebates.textContent = "Rebates";
-			// // const pRemarks = document.createElement("p");
-			// // pRemarks.textContent = "Remarks";
-			// const pTableau = document.createElement("p");
-			// pTableau.textContent = "Tableau";
-			
-			// const body = document.createElement("div");
-			// // body.appendChild(pGeneralInfo);
-			// // body.appendChild(mainCustomersTableHtml);
-			// // // body.appendChild(customersTableHtml);
-			// // body.appendChild(pBaselineInfo);
-			// // body.appendChild(pDiscount);
-			// // body.appendChild(discountsTableHtml);
-			// // body.appendChild(pRebates);
-			// // body.appendChild(rebatesTableHtml);
-			// // body.appendChild(pRemarks);
-			// // body.appendChild(remarksTextAreaHtml);
-			// body.appendChild(pTableau);
-			// body.appendChild(tableauChartHtml);
+			// Tableau
+			const tableauChartHtml = this.byId("idTableauChart").getDomRef();
+			const canvasImage = await html2canvas(tableauChartHtml);
+			doc.addImage(canvasImage, "PNG", marginLeft, tableHeight, 320, 100); // Adjust the coordinates and size as needed
 
-			// doc.html(body, {
-			// 	callback: () => {
-			// 		doc.save("proposal-xxx.pdf");
-			// 	},
-			// 	x: marginLeft,
-			// 	y: tableHeight,
-			// 	width: 170, //target width in the PDF document
-			// 	windowWidth: 800 //window width in CSS pixels
-			// });
+			// print
+			doc.save(fileName);	
 
 
 		},
