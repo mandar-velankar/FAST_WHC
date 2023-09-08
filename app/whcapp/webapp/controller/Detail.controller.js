@@ -195,19 +195,29 @@ sap.ui.define([
 			let input = oEvent.getSource(),
 				value = oEvent.getSource()?.getValue();
 			if (isNaN(value)) {
-				input.setValue(value.substring(0, value.length - 1));
+				input.setValue(value.substring(0, value.length - 2));
 			}
 
 			if (value.indexOf('.') != -1) {
-				input.setValue(value.substring(0, value.length - 1));
-			}
-
-			if (value > 6) {
-				oEvent.getSource().setValueState("Error");
-                oEvent.getSource().setValueStateText("Proposed Contract Length should not be greater than 6 years");
-                oEvent.getSource().openValueStateMessage();
+				input.setValue(value.substring(0, value.length - 2));
 			}
 		},
+
+		onProposedContractLengthChange: function (event) {
+			let input = event.getSource(),
+			value = input?.getValue();
+
+			if (value > 6) {
+				input.setValueState("Error");
+                input.setValueStateText("Proposed Contract Length should not be greater than 6 years");
+                input.openValueStateMessage();
+			}else {
+				input.setValueState("None");
+                input.setValueStateText("");
+                input.closeValueStateMessage();
+			}
+		},
+
 		onAfterItemAdded:async function(event){
 			const uploader = this.byId("UploadSet");
 			const item = event.getParameter("item")

@@ -216,7 +216,7 @@
 							<Input id="idBaseLineDiscountInput" value="{BaseLineDiscount}"  enabled="{= ${appView>/editmode}}" type="Number" description="%" width='40%'/>
 
 							<Label text='Proposed Contract Length '/>
-							<Input id="idProposedContractLengthInput" value="{ProposedContractLength}"  enabled="{= ${appView>/editmode}}" width='20%' liveChange="onBaseLineUnitChange" type="Number"/>
+							<Input id="idProposedContractLengthInput" value="{ProposedContractLength}"  enabled="{= ${appView>/editmode}}" width='20%' liveChange="onProposedContractLengthChange" type="Number"/>
 						</form:SimpleForm>
 						
 					
