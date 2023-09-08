@@ -530,7 +530,7 @@ sap.ui.define([
 			// Tableau
 			const tableauChartHtml = this.byId("idTableauChart").getDomRef();
 			const canvasImage = await html2canvas(tableauChartHtml);
-			doc.addImage(canvasImage, "PNG", marginLeft, tableHeight, 230, 100); // Adjust the coordinates and size as needed
+			doc.addImage(canvasImage, "PNG", marginLeft, tableHeight, 180, 100); // Adjust the coordinates and size as needed
 
 			// print
 			doc.save(fileName);	
