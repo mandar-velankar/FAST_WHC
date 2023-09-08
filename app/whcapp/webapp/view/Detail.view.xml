@@ -60,11 +60,12 @@
 		</f:title>
 		<f:header>
 			<f:DynamicPageHeader >
-				<FlexBox alignItems="Start">
-
-					<!--<VBox justifyContent="Center" class="sapUiSmallMarginEnd">-->
-						<Text text="Status: Draft"/>
-					<!--</VBox>-->
+				<FlexBox justifyContent="Start">
+					<HBox justifyContent="Center">
+						<Label text="Status:" textAlign="Center" width="100%"/>
+						<Text id="idStatus" text="{Status/Status}"/>
+						<Text id="idStatusId" text="{StatusID}" visible="false"/>
+                    </HBox>
 				</FlexBox>
 			</f:DynamicPageHeader>
 		</f:header>

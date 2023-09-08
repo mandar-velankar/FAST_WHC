@@ -293,6 +293,15 @@ sap.ui.define([
 
 		},
 
+		onMenuAction: function (event) {
+			let selectedItem = event.getParameter("item");
+			let selectedText = selectedItem.getText();
+		  
+			// Update the "Status" Text element's text property based on the selected menu item
+			let statusText = this.getView().byId("idStatus");
+			statusText.setText(selectedText);
+		},
+
 		onFormatDiscountTableValues: function (event) {
 			const discountTable = this.byId("discountsTable");
 			const items = discountTable.getItems();
