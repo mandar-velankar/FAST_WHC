@@ -333,16 +333,24 @@ sap.ui.define([
 					items.map(item => {
 						const obj = item.getBindingContext().getObject();
 						const path = item.getBindingContext().getPath();
-						const parsedValue = formatter.parsePercentage(obj.WAC);
-						this.getModel().setProperty(`${path}/WAC`, (parsedValue * 100));
+						const Mirena = formatter.parsePercentage(obj.Mirena);
+						const Kyleena = formatter.parsePercentage(obj.Kyleena);
+						const Skyla = formatter.parsePercentage(obj.Skyla);
+						this.getModel().setProperty(`${path}/Mirena`, Mirena ? Math.trunc(Mirena * 100) : Mirena);
+						this.getModel().setProperty(`${path}/Kyleena`, Kyleena ? Math.trunc(Kyleena * 100) : Kyleena);
+						this.getModel().setProperty(`${path}/Skyla`, Skyla ? Math.trunc(Skyla * 100) : Skyla);
 					})
 					break;
 				case "Percentage":
 					items.map(item => {
 						const obj = item.getBindingContext().getObject();
 						const path = item.getBindingContext().getPath();
-						const formattedValue = formatter.formatPercentage(obj.WAC / 100);
-						this.getModel().setProperty(`${path}/WAC`, formattedValue);
+						const Mirena = formatter.formatPercentage(obj.Mirena / 100);
+						const Kyleena = formatter.formatPercentage(obj.Kyleena / 100);
+						const Skyla = formatter.formatPercentage(obj.Skyla / 100);
+						this.getModel().setProperty(`${path}/Mirena`, Mirena);
+						this.getModel().setProperty(`${path}/Kyleena`, Kyleena);
+						this.getModel().setProperty(`${path}/Skyla`, Skyla);
 					})
 					break;
 				default:
