@@ -323,43 +323,123 @@ sap.ui.define([
 			const autoTableY = marginTop + textDimensions.h; 		
 
 			doc.autoTable({
-				head: [['Proposal Name', 'Proposal Type', 'Vistex ID']],
+				head: [
+					[
+						{content: "General Information", colSpan: 3, styles: { fillColor: [211, 15, 75], textColor: [255, 255, 255] }},
+					],
+					[
+						'Proposal Name', 'Proposal Type', 'Vistex ID'
+					]
+				],
 				body: [
 					[contract.Name, contract.Type, contract.VistexID],
 				],
 				startY: autoTableY, // Position the table below the text
+				theme: 'grid',
+				headStyles: { halign: 'center', fillColor: [98, 73, 99] }
 			});	
 
 			doc.autoTable({
 				head: [['Parent BHO IDs']],
 				body: mainCustomersTableItemNames,
+				theme: 'grid',
+				headStyles: { halign: 'center', fillColor: [98, 73, 99] }
 			});
 
 			doc.autoTable({
 				head: [['Member BHO IDs']],
 				body: customersTableItemNames,
+				theme: 'grid',
+				headStyles: { halign: 'center', fillColor: [98, 73, 99] }
 			});
 
 			doc.autoTable({
 				head: [['Product Name', 'WAC']],
 				body: wacItems,
+				theme: 'grid',
+				headStyles: { halign: 'center', fillColor: [98, 73, 99] }
 			});
 
 			doc.autoTable({
-				head: [['Baseline unit', 'Baseline Discount', 'Proposed Contract Length', 'Background Information']],
+				head: [
+					[
+						{content: "Baseline & Background Information", colSpan: 3, styles: { fillColor: [211, 15, 75], textColor: [255, 255, 255] }},
+					],
+					[
+						'Baseline unit', 'Baseline Discount', 'Proposed Contract Length'
+					]
+				],
 				body: [
-					[contract.BaseLineUnits, `${contract.BaseLineDiscount*100}%`, contract.ProposedContractLength, contract.BackgroundInfo],
-				]
+					[contract.BaseLineUnits, `${contract.BaseLineDiscount*100}%`, contract.ProposedContractLength],
+				],
+				theme: 'grid',
+				headStyles: { halign: 'center', fillColor: [98, 73, 99] }
 			});
 
 			doc.autoTable({
-				head: [['Year', 'Units', 'Mirena', 'Kyleena', 'Skyla']],
-				body: discountItems
+				head: [
+					[
+						"Background Information",
+					]
+				],
+				body: [
+					[contract.BackgroundInfo],
+				],
+				theme: 'grid',
+				headStyles: { halign: 'center', fillColor: [98, 73, 99], textColor: [255, 255, 255]}
+			});
+
+			doc.autoTable({
+				head: [
+					[
+						{content: "Discount", colSpan: 5, styles: { fillColor: [211, 15, 75], textColor: [255, 255, 255] }},
+					],
+					[
+						'Year', 'Units', 'Mirena', 'Kyleena', 'Skyla'
+					]
+				],
+				body: discountItems,
+				theme: 'grid',
+				headStyles: { halign: 'center', fillColor: [98, 73, 99] }
 			});	
 
 			doc.autoTable({
-				head: [['Year', [['L1'],['Units', 'Discount']], [['L2'],['Units', 'Discount']], [['L3'],['Units', 'Discount']]]],
-				body: rebateItems
+				head: [
+					[
+						{content: "Rebate", colSpan: 7, styles: { fillColor: [211, 15, 75], textColor: [255, 255, 255] }},
+					],
+					[
+						{content: "Year", colSpan: 0, rowSpan: 1,styles: { valign: 'center' }},
+						{content: "L1", colSpan: 2, styles: { fillColor: [255, 255, 255], textColor: [0, 0, 0] }},
+						{content: "L2", colSpan: 2, styles: { fillColor: [255, 255, 255], textColor: [0, 0, 0] }},
+						{content: "L3", colSpan: 2, styles: { fillColor: [255, 255, 255], textColor: [0, 0, 0] }},
+					],
+					[
+						'',
+						'Unit',
+						'Discount',
+						'Unit',
+						'Discount',
+						'Unit',
+						'Discount',
+					]
+				],
+				body: rebateItems,
+				theme: 'grid',
+				headStyles: { halign: 'center', fillColor: [98, 73, 99] }
+			});	
+
+			doc.autoTable({
+				head: [
+					[
+						{content: "Remarks", styles: { fillColor: [211, 15, 75], textColor: [255, 255, 255] }},
+					]
+				],
+				body: [
+					[contract.Remarks],
+				],
+				theme: 'grid',
+				headStyles: { halign: 'center', fillColor: [98, 73, 99] }
 			});	
 
 			
