@@ -280,14 +280,18 @@ sap.ui.define([
 			}
 		},
 
-		onPrintButtonPress: async function(event){
+		onPrintButtonPress: function(event){
+			this.savePDF();	
+		},
+
+		savePDF: async function(){
 			const doc = new jspdf.jsPDF();
-			const fileName = "proposal-xxx.pdf";
 			const marginTop = 15;
 			const marginLeft = 15;
 
 			// Get DATA
 			const contract = await this.getContract(this.id);
+			const fileName = `proposal-${contract.Name.replace(/ /g, '-')}-${new Date().toJSON()}.pdf`;
 			const discounts = await this.getDiscounts(this.id, contract.ProposedContractLength);
 			const discountItems = discounts.results.map(item => ["Y"+item.Year, item.Units, item.Myrena, item.Kyleena, item.Skyla]);
 			const rebates = await this.getRebates(this.id, contract.ProposedContractLength);
@@ -308,7 +312,7 @@ sap.ui.define([
 			const whcProducts = await this.getWHCProducts();
 			const wacItems = whcProducts.results.map(item => [item.ProductName, item.WAC]);
 
-			const textContent = 'Proposal XXX';
+			const textContent = `Proposal ${contract.Name}`;
 			doc.text(textContent, marginLeft, marginTop);
 
 			// Calculate the dimensions of the added text
@@ -456,12 +460,10 @@ sap.ui.define([
 			// Tableau
 			const tableauChartHtml = this.byId("idTableauChart").getDomRef();
 			const canvasImage = await html2canvas(tableauChartHtml);
-			doc.addImage(canvasImage, "PNG", marginLeft, tableHeight, 320, 100); // Adjust the coordinates and size as needed
+			doc.addImage(canvasImage, "PNG", marginLeft, tableHeight, 230, 100); // Adjust the coordinates and size as needed
 
 			// print
 			doc.save(fileName);	
-
-
 		},
 
 
