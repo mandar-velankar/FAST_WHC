@@ -299,7 +299,28 @@ sap.ui.define([
 		  
 			// Update the "Status" Text element's text property based on the selected menu item
 			let statusText = this.getView().byId("idStatus");
-			statusText.setText(selectedText);
+			switch (selectedText) {
+				case "Save Draft":
+					statusText.setText("Draft");
+				  	break;
+				case "Submit to Workshop":
+					statusText.setText("In Workshop");
+				  	break;
+				case "Approve":
+					statusText.setText("Approved");
+				  	break;
+				case "Reject":
+					statusText.setText("Rejected");
+				  	break;
+				case "Cancel Proposal":
+					statusText.setText("Cancelled");
+				  	break;
+				case "Archive":
+					statusText.setText("Archived");
+				  	break;
+				default:
+				  	break;
+			  }
 		},
 
 		onFormatDiscountTableValues: function (event) {
@@ -312,16 +333,24 @@ sap.ui.define([
 					items.map(item => {
 						const obj = item.getBindingContext().getObject();
 						const path = item.getBindingContext().getPath();
-						const parsedValue = formatter.parsePercentage(obj.WAC);
-						this.getModel().setProperty(`${path}/WAC`, (parsedValue * 100));
+						const Mirena = formatter.parsePercentage(obj.Mirena);
+						const Kyleena = formatter.parsePercentage(obj.Kyleena);
+						const Skyla = formatter.parsePercentage(obj.Skyla);
+						this.getModel().setProperty(`${path}/Mirena`, Mirena ? Math.trunc(Mirena * 100) : Mirena);
+						this.getModel().setProperty(`${path}/Kyleena`, Kyleena ? Math.trunc(Kyleena * 100) : Kyleena);
+						this.getModel().setProperty(`${path}/Skyla`, Skyla ? Math.trunc(Skyla * 100) : Skyla);
 					})
 					break;
 				case "Percentage":
 					items.map(item => {
 						const obj = item.getBindingContext().getObject();
 						const path = item.getBindingContext().getPath();
-						const formattedValue = formatter.formatPercentage(obj.WAC / 100);
-						this.getModel().setProperty(`${path}/WAC`, formattedValue);
+						const Mirena = formatter.formatPercentage(obj.Mirena / 100);
+						const Kyleena = formatter.formatPercentage(obj.Kyleena / 100);
+						const Skyla = formatter.formatPercentage(obj.Skyla / 100);
+						this.getModel().setProperty(`${path}/Mirena`, Mirena);
+						this.getModel().setProperty(`${path}/Kyleena`, Kyleena);
+						this.getModel().setProperty(`${path}/Skyla`, Skyla);
 					})
 					break;
 				default:
@@ -330,11 +359,264 @@ sap.ui.define([
 		},
 
 		onPrintButtonPress: function(event){
-			const doc = new jspdf.jsPDF();
+			this.savePDF();	
+		},
 
-			doc.text("Hello world!", 10, 10);
-			doc.save("a4.pdf");
-		}
+		savePDF: async function(){
+			const doc = new jspdf.jsPDF();
+			const marginTop = 15;
+			const marginLeft = 15;
+
+			// Get DATA
+			const contract = await this.getContract(this.id);
+			const fileName = `proposal-${contract.Name.replace(/ /g, '-')}-${new Date().toJSON()}.pdf`;
+			const discounts = await this.getDiscounts(this.id, contract.ProposedContractLength);
+			const discountItems = discounts.results.map(item => ["Y"+item.Year, item.Units, item.Myrena, item.Kyleena, item.Skyla]);
+			const rebates = await this.getRebates(this.id, contract.ProposedContractLength);
+			const sortedRebates = rebates.results.sort((a, b) => {
+				if (a.Year < b.Year) {
+					return -1;
+				}
+				if (a.Year > b.Year) {
+					return 1;
+				}
+				return 0;
+			});
+			const rebateItems = sortedRebates.map(item => ["Y"+item.Year, item.RebateLevels_Unit_Level_1, item.RebateLevels_Discount_Level_1, item.RebateLevels_Unit_Level_2, item.RebateLevels_Discount_Level_2, item.RebateLevels_Unit_Level_3, item.RebateLevels_Discount_Level_3]);
+			const mainCustomersTable = this.byId("mainCustomersTable");
+			const mainCustomersTableItemNames = mainCustomersTable.getItems().map(item => [item.getBindingContext().getObject().Name]);
+			const customersTable = this.byId("customersTable");
+			const customersTableItemNames = customersTable.getItems().map(item => [item.getBindingContext().getObject().Name]);
+			const whcProducts = await this.getWHCProducts();
+			const wacItems = whcProducts.results.map(item => [item.ProductName, item.WAC]);
+
+			const textContent = `Proposal ${contract.Name}`;
+			doc.text(textContent, marginLeft, marginTop);
+
+			// Calculate the dimensions of the added text
+			const textDimensions = doc.getTextDimensions(textContent);
+
+			// Calculate the Y position for the autoTable
+			const autoTableY = marginTop + textDimensions.h; 		
+
+			doc.autoTable({
+				head: [
+					[
+						{content: "General Information", colSpan: 3, styles: { fillColor: [211, 15, 75], textColor: [255, 255, 255] }},
+					],
+					[
+						'Proposal Name', 'Proposal Type', 'Vistex ID'
+					]
+				],
+				body: [
+					[contract.Name, contract.Type, contract.VistexID],
+				],
+				startY: autoTableY, // Position the table below the text
+				theme: 'grid',
+				headStyles: { halign: 'center', fillColor: [98, 73, 99] }
+			});	
+
+			doc.autoTable({
+				head: [['Parent BHO IDs']],
+				body: mainCustomersTableItemNames,
+				theme: 'grid',
+				headStyles: { halign: 'center', fillColor: [98, 73, 99] }
+			});
+
+			doc.autoTable({
+				head: [['Member BHO IDs']],
+				body: customersTableItemNames,
+				theme: 'grid',
+				headStyles: { halign: 'center', fillColor: [98, 73, 99] }
+			});
+
+			doc.autoTable({
+				head: [['Product Name', 'WAC']],
+				body: wacItems,
+				theme: 'grid',
+				headStyles: { halign: 'center', fillColor: [98, 73, 99] }
+			});
+
+			doc.autoTable({
+				head: [
+					[
+						{content: "Baseline & Background Information", colSpan: 3, styles: { fillColor: [211, 15, 75], textColor: [255, 255, 255] }},
+					],
+					[
+						'Baseline unit', 'Baseline Discount', 'Proposed Contract Length'
+					]
+				],
+				body: [
+					[contract.BaseLineUnits, `${contract.BaseLineDiscount*100}%`, contract.ProposedContractLength],
+				],
+				theme: 'grid',
+				headStyles: { halign: 'center', fillColor: [98, 73, 99] }
+			});
+
+			doc.autoTable({
+				head: [
+					[
+						"Background Information",
+					]
+				],
+				body: [
+					[contract.BackgroundInfo],
+				],
+				theme: 'grid',
+				headStyles: { halign: 'center', fillColor: [98, 73, 99], textColor: [255, 255, 255]}
+			});
+
+			doc.autoTable({
+				head: [
+					[
+						{content: "Discount", colSpan: 5, styles: { fillColor: [211, 15, 75], textColor: [255, 255, 255] }},
+					],
+					[
+						'Year', 'Units', 'Mirena', 'Kyleena', 'Skyla'
+					]
+				],
+				body: discountItems,
+				theme: 'grid',
+				headStyles: { halign: 'center', fillColor: [98, 73, 99] }
+			});	
+
+			doc.autoTable({
+				head: [
+					[
+						{content: "Rebate", colSpan: 7, styles: { fillColor: [211, 15, 75], textColor: [255, 255, 255] }},
+					],
+					[
+						{content: "Year", colSpan: 0, rowSpan: 1,styles: { valign: 'center' }},
+						{content: "L1", colSpan: 2, styles: { fillColor: [255, 255, 255], textColor: [0, 0, 0] }},
+						{content: "L2", colSpan: 2, styles: { fillColor: [255, 255, 255], textColor: [0, 0, 0] }},
+						{content: "L3", colSpan: 2, styles: { fillColor: [255, 255, 255], textColor: [0, 0, 0] }},
+					],
+					[
+						'',
+						'Unit',
+						'Discount',
+						'Unit',
+						'Discount',
+						'Unit',
+						'Discount',
+					]
+				],
+				body: rebateItems,
+				theme: 'grid',
+				headStyles: { halign: 'center', fillColor: [98, 73, 99] }
+			});	
+
+			doc.autoTable({
+				head: [
+					[
+						{content: "Remarks", styles: { fillColor: [211, 15, 75], textColor: [255, 255, 255] }},
+					]
+				],
+				body: [
+					[contract.Remarks],
+				],
+				theme: 'grid',
+				headStyles: { halign: 'center', fillColor: [98, 73, 99] }
+			});	
+
+
+			doc.autoTable({
+				head: [
+					[
+						{content: "Tableau", styles: { fillColor: [211, 15, 75], textColor: [255, 255, 255] }},
+					]
+				],
+				body: [],
+				theme: 'grid',
+				headStyles: { halign: 'center', fillColor: [98, 73, 99] }
+			});	
+
+			// Calculate the height of the table
+			const tableHeight = doc.previousAutoTable.finalY;
+
+
+			// Tableau
+			const tableauChartHtml = this.byId("idTableauChart").getDomRef();
+			const canvasImage = await html2canvas(tableauChartHtml);
+			doc.addImage(canvasImage, "PNG", marginLeft, tableHeight, 180, 100); // Adjust the coordinates and size as needed
+
+			// print
+			doc.save(fileName);	
+		},
+
+
+		getWHCProducts: async function () {
+			// const path = this.getView().getModel().createKey("/WHCProducts", {}); 
+			return new Promise((resolve, reject) => {
+				this.getModel().read("/WHCProducts", {
+					success: function (res) {
+						resolve(res)
+					},
+					error: function (err) {
+						reject(err)
+					}
+				});
+			});
+		},
+
+
+		getContract: async function (contractId) {
+			const path =this.getModel().createKey("/ContractsView", {
+				ID: contractId
+            });
+            let context = this.getModel().getContext(path);
+			if(!context.getObject()){
+				await new Promise((resolve, reject) => {
+					this.getModel().read(path, {
+						success: function (res) {
+							resolve(res)
+						},
+						error: function (err) {
+							reject(err)
+						}
+					});
+				});
+				context = this.getModel().getContext(path);
+			}
+
+
+			return context.getObject();
+		},
+
+		getDiscounts: async function (contractId, contractLength) {
+		
+            return new Promise((resolve, reject) => {
+				this.getModel().read("/DiscountTableView", {
+					filters: [
+						new Filter("Contracts_ID", "EQ", contractId),
+						new Filter("Year", "LE", contractLength),
+					],
+					success: function (res) {
+						resolve(res)
+					},
+					error: function (err) {
+						reject(err)
+					}
+				});
+			});
+		},
+
+		getRebates: async function (contractId, contractLength) {
+			return new Promise((resolve, reject) => {
+				this.getModel().read("/Rebates", {
+					filters: [
+						new Filter("Contracts_ID", "EQ", contractId),
+						new Filter("Year", "LE", contractLength),
+					],
+					success: function (res) {
+						resolve(res)
+					},
+					error: function (err) {
+						reject(err)
+					}
+				});
+			});
+		},
 	});
 
 });

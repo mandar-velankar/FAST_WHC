@@ -26,7 +26,7 @@ service CatalogService {
         Key Year: Integer;
         DiscountID: UUID;
         Units: Integer;
-        Myrena: String;
+        Mirena: String;
         Kyleena: String;
         Skyla: String;
     }

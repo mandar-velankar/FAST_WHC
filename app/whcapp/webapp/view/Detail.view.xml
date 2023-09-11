@@ -61,11 +61,11 @@
 		<f:header>
 			<f:DynamicPageHeader >
 				<FlexBox justifyContent="Start">
-					<HBox justifyContent="Center">
-						<Label text="Status:" textAlign="Center" width="100%"/>
+					<VBox justifyContent="Center">
+						<Label text="Status" textAlign="Center" width="100%"/>
 						<Text id="idStatus" text="{Status/Status}"/>
 						<Text id="idStatusId" text="{StatusID}" visible="false"/>
-                    </HBox>
+                    </VBox>
 				</FlexBox>
 			</f:DynamicPageHeader>
 		</f:header>
@@ -415,7 +415,7 @@
 								<Title text="Remarks" />
 							</OverflowToolbar>
 						</headerToolbar>
-						<TextArea value="{Remarks}" 
+						<TextArea id="idRemarksTextArea" value="{Remarks}" 
 								  showExceededText="true" 
 								  width="100%"
 								  growing="true"
@@ -455,10 +455,10 @@
 						</upload:UploadSet>
 					</Panel>
 					<Panel headerText="Tableau test" expandable="true" width="auto" class="sapUiResponsiveMargin" expanded="true">
-						<custom:Tableau src="{= ${TypeID} === 'New Proposal' ? 'https://tableau-ncsa.aws.cnb/t/CPROD/views/WHCContractProposal/ContractProposal?ORIGINAL_ORDERING_ACCOUNT_NUM=BHO3064937&amp;:embed=y&amp;:showVizHome=n&amp;:tabs=n&amp;:toolbar=n&amp;:apiID=host1#navType=0&amp;navSrc=Parse%22' :
+						<custom:Tableau id="idTableauChart" src="{= ${TypeID} === 'New Proposal' ? 'https://tableau-ncsa.aws.cnb/t/CPROD/views/WHCContractProposal/ContractProposal?ORIGINAL_ORDERING_ACCOUNT_NUM=BHO3064937&amp;:embed=y&amp;:showVizHome=n&amp;:tabs=n&amp;:toolbar=n&amp;:apiID=host1#navType=0&amp;navSrc=Parse%22' :
 						 													   'https://tableau-ncsa.aws.cnb/t/CPROD/views/WHCContractRenewalV1/WHCContractRenewal?Vistex%20ID=0060062019&amp;:embed=y&amp;:showVizHome=n&amp;:tabs=n&amp;:toolbar=n&amp;:apiID=host20#navType=0&amp;navSrc=Parse' }" 
-										width="auto" 
-										heigth="auto"/>
+										width="100%" 
+										heigth="100%"/>
 					</Panel>
 				</IconTabFilter>
 				</items>
