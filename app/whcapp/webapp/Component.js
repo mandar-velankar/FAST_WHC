@@ -7,9 +7,11 @@ sap.ui.define([
         "sap/ui/Device",
         "com/bayer/tender/whcapp/model/models",
         'sap/f/FlexibleColumnLayoutSemanticHelper',
-        'sap/f/library'
+        "./service/AccessService",
+        'sap/f/library',
+        "sap/ui/model/json/JSONModel"
     ],
-    function (UIComponent, Device, models, FlexibleColumnLayoutSemanticHelper, fioriLibrary) {
+    function (UIComponent, Device, models, FlexibleColumnLayoutSemanticHelper, AccessService, fioriLibrary, JSONModel) {
         "use strict";
 
         return UIComponent.extend("com.bayer.tender.whcapp.Component", {
@@ -34,6 +36,12 @@ sap.ui.define([
 
                 // set the device model
                 this.setModel(models.createDeviceModel(), "device");
+
+                this.accessService = new AccessService(this.getModel("access"));
+                this.accessService.getAccess().then(result=>{
+                    this.setModel(new JSONModel(result.data), "accessControl");
+                    return result.data;
+                });
             },
             destroy : function () {
                 // call the base component's destroy function

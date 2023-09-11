@@ -46,12 +46,12 @@
 					<MenuButton id="idButtonAction" text="Set Status" buttonMode="Split" useDefaultActionOnly="false" visible="true" type="Emphasized">
 							<menu>
 								<Menu itemSelected="onMenuAction">
-									<MenuItem text="Save Draft" visible="true" press=".onSave"/>
-									<MenuItem text="Submit to Workshop" visible="true" />
-									<MenuItem text="Approve" visible="true" />
-									<MenuItem text="Reject" visible="true" />
-									<MenuItem text="Cancel Proposal" visible="true" />
-									<MenuItem text="Archive" visible="true" />
+									<MenuItem text="Save Draft" visible="{accessControl>/whcproposalcreator}" press=".onSave"/>
+									<MenuItem text="Submit to Workshop" visible="{accessControl>/whcproposalcreator}" />
+									<MenuItem text="Approve" visible="{accessControl>/whcapprover}" />
+									<MenuItem text="Reject" visible="{accessControl>/whcapprover}" />
+									<MenuItem text="Cancel Proposal" visible="{accessControl>/whcproposalcreator}" />
+									<MenuItem text="Archive" visible="{accessControl>/whcproposalcreator}" />
 								</Menu>
 							</menu>
 						</MenuButton>
@@ -60,11 +60,12 @@
 		</f:title>
 		<f:header>
 			<f:DynamicPageHeader >
-				<FlexBox alignItems="Start">
-
-					<!--<VBox justifyContent="Center" class="sapUiSmallMarginEnd">-->
-						<Text text="Status: Draft"/>
-					<!--</VBox>-->
+				<FlexBox justifyContent="Start">
+					<VBox justifyContent="Center">
+						<Label text="Status" textAlign="Center" width="100%"/>
+						<Text id="idStatus" text="{Status/Status}"/>
+						<Text id="idStatusId" text="{StatusID}" visible="false"/>
+                    </VBox>
 				</FlexBox>
 			</f:DynamicPageHeader>
 		</f:header>
@@ -216,7 +217,7 @@
 							<Input id="idBaseLineDiscountInput" value="{BaseLineDiscount}"  enabled="{= ${appView>/editmode}}" type="Number" description="%" width='40%'/>
 
 							<Label text='Proposed Contract Length '/>
-							<Input id="idProposedContractLengthInput" value="{ProposedContractLength}"  enabled="{= ${appView>/editmode}}" width='20%' liveChange="onBaseLineUnitChange" type="Number"/>
+							<Input id="idProposedContractLengthInput" value="{ProposedContractLength}"  enabled="{= ${appView>/editmode}}" width='20%' liveChange="onProposedContractLengthChange" type="Number"/>
 						</form:SimpleForm>
 						
 					
@@ -246,7 +247,7 @@
 					</headerToolbar>
 					<Table id="discountsTable" 
 						items="{
-							path:'/Discounts'
+							path:'/DiscountTableView'
 						}"
 						growing="true"
 						growingThreshold="15"
@@ -274,7 +275,7 @@
 								<cells>
 									<Text text="Y{Year}" />
 									<Input value="{Units}" enabled="{= ${appView>/editmode}}"/>
-									<Input value="{WAC}" enabled="{= ${appView>/editmode}}"/>
+									<Input value="{Mirena}" enabled="{= ${appView>/editmode}}"/>
 									<Input value="{Kyleena}" enabled="{= ${appView>/editmode}}"/>
 									<Input value="{Skyla}" enabled="{= ${appView>/editmode}}"/>
 								</cells>
@@ -311,7 +312,7 @@
 									</t:multiLabels>
 									<t:template>
 										<Input value="{
-											path: 'Unit',
+											path: 'RebateLevels_Unit_Level_1',
 											type: 'sap.ui.model.type.Integer',
 											formatOptions: {
 												maxFractionDigits: 0,
@@ -330,7 +331,7 @@
 									</t:multiLabels>
 									<t:template>
 										<Input value="{
-											path: 'Discount',
+											path: 'RebateLevels_Discount_Level_1',
 											formatter: '.formatter.formatPercentage'
 										}" enabled="{= ${appView>/editmode}}"/>
 									</t:template>
@@ -345,7 +346,7 @@
 									</t:multiLabels>
 									<t:template>
 										<Input value="{
-											path: 'Unit',
+											path: 'RebateLevels_Unit_Level_2',
 											type: 'sap.ui.model.type.Integer',
 											formatOptions: {
 												maxFractionDigits: 0,
@@ -364,7 +365,7 @@
 									</t:multiLabels>
 									<t:template>
 										<Input value="{
-											path: 'Discount',
+											path: 'RebateLevels_Discount_Level_2',
 											formatter: '.formatter.formatPercentage'
 										}" enabled="{= ${appView>/editmode}}"/>
 									</t:template>
@@ -379,7 +380,7 @@
 									</t:multiLabels>
 									<t:template>
 										<Input value="{
-											path: 'Unit',
+											path: 'RebateLevels_Unit_Level_3',
 											type: 'sap.ui.model.type.Integer',
 											formatOptions: {
 												maxFractionDigits: 0,
@@ -398,7 +399,7 @@
 									</t:multiLabels>
 									<t:template>
 										<Input value="{
-											path: 'Discount',
+											path: 'RebateLevels_Discount_Level_3',
 											formatter: '.formatter.formatPercentage'
 										}" enabled="{= ${appView>/editmode}}"/>
 									</t:template>
@@ -414,7 +415,7 @@
 								<Title text="Remarks" />
 							</OverflowToolbar>
 						</headerToolbar>
-						<TextArea value="{Remarks}" 
+						<TextArea id="idRemarksTextArea" value="{Remarks}" 
 								  showExceededText="true" 
 								  width="100%"
 								  growing="true"
@@ -429,37 +430,15 @@
 							<Title text="Uploaded Files" />
 						</OverflowToolbar>
 					</headerToolbar>
-						<NotificationList>
-							<layoutData>
-								<FlexItemData />
-							</layoutData>
-
-							<NotificationListGroup
-								title="Uploaded Files"
-								showCloseButton="false"
-								close=".onItemClose">
-
-								<NotificationListItem
-									title="North Shore University Health System_Bayer Contracting Value"
-									description="Calc_Weighted_Avg_Template(4).xlsx"
-									showCloseButton="true"
-									unread="false"
-									priority="None"
-									close=".onItemClose"
-									press=".onListItemPress"
-									authorPicture="sap-icon://excel-attachment"
-									authorAvatarColor="Accent8" />
-							
-							</NotificationListGroup>
-						</NotificationList>
 						<upload:UploadSet
 								id="UploadSet"
 								instantUpload="false"
 								showIcons="false"
-								uploadEnabled="true"
+								uploadEnabled="{appView>/editmode}"
 								terminationEnabled="false"
 								maxFileNameLength="30"
 								httpRequestMethod="Put"
+								afterItemAdded="onAfterItemAdded"
 								uploadCompleted="onUploadCompleted"
 								items="{path: 'Attachments', templateShareable: false}">
 							<upload:items>
@@ -468,13 +447,18 @@
 										mediaType="{MediaType}"
 										visibleEdit="false"
 										url="/catalog/Attachments({ID})/Content"
+										enabledRemove="{appView>/editmode}"
+										removePressed=".onAttachmentDelete"
 										uploadState="Complete">
 								</upload:UploadSetItem>
 							</upload:items>
 						</upload:UploadSet>
 					</Panel>
 					<Panel headerText="Tableau test" expandable="true" width="auto" class="sapUiResponsiveMargin" expanded="true">
-						<custom:Tableau src='https://tableau-ncsa.aws.cnb/t/CPROD/views/WHCContractProposal/ContractProposal?ORIGINAL_ORDERING_ACCOUNT_NUM=BHO3064937' width="500px" heigth="500px"/>
+						<custom:Tableau id="idTableauChart" src="{= ${TypeID} === 'New Proposal' ? 'https://tableau-ncsa.aws.cnb/t/CPROD/views/WHCContractProposal/ContractProposal?ORIGINAL_ORDERING_ACCOUNT_NUM=BHO3064937&amp;:embed=y&amp;:showVizHome=n&amp;:tabs=n&amp;:toolbar=n&amp;:apiID=host1#navType=0&amp;navSrc=Parse%22' :
+						 													   'https://tableau-ncsa.aws.cnb/t/CPROD/views/WHCContractRenewalV1/WHCContractRenewal?Vistex%20ID=0060062019&amp;:embed=y&amp;:showVizHome=n&amp;:tabs=n&amp;:toolbar=n&amp;:apiID=host20#navType=0&amp;navSrc=Parse' }" 
+										width="100%" 
+										heigth="100%"/>
 					</Panel>
 				</IconTabFilter>
 				</items>
