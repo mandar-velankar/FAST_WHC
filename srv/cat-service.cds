@@ -2,16 +2,57 @@ using com.bayer.SXTENDER.whc as whc from '../db/data-model';
 
 service CatalogService {
     entity Contracts as projection on whc.Contracts;
+    entity ContractsHistory as projection on whc.Contracts_History;
     entity Attachments as projection on whc.Attachments;
     entity ContractCustomers as projection on whc.ContractCustomers;
 
-    entity ContractsView as select from Contracts as contract {
-        *,
-        contract.ContractType.Type,
-        contract.Status.StatusText as Status,
-        contract.ContractCustomers.Name as ParentAccountName: String,
-        contract.ContractCustomers.IsParent
-    };
+    entity ContractsView as select from Contracts {
+        key ID,
+        key ValidFrom,
+        key ValidTo,
+        Name,
+        BackgroundInfo,
+        VistexID,
+        StatusID,
+        TypeID,
+        Remarks,
+        BaseLineUnits,
+        BaseLineDiscount,
+        ProposedContractLength,
+        ContractType.Type,
+        Status.StatusText as Status,
+        ContractCustomers.Name as ParentAccountName: String,
+        ContractCustomers.IsParent,
+        true as isCurrent: Boolean,
+        createdAt,
+        createdBy,
+        modifiedAt,
+        modifiedBy
+    }
+    union 
+    select from ContractsHistory {
+        ID,
+        ValidFrom,
+        ValidTo,
+        Name,
+        BackgroundInfo,
+        VistexID,
+        StatusID,
+        TypeID,
+        Remarks,
+        BaseLineUnits,
+        BaseLineDiscount,
+        ProposedContractLength,
+        ContractType.Type,
+        Status.StatusText as Status,
+        ContractCustomers.Name as ParentAccountName: String,
+        ContractCustomers.IsParent,
+        false as isCurrent: Boolean,
+        createdAt,
+        createdBy,
+        modifiedAt,
+        modifiedBy
+    } where Status.StatusText = 'Approved';
 
     entity ContractFormView as select from Contracts as contract {
         *
