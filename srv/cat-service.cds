@@ -8,7 +8,7 @@ service CatalogService {
     entity ContractsView as select from Contracts as contract {
         *,
         contract.ContractType.Type,
-        contract.Status.Status,
+        contract.Status.StatusText as Status,
         contract.ContractCustomers.Name as ParentAccountName: String,
         contract.ContractCustomers.IsParent
     };

@@ -156,8 +156,8 @@ entity WHCProducts : cuid, managed {
   Discount        : Association to Discounts
 }
 
-entity WHCStatus : cuid, managed {
-  Status          : String(50);
+entity WHCStatus : cuid {
+  StatusText          : String(50);
 }
 
 entity WHCTypes : cuid, managed {
