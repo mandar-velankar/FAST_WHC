@@ -27,13 +27,11 @@ Content-Type: application/json
     "Remarks":null,
     "StatusID":"55d97328-2d03-4b1b-b18f-b63ac0259301",
     "TypeID":"d4ec08fe-8d80-4acd-9aa9-396ed718535e",
-    "ValidFrom":"2021-01-01T00:00:00.000Z",
-    "ValidTo":"9999-12-31T00:00:00.000Z",
     "VistexID":"1"
 }
 
 ###Contracts  - Update Contract
-PUT http://{{host}}{{service}}/Contracts(guid'b3d3b32e-f3d7-4c06-9a6d-0feff0427e37')
+PUT http://{{host}}{{service}}/Contracts(guid'fbe8164e-8880-4b1c-a9d5-36c768d8d257')
 Authorization: Basic YXJ0aW9t
 Content-Type: application/json
 
@@ -46,8 +44,6 @@ Content-Type: application/json
     "Remarks":null,
     "StatusID":"55d97328-2d03-4b1b-b18f-b63ac0259301",
     "TypeID":"d4ec08fe-8d80-4acd-9aa9-396ed718535e",
-    "ValidFrom":"2021-01-01T00:00:00.000Z",
-    "ValidTo":"9999-12-31T00:00:00.000Z",
     "VistexID":"1"
 }
 

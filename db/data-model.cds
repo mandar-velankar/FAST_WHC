@@ -19,7 +19,7 @@ entity Contracts : cuid, managed {
   BaseLineDiscount  : Double;
   ProposedContractLength : Integer;
   ContractCustomers : Association to many ContractCustomers
-                        on ContractCustomers.Contracts = $self;
+                        on ContractCustomers.ContractID = ID;
   Status            : Association to WHCStatus
                         on Status.ID = StatusID;
   ContractType      : Association to WHCTypes
@@ -45,7 +45,7 @@ entity Contracts_History : managed {
   BaseLineDiscount  : Double;
   ProposedContractLength : Integer;
   ContractCustomers : Association to many ContractCustomers_History
-                        on ContractCustomers.Contracts = $self;
+                        on ContractCustomers.ContractID = ID;
   Status            : Association to WHCStatus
                         on Status.ID = StatusID;
   ContractType      : Association to WHCTypes
@@ -72,8 +72,9 @@ entity ContractCustomers : cuid, managed {
   ValidTo   : Timestamp not null;
   BHOID     : String;
   Name      : String;
+  ContractID: String;
   IsParent  : Boolean default false;
-  Contracts : Association to Contracts;
+  Contracts : Association to Contracts_History on Contracts.ID = ContractID;
 }
 
 entity ContractCustomers_History : managed {
@@ -82,13 +83,14 @@ entity ContractCustomers_History : managed {
   ValidTo   : Timestamp;
   BHOID     : String;
   Name      : String;
+  ContractID: String;
   IsParent  : Boolean default false;
-  Contracts : Association to Contracts_History;
+  Contracts : Association to Contracts on Contracts.ID = ContractID;
 }
 
 entity Discounts : cuid, managed {
-  key Year        : Integer;
-  key Type        : Integer;
+  Year        : Integer;
+  Type        : Integer;
   // @cds.api.ignore
   @assert.notNull: false
   ValidFrom: Timestamp not null;
@@ -98,49 +100,54 @@ entity Discounts : cuid, managed {
   Units           : Integer;
   Discount        : Double;
   ProductID       : String;
-  Contracts       : Association to Contracts;
+  ContractID      : String;
+  Contracts       : Association to Contracts on Contracts.ID = ContractID;
   Product         : Composition of many WHCProducts
                       on Product.Discount = $self;
 }
 
 entity Discounts_History : managed {
-  key ID          : UUID;
-  key Year        : Integer;
-  key Type        : Integer;
+  ID          : UUID;
+  Year        : Integer;
+  Type        : Integer;
   ValidFrom: Timestamp;
   ValidTo: Timestamp;
   Units           : Integer;
   Discount        : Double;
   ProductID       : String;
-  Contracts       : Association to Contracts_History;
+  ContractID      : String;
+  Contracts       : Association to Contracts_History on Contracts.ID = ContractID;
   Product         : Association to WHCProducts
                       on Product.ID = ProductID;
 }
 
 entity Rebates : cuid, managed {
-  key Year        : Integer;
-  key Level       : Integer;
+  Year            : Integer;
+  Level           : Integer;
   // @cds.api.ignore
-  @assert.notNull: false
+  @assert.notNull : false
   ValidFrom: Timestamp not null;
   // @cds.api.ignore
-  @assert.notNull: false
+  @assert.notNull : false
   ValidTo         : Timestamp not null;
   Unit            : String(10);
   Discount        : Double;
   RebateLevels    : RebateLevels;
-  Contracts       : Association to Contracts;
+  ContractID      : String;
+  Contracts       : Association to Contracts on Contracts.ID = ContractID;
 }
 
 entity Rebates_History : managed {
-  key ID          : UUID;
-  key Year        : Integer;
-  key Level       : Integer;
+  ID              : UUID;
+  Year            : Integer;
+  Level           : Integer;
   ValidFrom       : Timestamp;
   ValidTo         : Timestamp;
   Unit            : String(10);
   Discount        : Double;
-  Contracts       : Association to Contracts_History;
+  RebateLevels    : RebateLevels;
+  ContractID      : String;
+  Contracts       : Association to Contracts_History on Contracts.ID = ContractID;
 }
 
 entity WHCProducts : cuid, managed {
