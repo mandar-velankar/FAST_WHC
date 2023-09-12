@@ -158,10 +158,10 @@ entity WHCTypes : cuid, managed {
 }
 
 type RebateLevels {
-        Unit_Level_1: String;
+        Unit_Level_1: Integer;
         Discount_Level_1: Double;
-        Unit_Level_2: String;
+        Unit_Level_2: Integer;
         Discount_Level_2: Double;
-        Unit_Level_3: String;
+        Unit_Level_3: Integer;
         Discount_Level_3: Double;
 }

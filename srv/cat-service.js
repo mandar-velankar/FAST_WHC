@@ -10,105 +10,161 @@ module.exports = (srv) => {
     srv.on("READ", "DiscountTableView", async (req) => {
         const where = req.query.SELECT.where;
         let discounts;
-        let contractId;
         if (where) {
-            contractId = where[2].val;
             discounts = await SELECT.from(Discounts).where(where);
         }else {
             discounts = await SELECT.from(Discounts);
         }
-        const contract = await SELECT.one.from(Contracts).where({ID: contractId});
         const products = await SELECT.from(WHCProducts);
 
-        const discountItems = [];
-        const proposedContractLength = contract?.ProposedContractLength;
-        if (!proposedContractLength) return discountItems;
+        const discountItems = discounts.map(discount => {
+            const discountProducts = products.filter(product => product.Discount_ID === discount.ID);
 
-        for (let i = 0; i < proposedContractLength; i++) {
             const obj = {
-                Contracts_ID: contractId,
-                Year: "",
-                Units: "",
-                DiscountID: "",
+                Contracts_ID: discount.Contracts_ID,
+                Year: discount.Year,
+                Units: discount.Units,
+                DiscountID: discount.ID,
                 Mirena: "",
                 Kyleena: "",
                 Skyla: ""
             };
-
-            discountItems.push(obj);
-        }
-
-        if (discounts.length < 1) return discountItems;
-
-        for (let i = 0; i < proposedContractLength; i++) {
-            const discountProducts = products.filter(product => product.Discount_ID === discounts[i]?.ID);
-            if (discounts[i]) {
-                discountItems[i].DiscountID = discounts[i]?.ID
-                discountItems[i].Year = discounts[i]?.Year
-                discountItems[i].Units = discounts[i]?.Units
-
-                discountProducts.forEach(product => {
-                    const productName = product.ProductName;
-                    discountItems[i][productName] = product.WAC
-                })
-            }else {
-                discountItems[i].Year = discountItems[i - 1].Year + 1
+            discountProducts.forEach(product => {
+                const productName = product.ProductName;
+                obj[productName] = product.WAC
+            })
+            return obj;
+        });
+        const sortedDiscountItems = discountItems.sort((a, b) => {
+            if (a.Year < b.Year) {
+                return -1;
             }
-            
-        }
-        return discountItems;
+            if (a.Year > b.Year) {
+                return 1;
+            }
+            return 0;
+        });
+        return sortedDiscountItems;
     });
 
-    srv.on("READ", "Rebates", async (req) => {
-        const where = req.query.SELECT.where;
-        let rebates;
-        let contractId;
-        if (where) {
-            contractId = where[2].val;
-            rebates = await SELECT.from(Rebates).where(where);
-        }else {
-            rebates = await SELECT.from(Rebates);
+    srv.on(["UPDATE"], "DiscountTableView", async (req) => {
+        const discount = await SELECT.one.from(Discounts).where({ID: req.data.DiscountID});
+        const products = await SELECT.from(WHCProducts).where({Discount_ID: req.data.DiscountID});
+        const productNames = ["Mirena", "Kyleena", "Skyla"];
+
+        const mappedDiscount = {
+            ID: req.data.DiscountID,
+            Units: req.data.Units,
+            Discount: req.data.Discount,
+            ProductID: req.data.ProductID
         }
-        const contract = await SELECT.one.from(Contracts).where({ID: contractId});
 
-        const rebateItems = [];
-        const proposedContractLength = contract?.ProposedContractLength;
-        if (!proposedContractLength) return rebateItems;
 
-        for (let i = 0; i < proposedContractLength; i++) {
-            const obj = {
+        if (discount) {
+            await UPDATE(Discounts)
+                .with (mappedDiscount)
+                .where({
+                    ID: req.data.DiscountID
+                })
+        }
+
+        if (products.length < 1) {
+            const newProducts = productNames.map(name => {
+                const product = {
+                    ProductName: name,
+                    WAC: req.data[name],
+                    Discount_ID: req.data.DiscountID,
+                    Discount_Year: req.data.Year
+                }
+                return product;
+            })
+            await INSERT.into(WHCProducts).entries(newProducts);
+        }else {
+            const updateProducts = products.map(product => {
+                const obj = {
+                    ProductName: product.ProductName,
+                    WAC: req.data[product.ProductName]
+                }
+                return obj;
+            }) 
+
+            for (let prod of updateProducts) {
+                await UPDATE(WHCProducts).with(prod).where({Discount_ID: req.data.DiscountID, ProductName: prod.ProductName});
+            }
+        }
+    })
+
+    srv.before(["UPDATE"], ["Contracts"], async (req) => {
+        (!req.data.ProposedContractLength || (req.data.ProposedContractLength < 0 || req.data.ProposedContractLength > 6)) && req.error({ code: 400, message: "Proposed Contract Length should not be greater than 6 years", target: "ProposedContractLength" });
+    })
+    
+    srv.on(["CREATE", "UPDATE"], ["ContractFormView", "Contracts"], async (req) => {
+        const contract = await SELECT.one.from(Contracts).where({ID: req.data?.ID});
+
+        const mappedContract = {
+            BackgroundInfo: req.data.BackgroundInfo,
+            BaseLineDiscount: req.data.BaseLineDiscount,
+            BaseLineUnits: req.data.BaseLineUnits,
+            ID: req.data?.ID,
+            Name: req.data.Name,
+            ProposedContractLength: req.data.ProposedContractLength,
+            Remarks: req.data.Remarks,
+            StatusID: req.data.StatusID,
+            TypeID: req.data.TypeID,
+            ValidFrom: req.data.ValidFrom,
+            ValidTo: req.data.ValidTo,
+            VistexID: req.data.VistexID
+        }
+        if (contract) {
+            await UPDATE(Contracts)
+				.with (mappedContract)
+				.where({
+					ID: contract.ID
+				})
+        }else {
+            const mappedDiscountsAndRebates = getMappedDiscountsAndRebates(req.data?.ID);
+
+            await INSERT.into(Contracts).entries(mappedContract);
+            await INSERT.into(Discounts).entries(mappedDiscountsAndRebates.newDiscounts);
+            await INSERT.into(Rebates).entries(mappedDiscountsAndRebates.newRebates);
+        }
+        return req.data;
+    })
+
+    const getMappedDiscountsAndRebates = (contractId) => {
+        const newDiscounts = [];
+        const newRebates = []
+
+        for (let i = 1; i <= 6; i++) {
+            const discount = {
                 Contracts_ID: contractId,
-                Year: "",
-                Level: "",
+                Year: i,
+                Type: 2,
+                ValidFrom: new Date(),
+                ValidTo: new Date(9999, 11, 31),
+                Units: 0
+            }
+            newDiscounts.push(discount);
+
+            const rebate = {
+                Contracts_ID: contractId,
+                Year: i,
+                Level: 1,
+                Unit: "",
+                ValidFrom: new Date(),
+                ValidTo: new Date(9999, 11, 31),
                 RebateLevels_Unit_Level_1: null,
                 RebateLevels_Discount_Level_1: null,
                 RebateLevels_Unit_Level_2: null,
                 RebateLevels_Discount_Level_2: null,
                 RebateLevels_Unit_Level_3: null,
                 RebateLevels_Discount_Level_3: null
-            };
-
-            rebateItems.push(obj);
-        }
-
-        if (rebates.length < 1) return rebateItems;
-
-        for (let i = 0; i < proposedContractLength; i++) {
-            if (rebates[i]) {
-                rebateItems[i].DiscountID = rebates[i]?.ID
-                rebateItems[i].Year = rebates[i]?.Year
-                rebateItems[i].Level = rebates[i]?.Level,
-                rebateItems[i].RebateLevels_Unit_Level_1 = rebates[i]?.RebateLevels_Unit_Level_1,
-                rebateItems[i].RebateLevels_Discount_Level_1 = rebates[i]?.RebateLevels_Discount_Level_1,
-                rebateItems[i].RebateLevels_Unit_Level_2 = rebates[i]?.RebateLevels_Unit_Level_2,
-                rebateItems[i].RebateLevels_Discount_Level_2 = rebates[i]?.RebateLevels_Discount_Level_2,
-                rebateItems[i].RebateLevels_Unit_Level_3 = rebates[i]?.RebateLevels_Unit_Level_3,
-                rebateItems[i].RebateLevels_Discount_Level_3 = rebates[i]?.RebateLevels_Discount_Level_3
-            }else {
-                rebateItems[i].Year = rebateItems[i - 1].Year + 1
             }
-            
+            newRebates.push(rebate);
         }
-        return rebateItems;
-    });
+        return {
+            newDiscounts,
+            newRebates
+        };
+    }
 };

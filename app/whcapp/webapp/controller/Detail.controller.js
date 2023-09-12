@@ -111,8 +111,18 @@ sap.ui.define([
 						descending: false
 					})
 				],
+				events: {
+					dataRequested: function () {
+						
+					},
+					dataReceived: this.rebatesDataReceived.bind(this)
+				}
 			});
-
+		},
+		rebatesDataReceived: function (event) {
+			const rebatesTable = this.byId("rebatesTable");
+			const rebates = event.getParameter("data")?.results;
+			rebatesTable.setVisibleRowCount(rebates.length);
 		},
 
 		getContractById: function () {
@@ -267,12 +277,17 @@ sap.ui.define([
 				});
 			})
 		},
+
+		
+
 		onSave: async function () {
 			try {
-				await this.submitChanges();
+				// await this.submitChanges();
+				this.getModel().submitChanges({
+					success: this.contractSavedSuccess.bind(this),
+					error: this.contractSavedError.bind(this)
+				});
 				
-				MessageBox.success("Contract created: " + this.getView().getBindingContext().getProperty("ID"));
-				this.getModel().refresh();
 			} catch (error) {
 				console.error(error);
 			}
@@ -290,6 +305,22 @@ sap.ui.define([
 			// 		MessageBox.success("Contract created: " + id);
 			// 	}
 			// }
+
+		},
+		contractSavedSuccess: function (event) {
+			const hasErrorMessages = this.oMessageManager.getMessageModel().getData();
+			if (hasErrorMessages.length < 1) {
+				MessageBox.success("Contract Updated: " + this.getView().getBindingContext().getProperty("ID"));
+				this.getModel("appView").setProperty("/editmode", false);
+				this.oDynamicPage.setShowFooter(false);
+				this.filterDiscountsTable();
+				this.bindRebatesTable();
+				this.getModel().refresh();
+			}
+			this.getModel("detailView").setProperty("/busy", false);
+		},
+
+		contractSavedError: function (error) {
 
 		},
 
@@ -336,18 +367,18 @@ sap.ui.define([
 						const Mirena = formatter.parsePercentage(obj.Mirena);
 						const Kyleena = formatter.parsePercentage(obj.Kyleena);
 						const Skyla = formatter.parsePercentage(obj.Skyla);
-						this.getModel().setProperty(`${path}/Mirena`, Mirena ? Math.trunc(Mirena * 100) : Mirena);
-						this.getModel().setProperty(`${path}/Kyleena`, Kyleena ? Math.trunc(Kyleena * 100) : Kyleena);
-						this.getModel().setProperty(`${path}/Skyla`, Skyla ? Math.trunc(Skyla * 100) : Skyla);
+						this.getModel().setProperty(`${path}/Mirena`, Mirena ? Math.trunc(Mirena * 100) + "" : Mirena);
+						this.getModel().setProperty(`${path}/Kyleena`, Kyleena ? Math.trunc(Kyleena * 100) + "" : Kyleena);
+						this.getModel().setProperty(`${path}/Skyla`, Skyla ? Math.trunc(Skyla * 100) + "" : Skyla);
 					})
 					break;
 				case "Percentage":
 					items.map(item => {
 						const obj = item.getBindingContext().getObject();
 						const path = item.getBindingContext().getPath();
-						const Mirena = formatter.formatPercentage(obj.Mirena / 100);
-						const Kyleena = formatter.formatPercentage(obj.Kyleena / 100);
-						const Skyla = formatter.formatPercentage(obj.Skyla / 100);
+						const Mirena = formatter.formatPercentage(obj.Mirena);
+						const Kyleena = formatter.formatPercentage(obj.Kyleena);
+						const Skyla = formatter.formatPercentage(obj.Skyla);
 						this.getModel().setProperty(`${path}/Mirena`, Mirena);
 						this.getModel().setProperty(`${path}/Kyleena`, Kyleena);
 						this.getModel().setProperty(`${path}/Skyla`, Skyla);

@@ -43,7 +43,7 @@
 					<Button id="deleteContractButtonId" icon="sap-icon://delete" text="Delete" type="Reject" press="onDeleteContractPress" enabled="true" />
 					<Button id="refreshButtonId" icon="sap-icon://refresh" type="Emphasized" press="onRefresh" enabled="true"/>
 					<Button id="printButtonId" text="Print" type="Emphasized" press=".onPrintButtonPress" enabled="true"/>
-					<MenuButton id="idButtonAction" text="Set Status" buttonMode="Split" useDefaultActionOnly="false" visible="true" type="Emphasized">
+					<MenuButton id="idButtonAction" text="Set Status" buttonMode="Split" useDefaultActionOnly="false" visible="true" type="Emphasized" enabled="{= ${appView>/editmode}}">
 							<menu>
 								<Menu itemSelected="onMenuAction">
 									<MenuItem text="Save Draft" visible="{accessControl>/whcproposalcreator}" press=".onSave"/>
@@ -125,7 +125,7 @@
 											<OverflowToolbar>
 												<content>
 													<Title text="Parent BHO ID" level="H2"/>
-													<Button text="+" type="Emphasized" press=".onAddMainCustomerButtonPress" enabled="true"/>
+													<Button text="+" type="Emphasized" press=".onAddMainCustomerButtonPress" enabled="{= ${appView>/editmode}}"/>
 													<MultiInput width="70%"
 														showClearIcon="true"
 														id="multiInput2"
@@ -166,7 +166,7 @@
 											<OverflowToolbar>
 												<content>
 													<Title text="Member BHO ID" level="H2"/>
-													<Button text="+" type="Emphasized" press=".onAddCustomerButtonPress" enabled="true"/>
+													<Button text="+" type="Emphasized" press=".onAddCustomerButtonPress" enabled="{= ${appView>/editmode}}"/>
 													<MultiInput width="70%"
 														showClearIcon="true"
 														id="multiInputMemberBHO"
@@ -237,7 +237,7 @@
 							<Title text="Discounts" />
 							<ToolbarSpacer />
 							<Label text='Type:'/>
-							<Select id = "idDiscountType" change="onFormatDiscountTableValues">
+							<Select id = "idDiscountType" change="onFormatDiscountTableValues" enabled="{= ${appView>/editmode}}">
 								<items>
 									<core:Item key = "Value" text="Value"></core:Item>
 									<core:Item key = "Percentage" text="Percentage"></core:Item>
@@ -332,7 +332,7 @@
 									<t:template>
 										<Input value="{
 											path: 'RebateLevels_Discount_Level_1',
-											formatter: '.formatter.formatPercentage'
+											type: 'com.bayer.tender.whcapp.model.datatypes.CustomPercentageType'
 										}" enabled="{= ${appView>/editmode}}"/>
 									</t:template>
 								</t:Column>
@@ -366,7 +366,7 @@
 									<t:template>
 										<Input value="{
 											path: 'RebateLevels_Discount_Level_2',
-											formatter: '.formatter.formatPercentage'
+											type: 'com.bayer.tender.whcapp.model.datatypes.CustomPercentageType'
 										}" enabled="{= ${appView>/editmode}}"/>
 									</t:template>
 								</t:Column>
@@ -400,7 +400,7 @@
 									<t:template>
 										<Input value="{
 											path: 'RebateLevels_Discount_Level_3',
-											formatter: '.formatter.formatPercentage'
+											type: 'com.bayer.tender.whcapp.model.datatypes.CustomPercentageType'
 										}" enabled="{= ${appView>/editmode}}"/>
 									</t:template>
 								</t:Column>

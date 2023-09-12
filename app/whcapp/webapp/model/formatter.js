@@ -34,7 +34,7 @@ sap.ui.define([
 
 		formatPercentage: function(value){
 			if(!value) return;
-			return percentageInstance.format(value);
+			return percentageInstance.format(value / 100);
 		},
 
         parsePercentage: function (value) {
