@@ -22,7 +22,7 @@ service CatalogService {
     entity Discounts as projection on whc.Discounts;
     entity Rebates as projection on whc.Rebates;
     entity DiscountTableView {
-        Key Contracts_ID: UUID;
+        Key ContractID: UUID;
         Key Year: Integer;
         DiscountID: UUID;
         Units: Integer;

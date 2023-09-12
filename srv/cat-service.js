@@ -21,7 +21,7 @@ module.exports = (srv) => {
             const discountProducts = products.filter(product => product.Discount_ID === discount.ID);
 
             const obj = {
-                Contracts_ID: discount.Contracts_ID,
+                ContractID: discount.Contracts_ID,
                 Year: discount.Year,
                 Units: discount.Units,
                 DiscountID: discount.ID,
