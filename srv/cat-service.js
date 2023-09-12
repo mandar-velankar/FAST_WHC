@@ -111,8 +111,6 @@ module.exports = (srv) => {
             Remarks: req.data.Remarks,
             StatusID: req.data.StatusID,
             TypeID: req.data.TypeID,
-            ValidFrom: req.data.ValidFrom,
-            ValidTo: req.data.ValidTo,
             VistexID: req.data.VistexID
         }
         if (contract) {
@@ -137,22 +135,18 @@ module.exports = (srv) => {
 
         for (let i = 1; i <= 6; i++) {
             const discount = {
-                Contracts_ID: contractId,
+                ContractID: contractId,
                 Year: i,
                 Type: 2,
-                ValidFrom: new Date(),
-                ValidTo: new Date(9999, 11, 31),
                 Units: 0
             }
             newDiscounts.push(discount);
 
             const rebate = {
-                Contracts_ID: contractId,
+                ContractID: contractId,
                 Year: i,
                 Level: 1,
                 Unit: "",
-                ValidFrom: new Date(),
-                ValidTo: new Date(9999, 11, 31),
                 RebateLevels_Unit_Level_1: null,
                 RebateLevels_Discount_Level_1: null,
                 RebateLevels_Unit_Level_2: null,

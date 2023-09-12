@@ -3,10 +3,10 @@ namespace com.bayer.SXTENDER.whc;
 using {cuid, managed} from '@sap/cds/common';
 
 entity Contracts : cuid, managed {
-  // @cds.api.ignore
+  @cds.api.ignore
   @assert.notNull: false
   ValidFrom: Timestamp not null;
-  // @cds.api.ignore
+  @cds.api.ignore
   @assert.notNull: false
   ValidTo: Timestamp not null;
   Name              : String;

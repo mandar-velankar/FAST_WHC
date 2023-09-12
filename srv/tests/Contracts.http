@@ -31,7 +31,7 @@ Content-Type: application/json
 }
 
 ###Contracts  - Update Contract
-PUT http://{{host}}{{service}}/Contracts(guid'fbe8164e-8880-4b1c-a9d5-36c768d8d257')
+PUT http://{{host}}{{service}}/Contracts(guid'e88f4e1d-9ce0-4f57-846d-a9630463ea63')
 Authorization: Basic YXJ0aW9t
 Content-Type: application/json
 

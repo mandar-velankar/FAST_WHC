@@ -88,7 +88,7 @@ sap.ui.define([
 			const template = discountTable.getBindingInfo("items").template;
 			const contract = await this.getContractById();
 			const filter = [
-				new Filter("Contracts_ID", FilterOperator.EQ, this.id),
+				new Filter("ContractID", FilterOperator.EQ, this.id),
 				new Filter("Year", FilterOperator.LE, contract?.ProposedContractLength),
 			]
 
@@ -102,7 +102,7 @@ sap.ui.define([
 			rebatesTable.bindRows({
 				path: "/Rebates",
 				filters: [
-					new Filter("Contracts_ID", "EQ", this.id),
+					new Filter("ContractID", "EQ", this.id),
 					new Filter("Year", "LE", contract?.ProposedContractLength),
 				],
 				sorter: [ 
@@ -619,7 +619,7 @@ sap.ui.define([
             return new Promise((resolve, reject) => {
 				this.getModel().read("/DiscountTableView", {
 					filters: [
-						new Filter("Contracts_ID", "EQ", contractId),
+						new Filter("ContractID", "EQ", contractId),
 						new Filter("Year", "LE", contractLength),
 					],
 					success: function (res) {
@@ -636,7 +636,7 @@ sap.ui.define([
 			return new Promise((resolve, reject) => {
 				this.getModel().read("/Rebates", {
 					filters: [
-						new Filter("Contracts_ID", "EQ", contractId),
+						new Filter("ContractID", "EQ", contractId),
 						new Filter("Year", "LE", contractLength),
 					],
 					success: function (res) {
