@@ -274,8 +274,6 @@ sap.ui.define([
 			const oBoundContext = oForm.getElementBinding().getBoundContext();
 			const newProposalObj = oBoundContext.getObject();
 
-			newProposalObj.ValidFrom = new Date();
-			newProposalObj.ValidTo = new Date(9999, 11, 31);
 			newProposalObj.TypeID = this.byId('idGroupType').getSelectedButton().getText();
 			const oNewBindingCtx = oDefaultModel.createEntry("/ContractFormView", {
 				properties: newProposalObj,
