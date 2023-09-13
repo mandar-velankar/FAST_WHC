@@ -31,7 +31,7 @@ sap.ui.define([
 		},
 		onSelectionChange: function (oEvent) {
 			const data = oEvent.getParameter("listItem").getBindingContext().getObject();
-			data?.ID && this._showDetail(data.ID);
+			data?.ID && this._showDetail(data.ContractsViewID);
 		},
 		_onMasterMatched: async function (event) {
 			//Set the layout property of the FCL control to 'OneColumn'

@@ -55,8 +55,8 @@ sap.ui.define([
 			});
 		},
 		_bindView: async function () {
-			const path = this.getModel().createKey("/Contracts", {
-				ID: this.id
+			const path = this.getModel().createKey("/ContractsView", {
+				ContractsViewID: this.id
 			});
 
 			// Set busy indicator during view binding
@@ -68,9 +68,9 @@ sap.ui.define([
 
 			this.getView().bindElement({
 				path: path,
-				parameters: {
-					expand: "ContractCustomers"
-				},
+				// parameters: {
+				// 	expand: "ContractCustomers"
+				// },
 				events: {
 					// 	change: this._onBindingChange.bind(this),
 					dataRequested: function () {

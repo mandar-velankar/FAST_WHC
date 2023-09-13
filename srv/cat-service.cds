@@ -7,9 +7,10 @@ service CatalogService {
     entity ContractCustomers as projection on whc.ContractCustomers;
 
     entity ContractsView as select from Contracts {
-        key ID,
-        key ValidFrom,
-        key ValidTo,
+        key ID || '-' || replace(ValidFrom, ' ', '-') || '-' || replace(ValidTo, ' ', '-') as ContractsViewID:String,
+        ID,
+        ValidFrom,
+        ValidTo,
         Name,
         BackgroundInfo,
         VistexID,
@@ -31,6 +32,7 @@ service CatalogService {
     }
     union 
     select from ContractsHistory {
+         key ID || '-' || replace(ValidFrom, ' ', '-') || '-' || replace(ValidTo, ' ', '-') as ContractsViewID:String,
         ID,
         ValidFrom,
         ValidTo,
