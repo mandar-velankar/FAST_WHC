@@ -5,6 +5,11 @@ service CatalogService {
     entity ContractsHistory as projection on whc.Contracts_History;
     entity Attachments as projection on whc.Attachments;
     entity ContractCustomers as projection on whc.ContractCustomers;
+    entity ContractCustomersHistory as projection on whc.ContractCustomers_History;
+    entity WHCProducts as projection on whc.WHCProducts;
+    entity Discounts as projection on whc.Discounts;
+    entity Rebates as projection on whc.Rebates;
+    entity RebatesHistory as projection on whc.Rebates_History;
 
     entity ContractsView as select from Contracts {
         key ID || '-' || replace(ValidFrom, ' ', '-') || '-' || replace(ValidTo, ' ', '-') as ContractsViewID:String,
@@ -60,11 +65,6 @@ service CatalogService {
         *
     };
 
-    entity WHCProducts as projection on whc.WHCProducts;
-
-    entity Discounts as projection on whc.Discounts;
-    entity Rebates as projection on whc.Rebates;
-    entity RebatesHistory as projection on whc.Rebates_History;
     entity DiscountTableView {
         Key ContractID: UUID;
         Key Year: Integer;
@@ -115,5 +115,44 @@ service CatalogService {
         createdBy,
         modifiedAt,
         modifiedBy  
+    } where Contract.Status.StatusText = 'Approved';
+
+
+    entity ContractCustomersView as select from ContractCustomers {
+        key ID || '-' || replace(ValidFrom, ' ', '-') || '-' || replace(ValidTo, ' ', '-') as ContractCustomerViewID:String,
+        ID,
+        ValidFrom,
+        ValidTo,
+        BHOID,
+        Name,
+        ContractID,
+        IsParent,
+        Contract.ValidFrom as ContractValidFrom: Timestamp,
+        Contract.ValidTo as ContractValidTo: Timestamp,
+        ContractID || '-' || replace(Contract.ValidFrom, ' ', '-') || '-' || replace(Contract.ValidTo, ' ', '-') as ContractsViewID:String,
+        true as isCurrent: Boolean,
+        createdAt,
+        createdBy,
+        modifiedAt,
+        modifiedBy
+    }
+    union 
+    select from ContractCustomersHistory {
+        key ID || '-' || replace(ValidFrom, ' ', '-') || '-' || replace(ValidTo, ' ', '-') as ContractCustomerViewID:String,
+        ID,
+        ValidFrom,
+        ValidTo,
+        BHOID,
+        Name,
+        ContractID,
+        IsParent,
+        Contract.ValidFrom as ContractValidFrom: Timestamp,
+        Contract.ValidTo as ContractValidTo: Timestamp,
+        ContractID || '-' || replace(Contract.ValidFrom, ' ', '-') || '-' || replace(Contract.ValidTo, ' ', '-') as ContractsViewID:String,
+        true as isCurrent: Boolean,
+        createdAt,
+        createdBy,
+        modifiedAt,
+        modifiedBy
     } where Contract.Status.StatusText = 'Approved';
 }
