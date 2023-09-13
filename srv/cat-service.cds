@@ -75,6 +75,13 @@ service CatalogService {
         Skyla: String;
     }
 
+
+    entity MostRecentRebatesHistoryIDs as select from RebatesHistory
+    {
+        key ID,
+        max(ValidTo) as MaxValidTo:Date
+    }group by ID;
+
     entity RebatesView as select from Rebates {
         key ID || '-' || replace(ValidFrom, ' ', '-') || '-' || replace(ValidTo, ' ', '-') as RebatesViewID:String,
         ID,
@@ -96,9 +103,10 @@ service CatalogService {
         modifiedBy
     }
     union 
-    select from RebatesHistory {
-        key ID || '-' || replace(ValidFrom, ' ', '-') || '-' || replace(ValidTo, ' ', '-') as RebatesViewID:String,
-        ID,
+    select from MostRecentRebatesHistoryIDs as mh
+    left outer join RebatesHistory as r on mh.ID = r.ID and mh.MaxValidTo = r.ValidTo{
+        key r.ID || '-' || replace(ValidFrom, ' ', '-') || '-' || replace(ValidTo, ' ', '-') as RebatesViewID:String,
+        r.ID,
         ValidFrom,
         ValidTo,
         Year,
