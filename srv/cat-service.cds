@@ -32,7 +32,7 @@ service CatalogService {
     }
     union 
     select from ContractsHistory {
-         key ID || '-' || replace(ValidFrom, ' ', '-') || '-' || replace(ValidTo, ' ', '-') as ContractsViewID:String,
+        key ID || '-' || replace(ValidFrom, ' ', '-') || '-' || replace(ValidTo, ' ', '-') as ContractsViewID:String,
         ID,
         ValidFrom,
         ValidTo,
@@ -76,23 +76,7 @@ service CatalogService {
     }
 
     entity RebatesView as select from Rebates {
-        key ID,
-        key ValidFrom,
-        key ValidTo,
-        Year,
-        Level,
-        Unit,
-        Discount,
-        RebateLevels,
-        ContractID,
-        true as isCurrent: Boolean,
-        createdAt,
-        createdBy,
-        modifiedAt,
-        modifiedBy
-    }
-    union 
-    select from RebatesHistory {
+        key ID || '-' || replace(ValidFrom, ' ', '-') || '-' || replace(ValidTo, ' ', '-') as RebatesViewID:String,
         ID,
         ValidFrom,
         ValidTo,
@@ -102,6 +86,30 @@ service CatalogService {
         Discount,
         RebateLevels,
         ContractID,
+        Contract.ValidFrom as ContractValidFrom: Timestamp,
+        Contract.ValidTo as ContractValidTo: Timestamp,
+        ContractID || '-' || replace(Contract.ValidFrom, ' ', '-') || '-' || replace(Contract.ValidTo, ' ', '-') as ContractsViewID:String,
+        true as isCurrent: Boolean,
+        createdAt,
+        createdBy,
+        modifiedAt,
+        modifiedBy
+    }
+    union 
+    select from RebatesHistory {
+        key ID || '-' || replace(ValidFrom, ' ', '-') || '-' || replace(ValidTo, ' ', '-') as RebatesViewID:String,
+        ID,
+        ValidFrom,
+        ValidTo,
+        Year,
+        Level,
+        Unit,
+        Discount,
+        RebateLevels,
+        ContractID,
+        Contract.ValidFrom as ContractValidFrom: Timestamp,
+        Contract.ValidTo as ContractValidTo: Timestamp,
+        ContractID || '-' || replace(Contract.ValidFrom, ' ', '-') || '-' || replace(Contract.ValidTo, ' ', '-') as ContractsViewID:String,
         false as isCurrent: Boolean,
         createdAt,
         createdBy,
