@@ -122,21 +122,23 @@ entity Discounts_History : managed {
 }
 
 entity DiscountProducts: cuid, managed {
+  ProductName     : String;
+  WAC             : String;
   @assert.notNull : false
   ValidFrom       : Timestamp not null;
   @assert.notNull : false
   ValidTo         : Timestamp not null;
   DiscountID      : UUID;
-  Product         : Association to WHCProducts;
   Discount        : Association to Discounts on Discount.ID = DiscountID;
 }
 
 entity DiscountProducts_History: managed {
+  ProductName     : String;
+  WAC             : String;
   ID              : UUID;
   ValidFrom       : Timestamp;
   ValidTo         : Timestamp; 
   DiscountID      : UUID;
-  Product         : Association to WHCProducts;
   Discount        : Association to Discounts_History on Discount.ID = DiscountID;
 }
 
