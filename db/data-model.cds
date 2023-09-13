@@ -102,8 +102,8 @@ entity Discounts : cuid, managed {
   ProductID       : String;
   ContractID      : String;
   Contracts       : Association to Contracts on Contracts.ID = ContractID;
-  Product         : Composition of many WHCProducts
-                      on Product.Discount = $self;
+  Products        : Composition of many DiscountProducts
+                      on Products.Discount = $self;                   
 }
 
 entity Discounts_History : managed {
@@ -117,8 +117,27 @@ entity Discounts_History : managed {
   ProductID       : String;
   ContractID      : String;
   Contracts       : Association to Contracts_History on Contracts.ID = ContractID;
-  Product         : Association to WHCProducts
-                      on Product.ID = ProductID;
+  Products         : Composition of many DiscountProducts_History
+                      on Products.Discount = $self;  
+}
+
+entity DiscountProducts: cuid, managed {
+  @assert.notNull : false
+  ValidFrom       : Timestamp not null;
+  @assert.notNull : false
+  ValidTo         : Timestamp not null;
+  DiscountID      : UUID;
+  Product         : Association to WHCProducts;
+  Discount        : Association to Discounts on Discount.ID = DiscountID;
+}
+
+entity DiscountProducts_History: managed {
+  ID              : UUID;
+  ValidFrom       : Timestamp;
+  ValidTo         : Timestamp; 
+  DiscountID      : UUID;
+  Product         : Association to WHCProducts;
+  Discount        : Association to Discounts_History on Discount.ID = DiscountID;
 }
 
 entity Rebates : cuid, managed {
@@ -153,7 +172,6 @@ entity Rebates_History : managed {
 entity WHCProducts : cuid, managed {
   ProductName     : String(100);
   WAC             : String(100);
-  Discount        : Association to Discounts
 }
 
 entity WHCStatus : cuid {
