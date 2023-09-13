@@ -122,7 +122,7 @@ sap.ui.define([
 		rebatesDataReceived: function (event) {
 			const rebatesTable = this.byId("rebatesTable");
 			const rebates = event.getParameter("data")?.results;
-			rebatesTable.setVisibleRowCount(rebates.length);
+			if (rebates.length > 0) rebatesTable.setVisibleRowCount(rebates.length);
 		},
 
 		getContractById: function () {
@@ -217,7 +217,7 @@ sap.ui.define([
 			let input = event.getSource(),
 			value = input?.getValue();
 
-			if (value > 6) {
+			if (value < 1 || value > 6) {
 				input.setValueState("Error");
                 input.setValueStateText("Proposed Contract Length should not be greater than 6 years");
                 input.openValueStateMessage();
@@ -272,8 +272,8 @@ sap.ui.define([
 		submitChanges: function () {
 			return new Promise((resolve, reject) => {
 				this.getModel().submitChanges({
-					success: () => resolve(),
-					error: () => reject()
+					success: this.contractSavedSuccess.bind(this),
+					error: this.contractSavedError.bind(this)
 				});
 			})
 		},
@@ -282,11 +282,7 @@ sap.ui.define([
 
 		onSave: async function () {
 			try {
-				// await this.submitChanges();
-				this.getModel().submitChanges({
-					success: this.contractSavedSuccess.bind(this),
-					error: this.contractSavedError.bind(this)
-				});
+				await this.submitChanges();
 				
 			} catch (error) {
 				console.error(error);

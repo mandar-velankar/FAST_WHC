@@ -21,7 +21,7 @@ module.exports = (srv) => {
             const discountProducts = products.filter(product => product.Discount_ID === discount.ID);
 
             const obj = {
-                ContractID: discount.Contracts_ID,
+                ContractID: discount.ContractID,
                 Year: discount.Year,
                 Units: discount.Units,
                 DiscountID: discount.ID,
@@ -73,8 +73,7 @@ module.exports = (srv) => {
                 const product = {
                     ProductName: name,
                     WAC: req.data[name],
-                    Discount_ID: req.data.DiscountID,
-                    Discount_Year: req.data.Year
+                    Discount_ID: req.data.DiscountID
                 }
                 return product;
             })
@@ -92,6 +91,11 @@ module.exports = (srv) => {
                 await UPDATE(WHCProducts).with(prod).where({Discount_ID: req.data.DiscountID, ProductName: prod.ProductName});
             }
         }
+    })
+
+    srv.before(["UPDATE"], ["Rebates"], async (req) => {
+       delete req.data.ValidFrom;
+       delete req.data.ValidTo;
     })
 
     srv.before(["UPDATE"], ["Contracts"], async (req) => {
