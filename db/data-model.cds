@@ -25,7 +25,7 @@ entity Contracts : cuid, managed {
   ContractType      : Association to WHCTypes
                         on ContractType.ID = TypeID;
   Rebates           : Association to Rebates
-                        on Rebates.Contracts = $self;
+                        on Rebates.Contract = $self;
   Discounts         : Association to Discounts  
                         on Discounts.Contracts = $self;
   Attachments : Composition of many Attachments on Attachments.Contract = $self;
@@ -51,7 +51,7 @@ entity Contracts_History : managed {
   ContractType      : Association to WHCTypes
                         on ContractType.ID = TypeID;
   Rebates           : Association to Rebates_History
-                        on Rebates.Contracts = $self;
+                        on Rebates.Contract = $self;
   Discounts         : Association to Discounts_History
                         on Discounts.Contracts = $self;
 }
@@ -155,7 +155,7 @@ entity Rebates : cuid, managed {
   Discount        : Double;
   RebateLevels    : RebateLevels;
   ContractID      : String;
-  Contracts       : Association to Contracts on Contracts.ID = ContractID;
+  Contract        : Association to Contracts on Contract.ID = ContractID;
 }
 
 entity Rebates_History : managed {
@@ -168,7 +168,7 @@ entity Rebates_History : managed {
   Discount        : Double;
   RebateLevels    : RebateLevels;
   ContractID      : String;
-  Contracts       : Association to Contracts_History on Contracts.ID = ContractID;
+  Contract        : Association to Contracts_History on Contract.ID = ContractID;
 }
 
 entity WHCProducts : cuid, managed {
