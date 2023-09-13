@@ -4,7 +4,8 @@ module.exports = (srv) => {
         Contracts,
         Discounts,
         Rebates,
-        WHCProducts
+        WHCProducts,
+        ContractCustomers
     } = cds.entities("com.bayer.SXTENDER.whc");
 
     srv.on("READ", "DiscountTableView", async (req) => {
@@ -118,11 +119,8 @@ module.exports = (srv) => {
             VistexID: req.data.VistexID
         }
         if (contract) {
-            await UPDATE(Contracts)
-				.with (mappedContract)
-				.where({
-					ID: contract.ID
-				})
+            await UPDATE(Contracts).with (mappedContract).where({ID: contract.ID});
+            await createCascadingHistoryData(req);
         }else {
             const mappedDiscountsAndRebates = getMappedDiscountsAndRebates(req.data?.ID);
 
@@ -164,5 +162,33 @@ module.exports = (srv) => {
             newDiscounts,
             newRebates
         };
+    }
+
+    const createCascadingHistoryData = async function(req){
+        const contractID = req.data?.ID;
+        const discounts = await SELECT.from(Discounts).where({ContractID: contractID});
+        const rebates = await SELECT.from(Rebates).where({ContractID: contractID});
+        const customers = await SELECT.from(ContractCustomers).where({ContractID: contractID});
+
+        const discountPromises = discounts.map(async d => {
+            d.modifiedAt = new Date().toJSON();
+            delete d.ValidFrom;
+            delete d.ValidTo;
+            return await UPDATE(Discounts).with(d).where({ID: d.ID});
+        });
+        const rebatePromises = rebates.map(async d => {
+            d.modifiedAt = new Date().toJSON();
+            delete d.ValidFrom;
+            delete d.ValidTo;
+            return await UPDATE(Rebates).with(d).where({ID: d.ID});
+        });
+        const customerPromises = customers.map(async d => {
+            d.modifiedAt = new Date().toJSON();
+            delete d.ValidFrom;
+            delete d.ValidTo;
+            return await UPDATE(ContractCustomers).with(d).where({ID: d.ID});
+        });
+
+        return Promise.all(discountPromises.concat(rebatePromises).concat(customerPromises));
     }
 };
