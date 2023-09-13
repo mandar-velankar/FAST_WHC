@@ -62,6 +62,7 @@ service CatalogService {
 
     entity Discounts as projection on whc.Discounts;
     entity Rebates as projection on whc.Rebates;
+    entity RebatesHistory as projection on whc.Rebates_History;
     entity DiscountTableView {
         Key ContractID: UUID;
         Key Year: Integer;
@@ -71,4 +72,38 @@ service CatalogService {
         Kyleena: String;
         Skyla: String;
     }
+
+    entity RebatesView as select from Rebates {
+        key ID,
+        key ValidFrom,
+        key ValidTo,
+        Year,
+        Level,
+        Unit,
+        Discount,
+        RebateLevels,
+        ContractID,
+        true as isCurrent: Boolean,
+        createdAt,
+        createdBy,
+        modifiedAt,
+        modifiedBy
+    }
+    union 
+    select from RebatesHistory {
+        ID,
+        ValidFrom,
+        ValidTo,
+        Year,
+        Level,
+        Unit,
+        Discount,
+        RebateLevels,
+        ContractID,
+        false as isCurrent: Boolean,
+        createdAt,
+        createdBy,
+        modifiedAt,
+        modifiedBy  
+    } where Contract.Status.StatusText = 'Approved';
 }
