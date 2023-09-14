@@ -247,7 +247,7 @@
 					</headerToolbar>
 					<Table id="discountsTable" 
 						items="{
-							path:'/DiscountTableView'
+							path:'/DiscountsView'
 						}"
 						growing="true"
 						growingThreshold="15"
@@ -424,7 +424,7 @@
 								  />
 					</Panel>
 
-					<Panel expandable="true" width="auto" class="sapUiResponsiveMargin" expanded="true">
+					<!-- <Panel expandable="true" width="auto" class="sapUiResponsiveMargin" expanded="true">
 					<headerToolbar>
 						<OverflowToolbar style="Clear">
 							<Title text="Uploaded Files" />
@@ -453,7 +453,7 @@
 								</upload:UploadSetItem>
 							</upload:items>
 						</upload:UploadSet>
-					</Panel>
+					</Panel> -->
 					<Panel headerText="Tableau test" expandable="true" width="auto" class="sapUiResponsiveMargin" expanded="true">
 						<custom:Tableau id="idTableauChart" src="{= ${TypeID} === 'New Proposal' ? 'https://tableau-ncsa.aws.cnb/t/CPROD/views/WHCContractProposal/ContractProposal?ORIGINAL_ORDERING_ACCOUNT_NUM=BHO3064937&amp;:embed=y&amp;:showVizHome=n&amp;:tabs=n&amp;:toolbar=n&amp;:apiID=host1#navType=0&amp;navSrc=Parse%22' :
 						 													   'https://tableau-ncsa.aws.cnb/t/CPROD/views/WHCContractRenewalV1/WHCContractRenewal?Vistex%20ID=0060062019&amp;:embed=y&amp;:showVizHome=n&amp;:tabs=n&amp;:toolbar=n&amp;:apiID=host20#navType=0&amp;navSrc=Parse' }" 

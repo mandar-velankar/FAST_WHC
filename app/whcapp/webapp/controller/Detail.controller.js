@@ -85,11 +85,12 @@ sap.ui.define([
 
 		filterDiscountsTable: async function () {
 			const discountTable = this.byId("discountsTable");
-			const template = discountTable.getBindingInfo("items").template;
 			const contract = await this.getContractById();
 			const filter = [
-				new Filter("ContractID", FilterOperator.EQ, this.id),
+				new Filter("ContractID", FilterOperator.EQ, contract?.ID),
 				new Filter("Year", FilterOperator.LE, contract?.ProposedContractLength),
+				new Filter("isCurrent", FilterOperator.EQ, contract?.isCurrent),
+				new Filter("ContractsViewID", FilterOperator.EQ, this.id)
 			]
 
 			discountTable.getBinding("items").filter(filter);
@@ -102,7 +103,7 @@ sap.ui.define([
 			rebatesTable.bindRows({
 				path: "/Rebates",
 				filters: [
-					new Filter("ContractID", "EQ", this.id),
+					new Filter("ContractID", "EQ", contract?.ID),
 					new Filter("Year", "LE", contract?.ProposedContractLength),
 				],
 				sorter: [ 
@@ -127,9 +128,9 @@ sap.ui.define([
 
 		getContractById: function () {
 			return new Promise((resolve, reject) => {
-				this.getModel().read("/Contracts", {
+				this.getModel().read("/ContractsView", {
 					filters: [
-						new Filter("ID", "EQ", this.id)
+						new Filter("ContractsViewID", "EQ", this.id)
 					],
 					success: function (res) {
 						resolve(res?.results[0]);
@@ -613,7 +614,7 @@ sap.ui.define([
 		getDiscounts: async function (contractId, contractLength) {
 		
             return new Promise((resolve, reject) => {
-				this.getModel().read("/DiscountTableView", {
+				this.getModel().read("/DiscountsView", {
 					filters: [
 						new Filter("ContractID", "EQ", contractId),
 						new Filter("Year", "LE", contractLength),

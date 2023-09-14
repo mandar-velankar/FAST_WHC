@@ -5,37 +5,67 @@ module.exports = (srv) => {
         Discounts,
         Rebates,
         WHCProducts,
-        ContractCustomers
+        ContractCustomers,
+        DiscountProducts,
+        Contracts_History,
+        Discounts_History,
+        DiscountProducts_History
     } = cds.entities("com.bayer.SXTENDER.whc");
 
-    srv.on("READ", "DiscountTableView", async (req) => {
+    srv.on("READ", "DiscountsView", async (req) => {
         const where = req.query.SELECT.where;
-        let discounts;
+        let discounts = [];
+        let products;
+        let contarctsViewId;
+        let isCurrent;
         if (where) {
-            discounts = await SELECT.from(Discounts).where(where);
-        }else {
-            discounts = await SELECT.from(Discounts);
+            contractID = where[2].val;
+            isCurrent = where.slice(7, 11)[3].val;
+            contarctsViewId = where.slice(11, 15)[3].val
+            let discountFilter = where.slice(0, 7);
+            if (isCurrent) {
+                discounts = await SELECT.from(Discounts).where(discountFilter);
+                products = await SELECT.from(DiscountProducts);
+            }else {
+                discounts = await SELECT.from(Discounts_History).where(discountFilter);
+                products = await SELECT.from(DiscountProducts_History);
+            }
         }
-        const products = await SELECT.from(WHCProducts);
-
-        const discountItems = discounts.map(discount => {
-            const discountProducts = products.filter(product => product.Discount_ID === discount.ID);
-
-            const obj = {
+         
+        const whcProducts = await SELECT.from(WHCProducts);
+        const discountItems = [];
+        discounts.map(async discount => {
+            const discountProducts = products.filter(product => product.DiscountID === discount.ID);
+            const mappedDiscount = {
                 ContractID: discount.ContractID,
                 Year: discount.Year,
                 Units: discount.Units,
                 DiscountID: discount.ID,
                 Mirena: "",
                 Kyleena: "",
-                Skyla: ""
+                Skyla: "",
+                isCurrent: isCurrent,
+                ContractsViewID: contarctsViewId
             };
-            discountProducts.forEach(product => {
-                const productName = product.ProductName;
-                obj[productName] = product.WAC
-            })
-            return obj;
+            if (discountProducts.length < 1) {
+                whcProducts.forEach(prod => {
+                    const productName = prod.ProductName;
+                    mappedDiscount[productName] = prod.WAC
+                })
+            }else {
+                discountProducts.forEach(product => {
+                    const productName = product.ProductName;
+                    mappedDiscount[productName] = product.WAC
+                });
+            }
+
+            discountItems.push(mappedDiscount);
+
+            if (discountProducts.length < 1 && isCurrent) {
+                await createMappedProducts(discount, whcProducts);
+            }
         });
+
         const sortedDiscountItems = discountItems.sort((a, b) => {
             if (a.Year < b.Year) {
                 return -1;
@@ -47,11 +77,10 @@ module.exports = (srv) => {
         });
         return sortedDiscountItems;
     });
-
-    srv.on(["UPDATE"], "DiscountTableView", async (req) => {
+ 
+    srv.on(["UPDATE"], "DiscountsView", async (req) => {
         const discount = await SELECT.one.from(Discounts).where({ID: req.data.DiscountID});
-        const products = await SELECT.from(WHCProducts).where({Discount_ID: req.data.DiscountID});
-        const productNames = ["Mirena", "Kyleena", "Skyla"];
+        const products = await SELECT.from(DiscountProducts).where({DiscountID: req.data.DiscountID});
 
         const mappedDiscount = {
             ID: req.data.DiscountID,
@@ -68,30 +97,8 @@ module.exports = (srv) => {
                     ID: req.data.DiscountID
                 })
         }
-
-        if (products.length < 1) {
-            const newProducts = productNames.map(name => {
-                const product = {
-                    ProductName: name,
-                    WAC: req.data[name],
-                    Discount_ID: req.data.DiscountID
-                }
-                return product;
-            })
-            await INSERT.into(WHCProducts).entries(newProducts);
-        }else {
-            const updateProducts = products.map(product => {
-                const obj = {
-                    ProductName: product.ProductName,
-                    WAC: req.data[product.ProductName]
-                }
-                return obj;
-            }) 
-
-            for (let prod of updateProducts) {
-                await UPDATE(WHCProducts).with(prod).where({Discount_ID: req.data.DiscountID, ProductName: prod.ProductName});
-            }
-        }
+        await updateMappedProducts(req, products);
+        
     })
 
     srv.before(["UPDATE"], ["Rebates"], async (req) => {
@@ -130,6 +137,30 @@ module.exports = (srv) => {
         }
         return req.data;
     })
+
+    const updateMappedProducts = async function (req, products) {
+        if (products.length > 0) {
+            const productPromises = products.map(async product => {
+                product.WAC = req.data[product.ProductName]
+                delete product.ValidFrom;
+                delete product.ValidTo;
+                return await UPDATE(DiscountProducts).with(product).where({ID: product.ID});
+            });
+            return Promise.all(productPromises);
+        }
+    }
+
+    const createMappedProducts = function (discount, whcProducts) {
+        const promises = whcProducts.map(async prod => {
+            const mappedProduct = {
+                ProductName: prod.ProductName,
+                WAC: prod.WAC,
+                DiscountID: discount.ID
+            };
+            return await INSERT.into(DiscountProducts).entries(mappedProduct);
+        })
+        return Promise.all(promises);
+    } 
 
     const getMappedDiscountsAndRebates = (contractId) => {
         const newDiscounts = [];

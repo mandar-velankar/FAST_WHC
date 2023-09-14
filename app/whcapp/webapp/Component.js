@@ -75,7 +75,7 @@ sap.ui.define([
                     "Contracts": {
                         groupId: "UpdateProposal"
                     },
-                    "DiscountTableView": {
+                    "DiscountsView": {
                         groupId: "UpdateProposal"
                     },
                     "Rebates": {

@@ -67,14 +67,18 @@ service CatalogService {
         *
     };
 
-    entity DiscountTableView {
-        Key ContractID: UUID;
+    entity DiscountsView {
+        key ContractsViewID:String;
         Key Year: Integer;
+        key isCurrent: Boolean default true;
+        ContractID: UUID;
         DiscountID: UUID;
         Units: Integer;
         Mirena: String;
         Kyleena: String;
         Skyla: String;
+        ContractValidFrom: Timestamp;
+        ContractValidTo: Timestamp;
     }
 
 
@@ -174,4 +178,5 @@ service CatalogService {
         modifiedAt,
         modifiedBy
     } where Contract.Status.StatusText = 'Approved';
+    entity DiscountProducts as projection on whc.DiscountProducts;
 }
