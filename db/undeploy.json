@@ -1,11 +1,5 @@
 [
   "src/gen/**/*.hdbview",
   "src/gen/**/*.hdbindex",
-  "src/gen/**/*.hdbconstraint",
-  "src/gen/**/*.hdbtable",
-  "src/gen/**/*.hdbtabledata",
-  "src/gen/com.bayer.SXTENDER.whc.WHCStatus.hdbtable",
-  "src/gen/CatalogService.OfferValidation.hdbview",
-  "src/gen/CatalogService.OfferValidation.hdbtable",
-  "src/gen/data/com.bayer.SXTENDER.whc-WHCStatus.hdbtabledata"
+  "src/gen/**/*.hdbconstraint"
 ]
