@@ -4,8 +4,6 @@
   "src/gen/**/*.hdbconstraint",
   "src/gen/**/*.hdbtable",
   "src/gen/**/*.hdbtabledata",
-  "src/gen/data/com.bayer.SXTENDER.whc-WHCStatus.hdbtabledata$0.expand",
-  "src/gen/data/com.bayer.SXTENDER.whc-WHCProducts.hdbtabledata$0.expand",
   "src/gen/com.bayer.SXTENDER.whc.WHCStatus.hdbtable",
   "src/gen/CatalogService.OfferValidation.hdbview",
   "src/gen/CatalogService.OfferValidation.hdbtable",
