@@ -19,7 +19,6 @@ module.exports = (srv) => {
         let contarctsViewId;
         let isCurrent;
         if (where) {
-            contractID = where[2].val;
             isCurrent = where.slice(7, 11)[3].val;
             contarctsViewId = where.slice(11, 15)[3].val
             let discountFilter = where.slice(0, 7);
