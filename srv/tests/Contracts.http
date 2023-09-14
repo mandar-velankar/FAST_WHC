@@ -1,0 +1,52 @@
+@hostname=localhost
+@port=4004
+@host={{hostname}}:{{port}}
+@service=/v2/catalog
+
+
+### Contracts  - Get All Contracts
+GET http://{{host}}{{service}}/Contracts
+Authorization: Basic YXJ0aW9t
+
+
+### Contracts  - Get Contract by ID - ODATA V2
+GET http://{{host}}{{service}}/Contracts(guid'f6df5ef6-ee78-11ed-a05b-0242ac120003')
+Authorization: Basic YXJ0aW9t
+
+###Contracts  - Create new Contract
+POST http://{{host}}{{service}}/Contracts
+Authorization: Basic YXJ0aW9t
+Content-Type: application/json
+
+{
+    "BackgroundInfo":"background",
+    "BaseLineDiscount":0.15,
+    "BaseLineUnits":null,
+    "Name":"Test contract 12222",
+    "ProposedContractLength":2,
+    "Remarks":null,
+    "StatusID":"55d97328-2d03-4b1b-b18f-b63ac0259301",
+    "TypeID":"d4ec08fe-8d80-4acd-9aa9-396ed718535e",
+    "VistexID":"1"
+}
+
+###Contracts  - Update Contract
+PUT http://{{host}}{{service}}/Contracts(guid'e88f4e1d-9ce0-4f57-846d-a9630463ea63')
+Authorization: Basic YXJ0aW9t
+Content-Type: application/json
+
+{
+    "BackgroundInfo":"background",
+    "BaseLineDiscount":0.15,
+    "BaseLineUnits":null,
+    "Name":"Test contract 12222 UPDATE 2222",
+    "ProposedContractLength":2,
+    "Remarks":null,
+    "StatusID":"55d97328-2d03-4b1b-b18f-b63ac0259301",
+    "TypeID":"d4ec08fe-8d80-4acd-9aa9-396ed718535e",
+    "VistexID":"1"
+}
+
+### Contracts  - Delete contract by ID
+DELETE http://{{host}}{{service}}/Contracts(guid'8512e1ce-a990-4d90-b958-a5526c08a689')
+Authorization: Basic YXJ0aW9t

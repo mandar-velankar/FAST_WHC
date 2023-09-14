@@ -259,14 +259,16 @@ sap.ui.define([
 		},
 
 		_onSubmitChangesSuccess: function (res) {
-			const newTenderCtx = this.byId("idNewProposalForm").getElementBinding().getBoundContext();
-			const ctxPath = newTenderCtx.getPath().replace("/", "");
+			const newContractCtx = this.byId("idNewProposalForm").getElementBinding().getBoundContext();
+			const ctxPath = newContractCtx.getPath().replace("/", "");
+            const newContractObj = newContractCtx.getObject();
 			const hasErrorMessages = this.getMessages([ctxPath]).length > 0;
 			//this.setMessageSection([ctxPath], "newProposalMsg");
 			if (!hasErrorMessages) {
 				MessageToast.show("Proposal has been created successfully");
 				this.onCloseCreateProposalPopup();
 				this.byId("masterTable")?.getBinding("items")?.refresh();
+                this._showDetail(newContractObj.ID);
 			}
 		},
 		setNewProposalPendingChanges: function (oForm) {
@@ -274,8 +276,6 @@ sap.ui.define([
 			const oBoundContext = oForm.getElementBinding().getBoundContext();
 			const newProposalObj = oBoundContext.getObject();
 
-			newProposalObj.ValidFrom = new Date();
-			newProposalObj.ValidTo = new Date(9999, 11, 31);
 			newProposalObj.TypeID = this.byId('idGroupType').getSelectedButton().getText();
 			const oNewBindingCtx = oDefaultModel.createEntry("/ContractFormView", {
 				properties: newProposalObj,
