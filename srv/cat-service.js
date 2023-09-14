@@ -1,4 +1,5 @@
 const cds = require('@sap/cds');
+const { v4: uuidv4 } = require('uuid');
 module.exports = (srv) => {
     const {
         Contracts,
@@ -9,7 +10,8 @@ module.exports = (srv) => {
         DiscountProducts,
         Contracts_History,
         Discounts_History,
-        DiscountProducts_History
+        DiscountProducts_History,
+        ContractsView
     } = cds.entities("com.bayer.SXTENDER.whc");
 
     srv.on("READ", "DiscountsView", async (req) => {
@@ -109,8 +111,9 @@ module.exports = (srv) => {
         (!req.data.ProposedContractLength || (req.data.ProposedContractLength < 0 || req.data.ProposedContractLength > 6)) && req.error({ code: 400, message: "Proposed Contract Length should not be greater than 6 years", target: "ProposedContractLength" });
     })
     
-    srv.on(["CREATE", "UPDATE"], ["ContractFormView", "Contracts"], async (req) => {
-        const contract = await SELECT.one.from(Contracts).where({ID: req.data?.ID});
+    srv.on(["CREATE", "UPDATE"], ["ContractsView"], async (req) => {
+        const newID = uuidv4();
+        let contract = await SELECT.one.from(Contracts).where({ID: req.data?.ID});
 
         const mappedContract = {
             BackgroundInfo: req.data.BackgroundInfo,
@@ -125,16 +128,20 @@ module.exports = (srv) => {
             VistexID: req.data.VistexID
         }
         if (contract) {
-            await UPDATE(Contracts).with (mappedContract).where({ID: contract.ID});
-            await createCascadingHistoryData(req);
+            if (req.data?.isCurrent) {
+                await UPDATE(Contracts).with (mappedContract).where({ID: contract.ID});
+                await createCascadingHistoryData(req);
+            }
         }else {
-            const mappedDiscountsAndRebates = getMappedDiscountsAndRebates(req.data?.ID);
-
+            const mappedDiscountsAndRebates = getMappedDiscountsAndRebates(newID);
+            mappedContract.ID = newID;
             await INSERT.into(Contracts).entries(mappedContract);
             await INSERT.into(Discounts).entries(mappedDiscountsAndRebates.newDiscounts);
             await INSERT.into(Rebates).entries(mappedDiscountsAndRebates.newRebates);
         }
-        return req.data;
+        contract = await SELECT.one.from(Contracts).where({ID: newID})
+        contract.ContractsViewID = `${contract.ID}-${contract.ValidFrom}-${contract.ValidTo}`;
+        return contract;
     })
 
     const updateMappedProducts = async function (req, products) {
