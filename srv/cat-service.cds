@@ -126,6 +126,14 @@ service CatalogService {
     } where Contract.Status.StatusText = 'Approved';
 
 
+
+    entity MostRecentContractCustomersIDs as select from ContractCustomersHistory
+    {
+        key ID,
+        max(ValidTo) as MaxValidTo:Date
+    }group by ID;
+
+
     entity ContractCustomersView as select from ContractCustomers {
         key ID || '-' || replace(ValidFrom, ' ', '-') || '-' || replace(ValidTo, ' ', '-') as ContractCustomerViewID:String,
         ID,
@@ -145,9 +153,10 @@ service CatalogService {
         modifiedBy
     }
     union 
-    select from ContractCustomersHistory {
-        key ID || '-' || replace(ValidFrom, ' ', '-') || '-' || replace(ValidTo, ' ', '-') as ContractCustomerViewID:String,
-        ID,
+    select from MostRecentContractCustomersIDs as mcc
+    left outer join ContractCustomersHistory as c on mcc.ID = c.ID and mcc.MaxValidTo = c.ValidTo{
+        key c.ID || '-' || replace(ValidFrom, ' ', '-') || '-' || replace(ValidTo, ' ', '-') as ContractCustomerViewID:String,
+        c.ID,
         ValidFrom,
         ValidTo,
         BHOID,
