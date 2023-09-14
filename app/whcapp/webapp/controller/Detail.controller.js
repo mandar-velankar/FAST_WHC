@@ -232,7 +232,7 @@ sap.ui.define([
 			const uploader = this.byId("UploadSet");
 			const item = event.getParameter("item")
 			const id = await this.createAttachmentEntry(this.id,item);
-			item.setUploadUrl(`/app/whc/v2/catalog/Attachments(${id})/Content`);
+			item.setUploadUrl(window.location.host.search('app') > -1 ? `/app/whc/v2/catalog/Attachments(${id})/Content` : `/whc/v2/catalog/Attachments(${id})/Content`);
 			uploader.uploadItem(item);
 		},
 		onUploadCompleted: function (event) {
