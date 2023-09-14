@@ -2,5 +2,6 @@
   "src/gen/**/*.hdbview",
   "src/gen/**/*.hdbindex",
   "src/gen/**/*.hdbconstraint",
-  "src/gen/**/*.hdbtable"
+  "src/gen/**/*.hdbtable",
+  "src/gen/**/*.hdbtabledata"
 ]
