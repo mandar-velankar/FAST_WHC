@@ -74,7 +74,7 @@ entity ContractCustomers : cuid, managed {
   Name      : String;
   ContractID: String;
   IsParent  : Boolean default false;
-  Contract : Association to Contracts_History on Contract.ID = ContractID;
+  Contract : Association to Contracts on Contract.ID = ContractID;
 }
 
 entity ContractCustomers_History : managed {
@@ -85,7 +85,7 @@ entity ContractCustomers_History : managed {
   Name      : String;
   ContractID: String;
   IsParent  : Boolean default false;
-  Contract : Association to Contracts on Contract.ID = ContractID;
+  Contract : Association to Contracts_History on Contract.ID = ContractID;
 }
 
 entity Discounts : cuid, managed {

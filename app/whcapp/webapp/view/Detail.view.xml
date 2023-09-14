@@ -39,7 +39,7 @@
 
 				<!-- ACTIONS -->
 				<f:actions>
-					<Button id="editButtonId" text="Edit" type="Emphasized" press=".onEdit" enabled="{= !${appView>/editmode}}"/>
+					<Button id="editButtonId" text="Edit" type="Emphasized" press=".onEdit" enabled="{= ${isCurrent} &amp;&amp; !${appView>/editmode}}"/>
 					<Button id="deleteContractButtonId" icon="sap-icon://delete" text="Delete" type="Reject" press="onDeleteContractPress" enabled="true" />
 					<Button id="refreshButtonId" icon="sap-icon://refresh" type="Emphasized" press="onRefresh" enabled="true"/>
 					<Button id="printButtonId" text="Print" type="Emphasized" press=".onPrintButtonPress" enabled="true"/>
