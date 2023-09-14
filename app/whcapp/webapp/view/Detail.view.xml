@@ -446,7 +446,7 @@
 										fileName="{FileName}"
 										mediaType="{MediaType}"
 										visibleEdit="false"
-										url="/catalog/Attachments({ID})/Content"
+										url="/app/whc/v2/catalog/Attachments({ID})/Content"
 										enabledRemove="{appView>/editmode}"
 										removePressed=".onAttachmentDelete"
 										uploadState="Complete">
