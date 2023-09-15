@@ -101,9 +101,9 @@ sap.ui.define([
 			const contract = await this.getContractById();
 
 			rebatesTable.bindRows({
-				path: "/Rebates",
+				path: "/RebatesView",
 				filters: [
-					new Filter("ContractID", "EQ", contract?.ID),
+					new Filter("ContractsViewID", "EQ", contract?.ContractsViewID),
 					new Filter("Year", "LE", contract?.ProposedContractLength),
 				],
 				sorter: [ 
@@ -631,9 +631,9 @@ sap.ui.define([
 
 		getRebates: async function (contractId, contractLength) {
 			return new Promise((resolve, reject) => {
-				this.getModel().read("/Rebates", {
+				this.getModel().read("/RebatesView", {
 					filters: [
-						new Filter("ContractID", "EQ", contractId),
+						new Filter("ContractsViewID", "EQ", contractId),
 						new Filter("Year", "LE", contractLength),
 					],
 					success: function (res) {

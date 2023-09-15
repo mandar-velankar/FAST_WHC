@@ -292,7 +292,7 @@
 						</headerToolbar>
 
 						<t:Table id="rebatesTable"
-								rows="{/Rebates}"
+								rows="{/RebatesView}"
 								busyIndicatorDelay="0"
 								selectionMode='None'>
 							<t:columns>

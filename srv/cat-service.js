@@ -134,6 +134,33 @@ module.exports = (srv) => {
         return contract;
     })
 
+    srv.on(["UPDATE"], ["RebatesView"], async (req) => {
+
+        let rabate = await SELECT.one.from(Rebates).where({ID: req.data?.ID});
+
+        const mappedRebate = {
+            Year: req.data.Year,
+            Level: req.data.Level,
+            Unit: req.data.Unit,
+            Discount: req.data.Discount,
+            RebateLevels_Unit_Level_1: req.data.RebateLevels_Unit_Level_1,
+            RebateLevels_Discount_Level_1: req.data.RebateLevels_Discount_Level_1,
+            RebateLevels_Unit_Level_2: req.data.RebateLevels_Unit_Level_2,
+            RebateLevels_Discount_Level_2: req.data.RebateLevels_Discount_Level_2,
+            RebateLevels_Unit_Level_3: req.data.RebateLevels_Unit_Level_3,
+            RebateLevels_Discount_Level_3: req.data.RebateLevels_Discount_Level_3,
+            ContractID: req.data.ContractID
+        };
+
+        if (rabate) {
+            if (req.data?.isCurrent) {
+                await UPDATE(Rebates).with (mappedRebate).where({ID: rabate.ID});
+            }
+        }
+        
+        return rabate;
+    })
+
     const updateMappedProducts = async function (req, products) {
         if (products.length > 0) {
             const productPromises = products.map(async product => {
