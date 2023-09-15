@@ -30,6 +30,7 @@ service CatalogService {
         ContractCustomers.Name as ParentAccountName: String,
         ContractCustomers.IsParent,
         ContractCustomers: redirected to ContractCustomers,
+        @Core.Computed: false
         true as isCurrent: Boolean,
         createdAt,
         createdBy,
@@ -56,6 +57,7 @@ service CatalogService {
         ContractCustomers.Name as ParentAccountName: String,
         ContractCustomers.IsParent,
         ContractCustomers: redirected to ContractCustomersHistory,
+        @Core.Computed: false
         false as isCurrent: Boolean,
         createdAt,
         createdBy,

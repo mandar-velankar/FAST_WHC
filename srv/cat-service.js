@@ -138,9 +138,11 @@ module.exports = (srv) => {
             await INSERT.into(Contracts).entries(mappedContract);
             await INSERT.into(Discounts).entries(mappedDiscountsAndRebates.newDiscounts);
             await INSERT.into(Rebates).entries(mappedDiscountsAndRebates.newRebates);
+
+            contract = await SELECT.one.from(Contracts).where({ID: newID})
+            contract.ContractsViewID = `${contract.ID}-${contract.ValidFrom}-${contract.ValidTo}`;
         }
-        contract = await SELECT.one.from(Contracts).where({ID: newID})
-        contract.ContractsViewID = `${contract.ID}-${contract.ValidFrom}-${contract.ValidTo}`;
+        
         return contract;
     })
 
