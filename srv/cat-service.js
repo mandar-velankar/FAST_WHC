@@ -8,10 +8,8 @@ module.exports = (srv) => {
         WHCProducts,
         ContractCustomers,
         DiscountProducts,
-        Contracts_History,
         Discounts_History,
         DiscountProducts_History,
-        ContractsView
     } = cds.entities("com.bayer.SXTENDER.whc");
 
     srv.on("READ", "DiscountsView", async (req) => {
@@ -33,7 +31,6 @@ module.exports = (srv) => {
             }
         }
          
-        const whcProducts = await SELECT.from(WHCProducts);
         const discountItems = [];
         discounts.map(async discount => {
             const discountProducts = products.filter(product => product.DiscountID === discount.ID);
@@ -48,23 +45,13 @@ module.exports = (srv) => {
                 isCurrent: isCurrent,
                 ContractsViewID: contarctsViewId
             };
-            if (discountProducts.length < 1) {
-                whcProducts.forEach(prod => {
-                    const productName = prod.ProductName;
-                    mappedDiscount[productName] = prod.WAC
-                })
-            }else {
-                discountProducts.forEach(product => {
-                    const productName = product.ProductName;
-                    mappedDiscount[productName] = product.WAC
-                });
-            }
+
+            discountProducts.forEach(product => {
+                const productName = product.ProductName;
+                mappedDiscount[productName] = product.WAC
+            });
 
             discountItems.push(mappedDiscount);
-
-            if (discountProducts.length < 1 && isCurrent) {
-                await createMappedProducts(discount, whcProducts);
-            }
         });
 
         const sortedDiscountItems = discountItems.sort((a, b) => {
@@ -113,6 +100,7 @@ module.exports = (srv) => {
     
     srv.on(["CREATE", "UPDATE"], ["ContractsView"], async (req) => {
         const newID = uuidv4();
+        const whcProducts = await SELECT.from(WHCProducts);
         let contract = await SELECT.one.from(Contracts).where({ID: req.data?.ID});
 
         const mappedContract = {
@@ -133,14 +121,14 @@ module.exports = (srv) => {
                 await createCascadingHistoryData(req);
             }
         }else {
-            const mappedDiscountsAndRebates = getMappedDiscountsAndRebates(newID);
+            const mappedDiscountsAndRebates = await getMappedDiscountsAndRebates(newID, whcProducts);
             mappedContract.ID = newID;
             await INSERT.into(Contracts).entries(mappedContract);
             await INSERT.into(Discounts).entries(mappedDiscountsAndRebates.newDiscounts);
             await INSERT.into(Rebates).entries(mappedDiscountsAndRebates.newRebates);
 
             contract = await SELECT.one.from(Contracts).where({ID: newID})
-            contract.ContractsViewID = `${contract.ID}-${contract.ValidFrom}-${contract.ValidTo}`;
+            contract.ContractsViewID = `${contract.ID}-${contract.ValidTo}`;
         }
         
         return contract;
@@ -158,7 +146,7 @@ module.exports = (srv) => {
         }
     }
 
-    const createMappedProducts = function (discount, whcProducts) {
+    const createDiscountProducts = function (discount, whcProducts) {
         const promises = whcProducts.map(async prod => {
             const mappedProduct = {
                 ProductName: prod.ProductName,
@@ -170,12 +158,13 @@ module.exports = (srv) => {
         return Promise.all(promises);
     } 
 
-    const getMappedDiscountsAndRebates = (contractId) => {
+    const getMappedDiscountsAndRebates = async (contractId, whcProducts) => {
         const newDiscounts = [];
         const newRebates = []
 
         for (let i = 1; i <= 6; i++) {
             const discount = {
+                ID: uuidv4(),
                 ContractID: contractId,
                 Year: i,
                 Type: 2,
@@ -196,6 +185,8 @@ module.exports = (srv) => {
                 RebateLevels_Discount_Level_3: null
             }
             newRebates.push(rebate);
+
+            await createDiscountProducts(discount, whcProducts);
         }
         return {
             newDiscounts,
@@ -208,8 +199,11 @@ module.exports = (srv) => {
         const discounts = await SELECT.from(Discounts).where({ContractID: contractID});
         const rebates = await SELECT.from(Rebates).where({ContractID: contractID});
         const customers = await SELECT.from(ContractCustomers).where({ContractID: contractID});
+        const discountProducts = await SELECT.from(DiscountProducts);
+        const filteredProducts = [];
 
         const discountPromises = discounts.map(async d => {
+            filteredProducts.push(discountProducts.filter(p => p.DiscountID == d.ID));
             d.modifiedAt = new Date().toJSON();
             delete d.ValidFrom;
             delete d.ValidTo;
@@ -227,6 +221,12 @@ module.exports = (srv) => {
             delete d.ValidTo;
             return await UPDATE(ContractCustomers).with(d).where({ID: d.ID});
         });
+        // const discountProductPromises = discountProducts.map(async d => {
+        //     d.modifiedAt = new Date().toJSON();
+        //     delete d.ValidFrom;
+        //     delete d.ValidTo;
+        //     return await UPDATE(DiscountProducts).with(d).where({ID: d.ID});
+        // });
 
         return Promise.all(discountPromises.concat(rebatePromises).concat(customerPromises));
     }
