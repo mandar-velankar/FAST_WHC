@@ -12,7 +12,7 @@ service CatalogService {
     entity RebatesHistory as projection on whc.Rebates_History;
 
     entity ContractsView as select from Contracts {
-        key ID || '-' || replace(ValidFrom, ' ', '-') || '-' || replace(ValidTo, ' ', '-') as ContractsViewID:String,
+        key ID || '-' || replace(TO_NVARCHAR(ValidFrom, 'YYYY-MM-DD HH24:MI:SS.FF3') || 'Z', ' ', 'T') || '-' || replace(TO_NVARCHAR(ValidTo, 'YYYY-MM-DD HH24:MI:SS.FF3') || 'Z', ' ', 'T') as ContractsViewID:String,
         ID,
         ValidFrom,
         ValidTo,
@@ -38,7 +38,7 @@ service CatalogService {
     }
     union 
     select from ContractsHistory {
-        key ID || '-' || replace(ValidFrom, ' ', '-') || '-' || replace(ValidTo, ' ', '-') as ContractsViewID:String,
+        key ID || '-' || replace(TO_NVARCHAR(ValidFrom, 'YYYY-MM-DD HH24:MI:SS.FF3') || 'Z', ' ', 'T') || '-' || replace(TO_NVARCHAR(ValidTo, 'YYYY-MM-DD HH24:MI:SS.FF3') || 'Z', ' ', 'T') as ContractsViewID:String,
         ID,
         ValidFrom,
         ValidTo,
