@@ -91,7 +91,7 @@ service CatalogService {
     }group by ID;
 
     entity RebatesView as select from Rebates {
-        key ID || '-' || replace(ValidFrom, ' ', '-') || '-' || replace(ValidTo, ' ', '-') as RebatesViewID:String,
+        key ID || '-' || replace(TO_NVARCHAR(ValidFrom, 'YYYY-MM-DD HH24:MI:SS.FF3') || 'Z', ' ', 'T') || '-' || replace(TO_NVARCHAR(ValidTo, 'YYYY-MM-DD HH24:MI:SS.FF3') || 'Z', ' ', 'T') as RebatesViewID:String,
         ID,
         ValidFrom,
         ValidTo,
@@ -103,7 +103,7 @@ service CatalogService {
         ContractID,
         Contract.ValidFrom as ContractValidFrom: Timestamp,
         Contract.ValidTo as ContractValidTo: Timestamp,
-        ContractID || '-' || replace(Contract.ValidFrom, ' ', '-') || '-' || replace(Contract.ValidTo, ' ', '-') as ContractsViewID:String,
+        ContractID || '-' || replace(TO_NVARCHAR(Contract.ValidFrom, 'YYYY-MM-DD HH24:MI:SS.FF3') || 'Z', ' ', 'T') || '-' || replace(TO_NVARCHAR(Contract.ValidTo, 'YYYY-MM-DD HH24:MI:SS.FF3') || 'Z', ' ', 'T') as ContractsViewID:String,
         true as isCurrent: Boolean,
         createdAt,
         createdBy,
@@ -113,7 +113,7 @@ service CatalogService {
     union 
     select from MostRecentRebatesHistoryIDs as mh
     left outer join RebatesHistory as r on mh.ID = r.ID and mh.MaxValidTo = r.ValidTo{
-        key r.ID || '-' || replace(ValidFrom, ' ', '-') || '-' || replace(ValidTo, ' ', '-') as RebatesViewID:String,
+        key r.ID || '-' || replace(TO_NVARCHAR(ValidFrom, 'YYYY-MM-DD HH24:MI:SS.FF3') || 'Z', ' ', 'T') || '-' || replace(TO_NVARCHAR(ValidTo, 'YYYY-MM-DD HH24:MI:SS.FF3') || 'Z', ' ', 'T') as RebatesViewID:String,
         r.ID,
         ValidFrom,
         ValidTo,
@@ -125,7 +125,7 @@ service CatalogService {
         ContractID,
         Contract.ValidFrom as ContractValidFrom: Timestamp,
         Contract.ValidTo as ContractValidTo: Timestamp,
-        ContractID || '-' || replace(Contract.ValidFrom, ' ', '-') || '-' || replace(Contract.ValidTo, ' ', '-') as ContractsViewID:String,
+        ContractID || '-' || replace(TO_NVARCHAR(Contract.ValidFrom, 'YYYY-MM-DD HH24:MI:SS.FF3') || 'Z', ' ', 'T') || '-' || replace(TO_NVARCHAR(Contract.ValidTo, 'YYYY-MM-DD HH24:MI:SS.FF3') || 'Z', ' ', 'T') as ContractsViewID:String,
         false as isCurrent: Boolean,
         createdAt,
         createdBy,
@@ -143,7 +143,7 @@ service CatalogService {
 
 
     entity ContractCustomersView as select from ContractCustomers {
-        key ID || '-' || replace(ValidFrom, ' ', '-') || '-' || replace(ValidTo, ' ', '-') as ContractCustomerViewID:String,
+        key ID || '-' || replace(TO_NVARCHAR(ValidFrom, 'YYYY-MM-DD HH24:MI:SS.FF3') || 'Z', ' ', 'T') || '-' || replace(TO_NVARCHAR(ValidTo, 'YYYY-MM-DD HH24:MI:SS.FF3') || 'Z', ' ', 'T') as ContractCustomerViewID:String,
         ID,
         ValidFrom,
         ValidTo,
@@ -153,7 +153,7 @@ service CatalogService {
         IsParent,
         Contract.ValidFrom as ContractValidFrom: Timestamp,
         Contract.ValidTo as ContractValidTo: Timestamp,
-        ContractID || '-' || replace(Contract.ValidFrom, ' ', '-') || '-' || replace(Contract.ValidTo, ' ', '-') as ContractsViewID:String,
+        ContractID || '-' || replace(TO_NVARCHAR(Contract.ValidFrom, 'YYYY-MM-DD HH24:MI:SS.FF3') || 'Z', ' ', 'T') || '-' || replace(TO_NVARCHAR(Contract.ValidTo, 'YYYY-MM-DD HH24:MI:SS.FF3') || 'Z', ' ', 'T') as ContractsViewID:String,
         true as isCurrent: Boolean,
         createdAt,
         createdBy,
@@ -163,7 +163,7 @@ service CatalogService {
     union 
     select from MostRecentContractCustomersIDs as mcc
     left outer join ContractCustomersHistory as c on mcc.ID = c.ID and mcc.MaxValidTo = c.ValidTo{
-        key c.ID || '-' || replace(ValidFrom, ' ', '-') || '-' || replace(ValidTo, ' ', '-') as ContractCustomerViewID:String,
+        key c.ID || '-' || replace(TO_NVARCHAR(ValidFrom, 'YYYY-MM-DD HH24:MI:SS.FF3') || 'Z', ' ', 'T') || '-' || replace(TO_NVARCHAR(ValidTo, 'YYYY-MM-DD HH24:MI:SS.FF3') || 'Z', ' ', 'T') as ContractCustomerViewID:String,
         c.ID,
         ValidFrom,
         ValidTo,
@@ -173,7 +173,7 @@ service CatalogService {
         IsParent,
         Contract.ValidFrom as ContractValidFrom: Timestamp,
         Contract.ValidTo as ContractValidTo: Timestamp,
-        ContractID || '-' || replace(Contract.ValidFrom, ' ', '-') || '-' || replace(Contract.ValidTo, ' ', '-') as ContractsViewID:String,
+        ContractID || '-' || replace(TO_NVARCHAR(Contract.ValidFrom, 'YYYY-MM-DD HH24:MI:SS.FF3') || 'Z', ' ', 'T') || '-' || replace(TO_NVARCHAR(Contract.ValidTo, 'YYYY-MM-DD HH24:MI:SS.FF3') || 'Z', ' ', 'T') as ContractsViewID:String,
         true as isCurrent: Boolean,
         createdAt,
         createdBy,
