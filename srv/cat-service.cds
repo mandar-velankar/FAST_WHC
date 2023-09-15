@@ -12,7 +12,7 @@ service CatalogService {
     entity RebatesHistory as projection on whc.Rebates_History;
 
     entity ContractsView as select from Contracts {
-        key ID || '-' || replace(TO_NVARCHAR(ValidFrom, 'YYYY-MM-DD HH24:MI:SS.FF3') || 'Z', ' ', 'T') || '-' || replace(TO_NVARCHAR(ValidTo, 'YYYY-MM-DD HH24:MI:SS.FF3') || 'Z', ' ', 'T') as ContractsViewID:String,
+        key ID || '-' || replace(TO_NVARCHAR(ValidTo, 'YYYY-MM-DD HH24:MI:SS.FF3') || 'Z', ' ', 'T') as ContractsViewID:String,
         ID,
         ValidFrom,
         ValidTo,
@@ -91,7 +91,7 @@ service CatalogService {
     }group by ID;
 
     entity RebatesView as select from Rebates {
-        key ID || '-' || replace(TO_NVARCHAR(ValidFrom, 'YYYY-MM-DD HH24:MI:SS.FF3') || 'Z', ' ', 'T') || '-' || replace(TO_NVARCHAR(ValidTo, 'YYYY-MM-DD HH24:MI:SS.FF3') || 'Z', ' ', 'T') as RebatesViewID:String,
+        key ID || '-' || replace(TO_NVARCHAR(ValidTo, 'YYYY-MM-DD HH24:MI:SS.FF3') || 'Z', ' ', 'T') as RebatesViewID:String,
         ID,
         ValidFrom,
         ValidTo,
@@ -103,7 +103,7 @@ service CatalogService {
         ContractID,
         Contract.ValidFrom as ContractValidFrom: Timestamp,
         Contract.ValidTo as ContractValidTo: Timestamp,
-        ContractID || '-' || replace(TO_NVARCHAR(Contract.ValidFrom, 'YYYY-MM-DD HH24:MI:SS.FF3') || 'Z', ' ', 'T') || '-' || replace(TO_NVARCHAR(Contract.ValidTo, 'YYYY-MM-DD HH24:MI:SS.FF3') || 'Z', ' ', 'T') as ContractsViewID:String,
+        ContractID || '-' || replace(TO_NVARCHAR(ValidTo, 'YYYY-MM-DD HH24:MI:SS.FF3') || 'Z', ' ', 'T') as ContractsViewID:String,
         true as isCurrent: Boolean,
         createdAt,
         createdBy,
@@ -125,7 +125,7 @@ service CatalogService {
         ContractID,
         Contract.ValidFrom as ContractValidFrom: Timestamp,
         Contract.ValidTo as ContractValidTo: Timestamp,
-        ContractID || '-' || replace(TO_NVARCHAR(Contract.ValidFrom, 'YYYY-MM-DD HH24:MI:SS.FF3') || 'Z', ' ', 'T') || '-' || replace(TO_NVARCHAR(Contract.ValidTo, 'YYYY-MM-DD HH24:MI:SS.FF3') || 'Z', ' ', 'T') as ContractsViewID:String,
+        ContractID || '-' || replace(TO_NVARCHAR(ValidTo, 'YYYY-MM-DD HH24:MI:SS.FF3') || 'Z', ' ', 'T') as ContractsViewID:String,
         false as isCurrent: Boolean,
         createdAt,
         createdBy,
@@ -143,7 +143,7 @@ service CatalogService {
 
 
     entity ContractCustomersView as select from ContractCustomers {
-        key ID || '-' || replace(TO_NVARCHAR(ValidFrom, 'YYYY-MM-DD HH24:MI:SS.FF3') || 'Z', ' ', 'T') || '-' || replace(TO_NVARCHAR(ValidTo, 'YYYY-MM-DD HH24:MI:SS.FF3') || 'Z', ' ', 'T') as ContractCustomerViewID:String,
+        key ID || '-' || replace(TO_NVARCHAR(ValidTo, 'YYYY-MM-DD HH24:MI:SS.FF3') || 'Z', ' ', 'T') as ContractCustomerViewID:String,
         ID,
         ValidFrom,
         ValidTo,
@@ -153,7 +153,7 @@ service CatalogService {
         IsParent,
         Contract.ValidFrom as ContractValidFrom: Timestamp,
         Contract.ValidTo as ContractValidTo: Timestamp,
-        ContractID || '-' || replace(TO_NVARCHAR(Contract.ValidFrom, 'YYYY-MM-DD HH24:MI:SS.FF3') || 'Z', ' ', 'T') || '-' || replace(TO_NVARCHAR(Contract.ValidTo, 'YYYY-MM-DD HH24:MI:SS.FF3') || 'Z', ' ', 'T') as ContractsViewID:String,
+        ContractID || '-' || replace(TO_NVARCHAR(ValidTo, 'YYYY-MM-DD HH24:MI:SS.FF3') || 'Z', ' ', 'T') as ContractsViewID:String,
         true as isCurrent: Boolean,
         createdAt,
         createdBy,
@@ -173,7 +173,7 @@ service CatalogService {
         IsParent,
         Contract.ValidFrom as ContractValidFrom: Timestamp,
         Contract.ValidTo as ContractValidTo: Timestamp,
-        ContractID || '-' || replace(TO_NVARCHAR(Contract.ValidFrom, 'YYYY-MM-DD HH24:MI:SS.FF3') || 'Z', ' ', 'T') || '-' || replace(TO_NVARCHAR(Contract.ValidTo, 'YYYY-MM-DD HH24:MI:SS.FF3') || 'Z', ' ', 'T') as ContractsViewID:String,
+        ContractID || '-' || replace(TO_NVARCHAR(ValidTo, 'YYYY-MM-DD HH24:MI:SS.FF3') || 'Z', ' ', 'T') as ContractsViewID:String,
         true as isCurrent: Boolean,
         createdAt,
         createdBy,
