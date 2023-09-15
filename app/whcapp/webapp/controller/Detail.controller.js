@@ -99,13 +99,27 @@ sap.ui.define([
 		bindRebatesTable: async function () {
 			const rebatesTable = this.byId("rebatesTable");
 			const contract = await this.getContractById();
+			let oneSecondLaterValidFromDate = new Date(contract?.ValidFrom);
+			oneSecondLaterValidFromDate.setSeconds(oneSecondLaterValidFromDate.getSeconds() + 1);
+
+			const filters = [
+				new Filter("ContractsViewID", "EQ", contract?.ContractsViewID),
+				new Filter("Year", "LE", contract?.ProposedContractLength)
+			];
+
+			// for history data we need additional filter
+			if(!contract.isCurrent){
+				const oFilterStartDate = new Filter("ValidFrom", FilterOperator.GE, contract?.ValidFrom);
+				const oFilterEndDate = new Filter("ValidFrom", FilterOperator.LE, oneSecondLaterValidFromDate);
+				filters.push(new Filter({
+					filters: [oFilterStartDate, oFilterEndDate],
+					and: true
+				}));
+			}
 
 			rebatesTable.bindRows({
 				path: "/RebatesView",
-				filters: [
-					new Filter("ContractsViewID", "EQ", contract?.ContractsViewID),
-					new Filter("Year", "LE", contract?.ProposedContractLength),
-				],
+				filters: filters,
 				sorter: [ 
 					new Sorter({
 						path: "Year",
@@ -400,7 +414,7 @@ sap.ui.define([
 			const fileName = `proposal-${contract.Name.replace(/ /g, '-')}-${new Date().toJSON()}.pdf`;
 			const discounts = await this.getDiscounts(this.id, contract.ProposedContractLength);
 			const discountItems = discounts.results.map(item => ["Y"+item.Year, item.Units, item.Myrena, item.Kyleena, item.Skyla]);
-			const rebates = await this.getRebates(this.id, contract.ProposedContractLength);
+			const rebates = await this.getRebates(contract);
 			const sortedRebates = rebates.results.sort((a, b) => {
 				if (a.Year < b.Year) {
 					return -1;
@@ -590,7 +604,7 @@ sap.ui.define([
 
 		getContract: async function (contractId) {
 			const path =this.getModel().createKey("/ContractsView", {
-				ID: contractId
+				ContractsViewID: contractId
             });
             let context = this.getModel().getContext(path);
 			if(!context.getObject()){
@@ -629,13 +643,29 @@ sap.ui.define([
 			});
 		},
 
-		getRebates: async function (contractId, contractLength) {
+		getRebates: async function (contract) {
+
+			let oneSecondLaterValidFromDate = new Date(contract?.ValidFrom);
+			oneSecondLaterValidFromDate.setSeconds(oneSecondLaterValidFromDate.getSeconds() + 1);
+
+			const filters = [
+				new Filter("ContractsViewID", "EQ", contract?.ContractsViewID),
+				new Filter("Year", "LE", contract?.ProposedContractLength)
+			];
+
+			// for history data we need additional filter
+			if(!contract.isCurrent){
+				const oFilterStartDate = new Filter("ValidFrom", FilterOperator.GE, contract?.ValidFrom);
+				const oFilterEndDate = new Filter("ValidFrom", FilterOperator.LE, oneSecondLaterValidFromDate);
+				filters.push(new Filter({
+					filters: [oFilterStartDate, oFilterEndDate],
+					and: true
+				}));
+			}
+
 			return new Promise((resolve, reject) => {
 				this.getModel().read("/RebatesView", {
-					filters: [
-						new Filter("ContractsViewID", "EQ", contractId),
-						new Filter("Year", "LE", contractLength),
-					],
+					filters: filters,
 					success: function (res) {
 						resolve(res)
 					},

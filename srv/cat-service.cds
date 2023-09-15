@@ -112,27 +112,27 @@ service CatalogService {
         modifiedBy
     }
     union 
-    select from MostRecentRebatesHistoryIDs as mh
-    left outer join RebatesHistory as r on mh.ID = r.ID and mh.MaxValidTo = r.ValidTo{
-        key r.ID || '-' || replace(TO_NVARCHAR(ValidFrom, 'YYYY-MM-DD HH24:MI:SS.FF3') || 'Z', ' ', 'T') || '-' || replace(TO_NVARCHAR(ValidTo, 'YYYY-MM-DD HH24:MI:SS.FF3') || 'Z', ' ', 'T') as RebatesViewID:String,
-        r.ID,
-        ValidFrom,
-        ValidTo,
-        Year,
-        Level,
-        Unit,
-        Discount,
-        RebateLevels,
-        ContractID,
-        Contract.ValidFrom as ContractValidFrom: Timestamp,
-        Contract.ValidTo as ContractValidTo: Timestamp,
-        ContractID || '-' || replace(TO_NVARCHAR(Contract.ValidFrom, 'YYYY-MM-DD HH24:MI:SS.FF3') || 'Z', ' ', 'T') as ContractsViewID:String,
+    select from ContractsHistory as cr
+    left outer join RebatesHistory as rh on cr.ID = rh.ContractID and cr.ValidFrom = rh.ValidFrom{
+        key rh.ID || '-' || replace(TO_NVARCHAR(rh.ValidFrom, 'YYYY-MM-DD HH24:MI:SS.FF3') || 'Z', ' ', 'T') || '-' || replace(TO_NVARCHAR(rh.ValidTo, 'YYYY-MM-DD HH24:MI:SS.FF3') || 'Z', ' ', 'T') as RebatesViewID:String,
+        rh.ID,
+        rh.ValidFrom,
+        rh.ValidTo,
+        rh.Year,
+        rh.Level,
+        rh.Unit,
+        rh.Discount,
+        rh.RebateLevels,
+        rh.ContractID,
+        rh.Contract.ValidFrom as ContractValidFrom: Timestamp,
+        rh.Contract.ValidTo as ContractValidTo: Timestamp,
+        rh.ContractID || '-' || replace(TO_NVARCHAR(Contract.ValidFrom, 'YYYY-MM-DD HH24:MI:SS.FF3') || 'Z', ' ', 'T') as ContractsViewID:String,
         @Core.Computed: false
         false as isCurrent: Boolean,
-        createdAt,
-        createdBy,
-        modifiedAt,
-        modifiedBy  
+        rh.createdAt,
+        rh.createdBy,
+        rh.modifiedAt,
+        rh.modifiedBy  
     } where Contract.Status.StatusText = 'Approved';
 
 
