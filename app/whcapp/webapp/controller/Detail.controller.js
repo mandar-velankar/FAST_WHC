@@ -40,6 +40,7 @@ sap.ui.define([
 				this._bindView()
 				this.filterDiscountsTable();
 				this.bindRebatesTable();
+				this.bindAllContractMembers();
 			});
 		},
 		_bindView: async function () {
@@ -144,6 +145,77 @@ sap.ui.define([
 			});
 		},
 
+		bindAllContractMembers: async function(){
+			await this.bindContractParentMembers();
+			await this.bindContractMembers();
+		},
+
+		bindContractParentMembers: async function (){
+			let oMultiInput = this.byId('multiInput2');
+			const contract = await this.getContractById();
+			let contractCustomers = await this.getContractCustomersById();
+			let tokens = [];
+			let oneSecondLaterValidFromDate = new Date(contract?.ValidFrom);
+			oneSecondLaterValidFromDate.setSeconds(oneSecondLaterValidFromDate.getSeconds() + 1);
+
+			contractCustomers = contractCustomers.filter(customer => customer.IsParent === true);
+
+			// for history data we need additional filter
+			if(!contract.isCurrent){
+				contractCustomers = contractCustomers.filter(customer => customer.ValidFrom > contract?.ValidFrom && customer.ValidFrom <= oneSecondLaterValidFromDate);
+			}
+
+			//add tokens
+			contractCustomers.forEach(customer => {
+				tokens.push(new Token({ text: customer.Name, key: customer.BHOID }));
+			});
+
+			if(tokens){
+				oMultiInput.setTokens(tokens);
+			}
+		},
+
+		bindContractMembers: async function (){
+			let oMultiInput = this.byId('multiInputMemberBHO');
+			const contract = await this.getContractById();
+			let contractCustomers = await this.getContractCustomersById();
+			let tokens = [];
+			let oneSecondLaterValidFromDate = new Date(contract?.ValidFrom);
+			oneSecondLaterValidFromDate.setSeconds(oneSecondLaterValidFromDate.getSeconds() + 1);
+
+			contractCustomers = contractCustomers.filter(customer => customer.IsParent === false);
+
+			// for history data we need additional filter
+			if(!contract.isCurrent){
+				contractCustomers = contractCustomers.filter(customer => customer.ValidFrom > contract?.ValidFrom && customer.ValidFrom <= oneSecondLaterValidFromDate);
+			}
+
+			//add tokens
+			contractCustomers.forEach(customer => {
+				tokens.push(new Token({ text: customer.Name, key: customer.BHOID }));
+			});
+
+			if(tokens){
+				oMultiInput.setTokens(tokens);
+			}
+		},
+
+		getContractCustomersById: function(){
+			return new Promise((resolve, reject) => {
+				this.getModel().read("/ContractCustomersView", {
+					filters: [
+						new Filter("ContractID", "EQ", this.id)
+					],
+					success: function (res) {
+						resolve(res?.results);
+					},
+					error: function (error) {
+						reject(error);
+					}
+				})
+			});
+		},
+
 		onEdit: function () {
 			const editmode = this.getModel("appView").getProperty("/editmode");
 			this.getModel("appView").setProperty("/editmode", !editmode);
@@ -179,21 +251,20 @@ sap.ui.define([
 				const entity = ev.detail.entity;
 
 				let newCustomerObject = {
-					"BHOID": entity.entityId,
+					"BHOID": entity.entity.Bayer_ID__c,
 					"Name": entity.entity.whc_legal_name__c,
 					"ContractID": this.id,
 					"IsParent": true
 				}
 
-				const oNewBindingCtx = oDefaultModel.createEntry("/ContractCustomersView", {
+				this.getOwnerComponent().getModel().createEntry("/ContractCustomersView", {
 					properties: newCustomerObject
 				});
 
-				oMultiInput2.addToken([
-					new Token({ text: entity.entity.whc_legal_name__c, key: entity.entityId })
-				]);
-				
-				oDefaultModel.resetChanges([oBoundContext.getPath()]);
+				let tokens = oMultiInput2.getTokens();
+				tokens.push(new Token({ text: entity.entity.whc_legal_name__c, key: entity.entity.Bayer_ID__c }))
+
+				oMultiInput2.setTokens(tokens);
 
 				searchWidgetEl.close();
 			}, { once: true });
@@ -208,19 +279,20 @@ sap.ui.define([
 				const entity = ev.detail.entity;
 
 				let newCustomerObject = {
-					"BHOID": entity.entityId,
+					"BHOID": entity.entity.Bayer_ID__c,
 					"Name": entity.entity.whc_legal_name__c,
 					"ContractID": this.id,
 					"IsParent": false
 				}
 
-				const oNewBindingCtx = oDefaultModel.createEntry("/ContractCustomersView", {
+				this.getOwnerComponent().getModel().createEntry("/ContractCustomersView", {
 					properties: newCustomerObject
 				});
 
-				oMultiInput1.addToken([
-					new Token({ text: entity.entity.whc_legal_name__c, key: entity.entityId })
-				]);
+				let tokens = oMultiInput1.getTokens();
+				tokens.push(new Token({ text: entity.entity.whc_legal_name__c, key: entity.entity.Bayer_ID__c }))
+
+				oMultiInput1.setTokens(tokens);
 
 				searchWidgetEl.close();
 			}, { once: true });

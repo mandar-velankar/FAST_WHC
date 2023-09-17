@@ -115,7 +115,13 @@
 								<l:PaneContainer>
 								<l:SplitPane requiredParentWidth="200">
 										<Table id="mainCustomersTable" 
-											items="{path:'ContractCustomers'}"
+											items="{
+												path:'/ContractCustomersView',
+												sorter: { path: 'Name' },
+												filters: [
+													{path: 'IsParent', operator: 'EQ', value1: true}
+												]
+											}"
 											growing="true"
 											growingThreshold="15"
 											growingScrollToLoad="false"
@@ -125,12 +131,12 @@
 											<OverflowToolbar>
 												<content>
 													<Title text="Parent BHO ID" level="H2"/>
-													<Button text="+" type="Emphasized" press=".onAddMainCustomerButtonPress" enabled="{= ${appView>/editmode}}"/>
+													<Button text="+" type="Emphasized" press=".onAddMainCustomerButtonPress" enabled="{= ${appView>/editmode}}" visible="{= ${appView>/editmode}}"/>
 													<MultiInput width="70%"
 														showClearIcon="true"
 														id="multiInput2"
 														suggestionItems="{
-															path: '/ContractCustomers',
+															path: '/ContractCustomersView',
 															sorter: { path: 'Name' }
 														}"
 														showValueHelp="false"
@@ -156,7 +162,13 @@
 									</l:SplitPane>
 									<l:SplitPane requiredParentWidth="700">
 										<Table id="customersTable" 
-											items="{path:'/ContractCustomers'}"
+											items="{
+												path:'/ContractCustomersView',
+												sorter: { path: 'Name' },
+												filters: [
+													{path: 'IsParent', operator: 'EQ', value1: false}
+												]
+											}"
 											growing="true"
 											growingThreshold="15"
 											growingScrollToLoad="false"
@@ -166,13 +178,16 @@
 											<OverflowToolbar>
 												<content>
 													<Title text="Member BHO ID" level="H2"/>
-													<Button text="+" type="Emphasized" press=".onAddCustomerButtonPress" enabled="{= ${appView>/editmode}}"/>
+													<Button text="+" type="Emphasized" press=".onAddCustomerButtonPress" enabled="{= ${appView>/editmode}}" visible="{= ${appView>/editmode}}"/>
 													<MultiInput width="70%"
 														showClearIcon="true"
 														id="multiInputMemberBHO"
 														suggestionItems="{
-															path: '/ContractCustomers',
-															sorter: { path: 'Name' }
+															path: '/ContractCustomersView',
+															sorter: { path: 'Name' },
+															filters: [
+																{path: 'IsParent', operator: 'EQ', value1: false}
+															]
 														}"
 														showValueHelp="false"
 														enabled="{= ${appView>/editmode}}">

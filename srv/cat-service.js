@@ -181,7 +181,7 @@ module.exports = (srv) => {
             mappedContractCustomer.ID = newID;
             await INSERT.into(ContractCustomers).entries(mappedContractCustomer);
             contractCustomer = await SELECT.one.from(ContractCustomers).where({ID: newID})
-            contractCustomer.ContractCustomersViewID = `${contract.ID}-${contract.ValidFrom}-${contract.ValidTo}`;
+            contractCustomer.ContractCustomerViewID = `${contractCustomer.ID}-${contractCustomer.ValidFrom}-${contractCustomer.ValidTo}`;
         }
         
         return contractCustomer;
