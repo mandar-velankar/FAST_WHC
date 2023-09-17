@@ -156,7 +156,7 @@
 									</l:SplitPane>
 									<l:SplitPane requiredParentWidth="700">
 										<Table id="customersTable" 
-											items="{path:'ContractCustomers'}"
+											items="{path:'/ContractCustomers'}"
 											growing="true"
 											growingThreshold="15"
 											growingScrollToLoad="false"

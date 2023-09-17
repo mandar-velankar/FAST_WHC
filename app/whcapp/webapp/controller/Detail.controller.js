@@ -31,18 +31,6 @@ sap.ui.define([
 			// activate automatic message generation for complete view
 			this.oMessageManager.registerObject(this.getView(), true);
 			this.oDynamicPage = this.byId("detailPage");
-
-			let oMultiInput1 = this.byId("multiInputMemberBHO");
-			oMultiInput1.setTokens([
-				new Token({ text: "Contract customer 11", key: "Contract customer 11" }),
-				new Token({ text: "Contract customer 12", key: "Contract customer 12" })
-			]);
-
-			let oMultiInput2 = this.byId("multiInput2");
-			oMultiInput2.setTokens([
-				new Token({ text: "Contract customer 11", key: "Contract customer 11" }),
-				new Token({ text: "Contract customer 12", key: "Contract customer 12" })
-			]);
 		},
 		_onObjectMatched: async function (oEvent) {
 			this.id = oEvent.getParameter("arguments").id;
@@ -184,15 +172,61 @@ sap.ui.define([
 			}
 		},
 		onAddMainCustomerButtonPress: function (event) {
+			let oMultiInput2 = this.byId("multiInput2");
 			const searchWidgetEl = document.getElementById("searchWidget");
 			searchWidgetEl.start();
 			searchWidgetEl.addEventListener(`veeva-network:CT_SEARCH:select`, (ev) => {
 				const entity = ev.detail.entity;
-				MessageToast.show(`ID of selected customer: ${entity.entityId} - ${entity.entity.whc_legal_name__c}`);//or corporate_name__v instead of whc_legal...
+
+				let newCustomerObject = {
+					"BHOID": entity.entityId,
+					"Name": entity.entity.whc_legal_name__c,
+					"ContractID": this.id,
+					"IsParent": true
+				}
+
+				const oNewBindingCtx = oDefaultModel.createEntry("/ContractCustomersView", {
+					properties: newCustomerObject
+				});
+
+				oMultiInput2.addToken([
+					new Token({ text: entity.entity.whc_legal_name__c, key: entity.entityId })
+				]);
+				
+				oDefaultModel.resetChanges([oBoundContext.getPath()]);
+
 				searchWidgetEl.close();
 			}, { once: true });
 
 		},
+
+		onAddCustomerButtonPress: function (event) {
+			let oMultiInput1 = this.byId("multiInputMemberBHO");
+			const searchWidgetEl = document.getElementById("searchWidget");
+			searchWidgetEl.start();
+			searchWidgetEl.addEventListener(`veeva-network:CT_SEARCH:select`, (ev) => {
+				const entity = ev.detail.entity;
+
+				let newCustomerObject = {
+					"BHOID": entity.entityId,
+					"Name": entity.entity.whc_legal_name__c,
+					"ContractID": this.id,
+					"IsParent": false
+				}
+
+				const oNewBindingCtx = oDefaultModel.createEntry("/ContractCustomersView", {
+					properties: newCustomerObject
+				});
+
+				oMultiInput1.addToken([
+					new Token({ text: entity.entity.whc_legal_name__c, key: entity.entityId })
+				]);
+
+				searchWidgetEl.close();
+			}, { once: true });
+
+		},
+
 		onShowWacButtonPress: async function () {
 			let that = this;
 
