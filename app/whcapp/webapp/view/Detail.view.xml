@@ -115,13 +115,7 @@
 								<l:PaneContainer>
 								<l:SplitPane requiredParentWidth="200">
 										<Table id="mainCustomersTable" 
-											items="{
-												path:'/ContractCustomersView',
-												sorter: { path: 'Name' },
-												filters: [
-													{path: 'IsParent', operator: 'EQ', value1: true}
-												]
-											}"
+											items="{/ContractCustomersView}"
 											growing="true"
 											growingThreshold="15"
 											growingScrollToLoad="false"
@@ -162,17 +156,11 @@
 									</l:SplitPane>
 									<l:SplitPane requiredParentWidth="700">
 										<Table id="customersTable" 
-											items="{
-												path:'/ContractCustomersView',
-												sorter: { path: 'Name' },
-												filters: [
-													{path: 'IsParent', operator: 'EQ', value1: false}
-												]
-											}"
-											growing="true"
-											growingThreshold="15"
-											growingScrollToLoad="false"
-											busyIndicatorDelay="0"
+											   items = "{/ContractCustomersView}"
+											   growing="true"
+											   growingThreshold="15"
+											   growingScrollToLoad="false"
+											   busyIndicatorDelay="0"
 										>
 										<headerToolbar>
 											<OverflowToolbar>

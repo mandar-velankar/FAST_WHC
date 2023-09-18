@@ -154,11 +154,23 @@ sap.ui.define([
 
 		bindContractParentMembers: async function (){
 			let oMultiInput = this.byId('multiInput2');
+			let oMembersTable = this.byId('mainCustomersTable');
 			const contract = await this.getContractById();
 			let contractCustomers = await this.getContractCustomersById();
 			let tokens = [];
 			let oneSecondLaterValidFromDate = new Date(contract?.ValidFrom);
 			oneSecondLaterValidFromDate.setSeconds(oneSecondLaterValidFromDate.getSeconds() + 1);
+
+			//bind table data
+			const membersTableTemplate = oMembersTable.getBindingInfo("items").template;
+			oMembersTable.bindItems({
+				path: "/ContractCustomersView",
+				filters: [
+					new Filter("ContractID", "EQ", this.id),
+					new Filter("IsParent", "EQ", true)
+				],
+				template: membersTableTemplate
+			});
 
 			contractCustomers = contractCustomers.filter(customer => customer.IsParent === true);
 
@@ -172,18 +184,28 @@ sap.ui.define([
 				tokens.push(new Token({ text: customer.Name, key: customer.BHOID }));
 			});
 
-			if(tokens){
-				oMultiInput.setTokens(tokens);
-			}
+			oMultiInput.setTokens(tokens);
 		},
 
 		bindContractMembers: async function (){
 			let oMultiInput = this.byId('multiInputMemberBHO');
+			let oMembersTable = this.byId('customersTable');
 			const contract = await this.getContractById();
 			let contractCustomers = await this.getContractCustomersById();
 			let tokens = [];
 			let oneSecondLaterValidFromDate = new Date(contract?.ValidFrom);
 			oneSecondLaterValidFromDate.setSeconds(oneSecondLaterValidFromDate.getSeconds() + 1);
+
+			//bind table data
+			const membersTableTemplate = oMembersTable.getBindingInfo("items").template;
+			oMembersTable.bindItems({
+				path: "/ContractCustomersView",
+				filters: [
+					new Filter("ContractID", "EQ", this.id),
+					new Filter("IsParent", "EQ", false)
+				],
+				template: membersTableTemplate
+			});
 
 			contractCustomers = contractCustomers.filter(customer => customer.IsParent === false);
 
@@ -197,9 +219,7 @@ sap.ui.define([
 				tokens.push(new Token({ text: customer.Name, key: customer.BHOID }));
 			});
 
-			if(tokens){
-				oMultiInput.setTokens(tokens);
-			}
+			oMultiInput.setTokens(tokens);
 		},
 
 		getContractCustomersById: function(){
