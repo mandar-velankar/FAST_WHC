@@ -31,18 +31,6 @@ sap.ui.define([
 			// activate automatic message generation for complete view
 			this.oMessageManager.registerObject(this.getView(), true);
 			this.oDynamicPage = this.byId("detailPage");
-
-			let oMultiInput1 = this.byId("multiInputMemberBHO");
-			oMultiInput1.setTokens([
-				new Token({ text: "Contract customer 11", key: "Contract customer 11" }),
-				new Token({ text: "Contract customer 12", key: "Contract customer 12" })
-			]);
-
-			let oMultiInput2 = this.byId("multiInput2");
-			oMultiInput2.setTokens([
-				new Token({ text: "Contract customer 11", key: "Contract customer 11" }),
-				new Token({ text: "Contract customer 12", key: "Contract customer 12" })
-			]);
 		},
 		_onObjectMatched: async function (oEvent) {
 			this.id = oEvent.getParameter("arguments").id;
@@ -52,6 +40,7 @@ sap.ui.define([
 				this._bindView()
 				this.filterDiscountsTable();
 				this.bindRebatesTable();
+				this.bindAllContractMembers();
 			});
 		},
 		_bindView: async function () {
@@ -158,6 +147,77 @@ sap.ui.define([
 			});
 		},
 
+		bindAllContractMembers: async function(){
+			await this.bindContractParentMembers();
+			await this.bindContractMembers();
+		},
+
+		bindContractParentMembers: async function (){
+			let oMultiInput = this.byId('multiInput2');
+			const contract = await this.getContractById();
+			let contractCustomers = await this.getContractCustomersById();
+			let tokens = [];
+			let oneSecondLaterValidFromDate = new Date(contract?.ValidFrom);
+			oneSecondLaterValidFromDate.setSeconds(oneSecondLaterValidFromDate.getSeconds() + 1);
+
+			contractCustomers = contractCustomers.filter(customer => customer.IsParent === true);
+
+			// for history data we need additional filter
+			if(!contract.isCurrent){
+				contractCustomers = contractCustomers.filter(customer => customer.ValidFrom > contract?.ValidFrom && customer.ValidFrom <= oneSecondLaterValidFromDate);
+			}
+
+			//add tokens
+			contractCustomers.forEach(customer => {
+				tokens.push(new Token({ text: customer.Name, key: customer.BHOID }));
+			});
+
+			if(tokens){
+				oMultiInput.setTokens(tokens);
+			}
+		},
+
+		bindContractMembers: async function (){
+			let oMultiInput = this.byId('multiInputMemberBHO');
+			const contract = await this.getContractById();
+			let contractCustomers = await this.getContractCustomersById();
+			let tokens = [];
+			let oneSecondLaterValidFromDate = new Date(contract?.ValidFrom);
+			oneSecondLaterValidFromDate.setSeconds(oneSecondLaterValidFromDate.getSeconds() + 1);
+
+			contractCustomers = contractCustomers.filter(customer => customer.IsParent === false);
+
+			// for history data we need additional filter
+			if(!contract.isCurrent){
+				contractCustomers = contractCustomers.filter(customer => customer.ValidFrom > contract?.ValidFrom && customer.ValidFrom <= oneSecondLaterValidFromDate);
+			}
+
+			//add tokens
+			contractCustomers.forEach(customer => {
+				tokens.push(new Token({ text: customer.Name, key: customer.BHOID }));
+			});
+
+			if(tokens){
+				oMultiInput.setTokens(tokens);
+			}
+		},
+
+		getContractCustomersById: function(){
+			return new Promise((resolve, reject) => {
+				this.getModel().read("/ContractCustomersView", {
+					filters: [
+						new Filter("ContractID", "EQ", this.id)
+					],
+					success: function (res) {
+						resolve(res?.results);
+					},
+					error: function (error) {
+						reject(error);
+					}
+				})
+			});
+		},
+
 		onEdit: function () {
 			const editmode = this.getModel("appView").getProperty("/editmode");
 			this.getModel("appView").setProperty("/editmode", !editmode);
@@ -189,15 +249,61 @@ sap.ui.define([
 			}
 		},
 		onAddMainCustomerButtonPress: function (event) {
+			let oMultiInput2 = this.byId("multiInput2");
 			const searchWidgetEl = document.getElementById("searchWidget");
 			searchWidgetEl.start();
 			searchWidgetEl.addEventListener(`veeva-network:CT_SEARCH:select`, (ev) => {
 				const entity = ev.detail.entity;
-				MessageToast.show(`ID of selected customer: ${entity.entityId} - ${entity.entity.whc_legal_name__c}`);//or corporate_name__v instead of whc_legal...
+
+				let newCustomerObject = {
+					"BHOID": entity.entity.Bayer_ID__c,
+					"Name": entity.entity.whc_legal_name__c,
+					"ContractID": this.id,
+					"IsParent": true
+				}
+
+				this.getOwnerComponent().getModel().createEntry("/ContractCustomersView", {
+					properties: newCustomerObject
+				});
+
+				let tokens = oMultiInput2.getTokens();
+				tokens.push(new Token({ text: entity.entity.whc_legal_name__c, key: entity.entity.Bayer_ID__c }))
+
+				oMultiInput2.setTokens(tokens);
+
 				searchWidgetEl.close();
 			}, { once: true });
 
 		},
+
+		onAddCustomerButtonPress: function (event) {
+			let oMultiInput1 = this.byId("multiInputMemberBHO");
+			const searchWidgetEl = document.getElementById("searchWidget");
+			searchWidgetEl.start();
+			searchWidgetEl.addEventListener(`veeva-network:CT_SEARCH:select`, (ev) => {
+				const entity = ev.detail.entity;
+
+				let newCustomerObject = {
+					"BHOID": entity.entity.Bayer_ID__c,
+					"Name": entity.entity.whc_legal_name__c,
+					"ContractID": this.id,
+					"IsParent": false
+				}
+
+				this.getOwnerComponent().getModel().createEntry("/ContractCustomersView", {
+					properties: newCustomerObject
+				});
+
+				let tokens = oMultiInput1.getTokens();
+				tokens.push(new Token({ text: entity.entity.whc_legal_name__c, key: entity.entity.Bayer_ID__c }))
+
+				oMultiInput1.setTokens(tokens);
+
+				searchWidgetEl.close();
+			}, { once: true });
+
+		},
+
 		onShowWacButtonPress: async function () {
 			let that = this;
 

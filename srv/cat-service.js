@@ -169,6 +169,32 @@ module.exports = (srv) => {
         }
         
         return rabate;
+
+    });
+    
+    srv.on(["CREATE", "UPDATE"], ["ContractCustomersView"], async (req) => {
+        const newID = uuidv4();
+        let contractCustomer = await SELECT.one.from(ContractCustomers).where({ID: req.data?.ID});
+
+        const mappedContractCustomer = {
+            BHOID: req.data.BHOID,
+			Name: req.data.Name,
+			ContractID: req.data.ContractID,
+			IsParent: req.data.IsParent
+        }
+        if (contractCustomer) {
+            if (req.data?.isCurrent) {
+                await UPDATE(ContractCustomers).with (mappedContractCustomer).where({ID: contractCustomer.ID});
+                await createCascadingHistoryData(req);
+            }
+        }else {
+            mappedContractCustomer.ID = newID;
+            await INSERT.into(ContractCustomers).entries(mappedContractCustomer);
+            contractCustomer = await SELECT.one.from(ContractCustomers).where({ID: newID})
+            contractCustomer.ContractCustomerViewID = `${contractCustomer.ID}-${contractCustomer.ValidFrom}-${contractCustomer.ValidTo}`;
+        }
+        
+        return contractCustomer;
     })
 
     const updateMappedProducts = async function (req, products) {

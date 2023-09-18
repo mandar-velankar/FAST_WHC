@@ -156,7 +156,8 @@ service CatalogService {
         IsParent,
         Contract.ValidFrom as ContractValidFrom: Timestamp,
         Contract.ValidTo as ContractValidTo: Timestamp,
-        ContractID || '-9999-12-31T23:59:59.999Z' as ContractsViewID:String,
+        ContractID || '-' || replace(TO_NVARCHAR(Contract.ValidFrom, 'YYYY-MM-DD HH24:MI:SS.FF3') || 'Z', ' ', 'T') || '-' || replace(TO_NVARCHAR(Contract.ValidTo, 'YYYY-MM-DD HH24:MI:SS.FF3') || 'Z', ' ', 'T') as ContractsViewID:String,
+        @Core.Computed: false
         true as isCurrent: Boolean,
         createdAt,
         createdBy,
@@ -176,7 +177,8 @@ service CatalogService {
         IsParent,
         Contract.ValidFrom as ContractValidFrom: Timestamp,
         Contract.ValidTo as ContractValidTo: Timestamp,
-        ContractID || '-' || replace(TO_NVARCHAR(Contract.ValidFrom, 'YYYY-MM-DD HH24:MI:SS.FF3') || 'Z', ' ', 'T') as ContractsViewID:String,
+        ContractID || '-' || replace(TO_NVARCHAR(Contract.ValidFrom, 'YYYY-MM-DD HH24:MI:SS.FF3') || 'Z', ' ', 'T') || '-' || replace(TO_NVARCHAR(Contract.ValidTo, 'YYYY-MM-DD HH24:MI:SS.FF3') || 'Z', ' ', 'T') as ContractsViewID:String,
+        @Core.Computed: false
         true as isCurrent: Boolean,
         createdAt,
         createdBy,
