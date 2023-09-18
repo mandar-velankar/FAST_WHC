@@ -7,6 +7,7 @@ service CatalogService {
     entity ContractCustomers as projection on whc.ContractCustomers;
     entity ContractCustomersHistory as projection on whc.ContractCustomers_History;
     entity WHCProducts as projection on whc.WHCProducts;
+    entity WHCStatus as projection on whc.WHCStatus;
     entity Discounts as projection on whc.Discounts;
     entity Rebates as projection on whc.Rebates;
     entity RebatesHistory as projection on whc.Rebates_History;

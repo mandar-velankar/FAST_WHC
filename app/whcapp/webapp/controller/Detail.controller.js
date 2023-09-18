@@ -297,6 +297,9 @@ sap.ui.define([
 
 		onSave: async function () {
 			try {
+				const draftStatusID = await this.getStatusID('Draft');
+				const context = this.getView().getBindingContext();
+				this.getView().getModel().setProperty("StatusID",draftStatusID,context);
 				await this.submitChanges();
 				
 			} catch (error) {
@@ -637,6 +640,22 @@ sap.ui.define([
 					],
 					success: function (res) {
 						resolve(res)
+					},
+					error: function (err) {
+						reject(err)
+					}
+				});
+			});
+		},
+		getStatusID: async function (statusText) {
+		
+            return new Promise((resolve, reject) => {
+				this.getModel().read("/WHCStatus", {
+					filters: [
+						new Filter("StatusText", FilterOperator.EQ, statusText)
+					],
+					success: function (res) {
+						resolve(res?.results?.[0]?.ID)
 					},
 					error: function (err) {
 						reject(err)
