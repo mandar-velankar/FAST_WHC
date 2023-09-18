@@ -412,7 +412,7 @@ sap.ui.define([
 			// Get DATA
 			const contract = await this.getContract(this.id);
 			const fileName = `proposal-${contract.Name.replace(/ /g, '-')}-${new Date().toJSON()}.pdf`;
-			const discounts = await this.getDiscounts(this.id, contract.ProposedContractLength);
+			const discounts = await this.getDiscounts(contract);
 			const discountItems = discounts.results.map(item => ["Y"+item.Year, item.Units, item.Myrena, item.Kyleena, item.Skyla]);
 			const rebates = await this.getRebates(contract);
 			const sortedRebates = rebates.results.sort((a, b) => {
@@ -625,13 +625,15 @@ sap.ui.define([
 			return context.getObject();
 		},
 
-		getDiscounts: async function (contractId, contractLength) {
+		getDiscounts: async function (contract) {
 		
             return new Promise((resolve, reject) => {
 				this.getModel().read("/DiscountsView", {
 					filters: [
-						new Filter("ContractID", "EQ", contractId),
-						new Filter("Year", "LE", contractLength),
+						new Filter("ContractID", FilterOperator.EQ, contract?.ID),
+						new Filter("Year", FilterOperator.LE, contract?.ProposedContractLength),
+						new Filter("isCurrent", FilterOperator.EQ, contract?.isCurrent),
+						new Filter("ContractsViewID", FilterOperator.EQ, contract?.ContractsViewID)
 					],
 					success: function (res) {
 						resolve(res)

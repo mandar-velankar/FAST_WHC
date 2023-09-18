@@ -1,5 +1,6 @@
 const cds = require('@sap/cds');
 const { v4: uuidv4 } = require('uuid');
+const ServiceHelper = require('./utils/ServiceHelper');
 module.exports = (srv) => {
     const {
         Contracts,
@@ -13,21 +14,24 @@ module.exports = (srv) => {
     } = cds.entities("com.bayer.SXTENDER.whc");
 
     srv.on("READ", "DiscountsView", async (req) => {
-        const where = req.query.SELECT.where;
         let discounts = [];
         let products;
         let contarctsViewId;
         let isCurrent;
-        if (where) {
-            isCurrent = where.slice(7, 11)[3].val;
-            contarctsViewId = where.slice(11, 15)[3].val
-            let discountFilter = where.slice(0, 7);
+        if (req.query.SELECT.where) {
+            const contractId = ServiceHelper.getWhereValue(req, "ContractID");
+            const whereYear = ServiceHelper.buildWhere(req, "Year");
+            isCurrent = ServiceHelper.getWhereValue(req, "isCurrent");
+            contarctsViewId = ServiceHelper.getWhereValue(req, "ContractsViewID");
+
             if (isCurrent) {
-                discounts = await SELECT.from(Discounts).where(discountFilter);
+                discounts = await SELECT.from(Discounts).where({ContractID: contractId}).where(whereYear);
                 products = await SELECT.from(DiscountProducts);
             }else {
-                discounts = await SELECT.from(Discounts_History).where(discountFilter);
+                const contract = await SELECT.one.from("CatalogService.ContractsView").where({ContractsViewID: contarctsViewId});
+                discounts = await SELECT.from(Discounts_History).where({ContractID: contractId}).where(whereYear);
                 products = await SELECT.from(DiscountProducts_History);
+                discounts = discounts.filter(d => d.ValidFrom === contract.ValidFrom);
             }
         }
          
@@ -94,7 +98,7 @@ module.exports = (srv) => {
        delete req.data.ValidTo;
     })
 
-    srv.before(["UPDATE"], ["Contracts"], async (req) => {
+    srv.before(["UPDATE"], ["ContractsView"], async (req) => {
         (!req.data.ProposedContractLength || (req.data.ProposedContractLength < 0 || req.data.ProposedContractLength > 6)) && req.error({ code: 400, message: "Proposed Contract Length should not be greater than 6 years", target: "ProposedContractLength" });
     })
     
@@ -227,7 +231,7 @@ module.exports = (srv) => {
         const rebates = await SELECT.from(Rebates).where({ContractID: contractID});
         const customers = await SELECT.from(ContractCustomers).where({ContractID: contractID});
         const discountProducts = await SELECT.from(DiscountProducts);
-        const filteredProducts = [];
+        let filteredProducts = [];
 
         const discountPromises = discounts.map(async d => {
             filteredProducts.push(discountProducts.filter(p => p.DiscountID == d.ID));
@@ -248,13 +252,14 @@ module.exports = (srv) => {
             delete d.ValidTo;
             return await UPDATE(ContractCustomers).with(d).where({ID: d.ID});
         });
-        // const discountProductPromises = discountProducts.map(async d => {
-        //     d.modifiedAt = new Date().toJSON();
-        //     delete d.ValidFrom;
-        //     delete d.ValidTo;
-        //     return await UPDATE(DiscountProducts).with(d).where({ID: d.ID});
-        // });
+        filteredProducts = filteredProducts.flat()
+        const discountProductPromises = filteredProducts.map(async d => {
+            d.modifiedAt = new Date().toJSON();
+            delete d.ValidFrom;
+            delete d.ValidTo;
+            return await UPDATE(DiscountProducts).with(d).where({ID: d.ID});
+        });
 
-        return Promise.all(discountPromises.concat(rebatePromises).concat(customerPromises));
+        return Promise.all(discountPromises.concat(rebatePromises).concat(customerPromises).concat(discountProductPromises));
     }
 };
