@@ -468,7 +468,7 @@
 			<OverflowToolbar>
 				<ToolbarSpacer />
 				<Button type="Accept" text="Save" press="onSave"/>
-				<Button type="Reject" text="Cancel" press="onFooterCancelPress()"/>
+				<Button type="Reject" text="Cancel" press="onFooterCancelPress"/>
 			</OverflowToolbar>
 		</f:footer>
 	</f:DynamicPage>

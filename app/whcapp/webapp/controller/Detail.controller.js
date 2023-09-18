@@ -86,7 +86,7 @@ sap.ui.define([
 		filterDiscountsTable: async function (proposedContractLength) {
 			const discountTable = this.byId("discountsTable");
 			const contract = await this.getContractById();
-			const year = contract?.ProposedContractLength || proposedContractLength;
+			const year = proposedContractLength || contract?.ProposedContractLength;
 			const filter = [
 				new Filter("ContractID", FilterOperator.EQ, contract?.ID),
 				new Filter("Year", FilterOperator.LE, year),
@@ -100,7 +100,7 @@ sap.ui.define([
 		bindRebatesTable: async function (proposedContractLength) {
 			const rebatesTable = this.byId("rebatesTable");
 			const contract = await this.getContractById();
-			const year = contract?.ProposedContractLength || proposedContractLength;
+			const year = proposedContractLength || contract?.ProposedContractLength;
 			let oneSecondLaterValidFromDate = new Date(contract?.ValidFrom);
 			oneSecondLaterValidFromDate.setSeconds(oneSecondLaterValidFromDate.getSeconds() + 1);
 
@@ -164,6 +164,9 @@ sap.ui.define([
 			this.oDynamicPage.setShowFooter(true);
 		},
 		onFooterCancelPress: function () {
+			this.getModel().resetChanges();
+			this.filterDiscountsTable();
+			this.bindRebatesTable();
 			const editmode = this.getModel("appView").getProperty("/editmode");
 			this.getModel("appView").setProperty("/editmode", !editmode);
 			this.oDynamicPage.setShowFooter(false);
