@@ -413,6 +413,7 @@ sap.ui.define([
 				const draftStatusID = await this.getStatusID('Draft');
 				const context = this.getView().getBindingContext();
 				this.getView().getModel().setProperty("StatusID",draftStatusID,context);
+				this.calculateDiscountProductsPercentage();
 				await this.submitChanges();
 				
 			} catch (error) {
@@ -514,6 +515,21 @@ sap.ui.define([
 				default:
 					break;
 			}
+		},
+
+		calculateDiscountProductsPercentage: function () {
+			const discountTable = this.byId("discountsTable");
+			const items = discountTable.getItems();
+			items.map(item => {
+				const obj = item.getBindingContext().getObject();
+				const path = item.getBindingContext().getPath();
+				const Mirena = formatter.parsePercentage(obj.Mirena);
+				const Kyleena = formatter.parsePercentage(obj.Kyleena);
+				const Skyla = formatter.parsePercentage(obj.Skyla);
+				this.getModel().setProperty(`${path}/Mirena`, `${Mirena}`);
+				this.getModel().setProperty(`${path}/Kyleena`, `${Kyleena}`);
+				this.getModel().setProperty(`${path}/Skyla`, `${Skyla}`);
+			})
 		},
 
 		onPrintButtonPress: function(event){

@@ -58,7 +58,7 @@ module.exports = (srv) => {
 
             discountProducts.forEach(product => {
                 const productName = product.ProductName;
-                mappedDiscount[productName] = product.WAC
+                mappedDiscount[productName] = product.WAC * 100;
             });
 
             discountItems.push(mappedDiscount);
