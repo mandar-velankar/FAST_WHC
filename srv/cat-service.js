@@ -37,7 +37,13 @@ module.exports = (srv) => {
          
         const discountItems = [];
         discounts.map(async discount => {
-            const discountProducts = products.filter(product => product.DiscountID === discount.ID);
+            let discountProducts
+            if (isCurrent) {
+                discountProducts = products.filter(product => product.DiscountID === discount.ID);
+            }else {
+                discountProducts = products.filter(product => product.ValidFrom === discount.ValidFrom);
+            }
+            
             const mappedDiscount = {
                 ContractID: discount.ContractID,
                 Year: discount.Year,

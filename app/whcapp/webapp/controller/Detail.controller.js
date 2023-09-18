@@ -83,12 +83,13 @@ sap.ui.define([
 			});
 		},
 
-		filterDiscountsTable: async function () {
+		filterDiscountsTable: async function (proposedContractLength) {
 			const discountTable = this.byId("discountsTable");
 			const contract = await this.getContractById();
+			const year = contract?.ProposedContractLength || proposedContractLength;
 			const filter = [
 				new Filter("ContractID", FilterOperator.EQ, contract?.ID),
-				new Filter("Year", FilterOperator.LE, contract?.ProposedContractLength),
+				new Filter("Year", FilterOperator.LE, year),
 				new Filter("isCurrent", FilterOperator.EQ, contract?.isCurrent),
 				new Filter("ContractsViewID", FilterOperator.EQ, this.id)
 			]
@@ -96,15 +97,16 @@ sap.ui.define([
 			discountTable.getBinding("items").filter(filter);
 		},
 
-		bindRebatesTable: async function () {
+		bindRebatesTable: async function (proposedContractLength) {
 			const rebatesTable = this.byId("rebatesTable");
 			const contract = await this.getContractById();
+			const year = contract?.ProposedContractLength || proposedContractLength;
 			let oneSecondLaterValidFromDate = new Date(contract?.ValidFrom);
 			oneSecondLaterValidFromDate.setSeconds(oneSecondLaterValidFromDate.getSeconds() + 1);
 
 			const filters = [
 				new Filter("ContractsViewID", "EQ", contract?.ContractsViewID),
-				new Filter("Year", "LE", contract?.ProposedContractLength)
+				new Filter("Year", "LE", year)
 			];
 
 			// for history data we need additional filter
@@ -240,6 +242,8 @@ sap.ui.define([
 				input.setValueState("None");
                 input.setValueStateText("");
                 input.closeValueStateMessage();
+				this.filterDiscountsTable(value);
+				this.bindRebatesTable(value);
 			}
 		},
 
