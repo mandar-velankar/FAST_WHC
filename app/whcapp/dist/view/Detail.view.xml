@@ -64,7 +64,7 @@
 				<items>
 					<IconTabFilter text="Customers" key="customers">
 						<Table id="customersTable" 
-                            items="{path:'ContractCustomers'}"
+                            items="{path:'ContractCustomersView'}"
                             growing="true"
                             growingThreshold="15"
                             growingScrollToLoad="false"

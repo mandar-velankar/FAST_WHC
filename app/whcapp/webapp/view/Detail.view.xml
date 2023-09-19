@@ -39,7 +39,7 @@
 
 				<!-- ACTIONS -->
 				<f:actions>
-					<Button id="editButtonId" text="Edit" type="Emphasized" press=".onEdit" enabled="{= !${appView>/editmode}}"/>
+					<Button id="editButtonId" text="Edit" type="Emphasized" press=".onEdit" enabled="{= ${isCurrent} &amp;&amp; !${appView>/editmode}}"/>
 					<Button id="deleteContractButtonId" icon="sap-icon://delete" text="Delete" type="Reject" press="onDeleteContractPress" enabled="true" />
 					<Button id="refreshButtonId" icon="sap-icon://refresh" type="Emphasized" press="onRefresh" enabled="true"/>
 					<Button id="printButtonId" text="Print" type="Emphasized" press=".onPrintButtonPress" enabled="true"/>
@@ -115,7 +115,7 @@
 								<l:PaneContainer>
 								<l:SplitPane requiredParentWidth="200">
 										<Table id="mainCustomersTable" 
-											items="{path:'ContractCustomers'}"
+											items="{/ContractCustomersView}"
 											growing="true"
 											growingThreshold="15"
 											growingScrollToLoad="false"
@@ -125,12 +125,12 @@
 											<OverflowToolbar>
 												<content>
 													<Title text="Parent BHO ID" level="H2"/>
-													<Button text="+" type="Emphasized" press=".onAddMainCustomerButtonPress" enabled="{= ${appView>/editmode}}"/>
+													<Button text="+" type="Emphasized" press=".onAddMainCustomerButtonPress" enabled="{= ${appView>/editmode}}" visible="{= ${appView>/editmode}}"/>
 													<MultiInput width="70%"
 														showClearIcon="true"
 														id="multiInput2"
 														suggestionItems="{
-															path: '/ContractCustomers',
+															path: '/ContractCustomersView',
 															sorter: { path: 'Name' }
 														}"
 														showValueHelp="false"
@@ -156,23 +156,26 @@
 									</l:SplitPane>
 									<l:SplitPane requiredParentWidth="700">
 										<Table id="customersTable" 
-											items="{path:'ContractCustomers'}"
-											growing="true"
-											growingThreshold="15"
-											growingScrollToLoad="false"
-											busyIndicatorDelay="0"
+											   items = "{/ContractCustomersView}"
+											   growing="true"
+											   growingThreshold="15"
+											   growingScrollToLoad="false"
+											   busyIndicatorDelay="0"
 										>
 										<headerToolbar>
 											<OverflowToolbar>
 												<content>
 													<Title text="Member BHO ID" level="H2"/>
-													<Button text="+" type="Emphasized" press=".onAddCustomerButtonPress" enabled="{= ${appView>/editmode}}"/>
+													<Button text="+" type="Emphasized" press=".onAddCustomerButtonPress" enabled="{= ${appView>/editmode}}" visible="{= ${appView>/editmode}}"/>
 													<MultiInput width="70%"
 														showClearIcon="true"
 														id="multiInputMemberBHO"
 														suggestionItems="{
-															path: '/ContractCustomers',
-															sorter: { path: 'Name' }
+															path: '/ContractCustomersView',
+															sorter: { path: 'Name' },
+															filters: [
+																{path: 'IsParent', operator: 'EQ', value1: false}
+															]
 														}"
 														showValueHelp="false"
 														enabled="{= ${appView>/editmode}}">
@@ -247,7 +250,7 @@
 					</headerToolbar>
 					<Table id="discountsTable" 
 						items="{
-							path:'/DiscountTableView'
+							path:'/DiscountsView'
 						}"
 						growing="true"
 						growingThreshold="15"
@@ -292,7 +295,7 @@
 						</headerToolbar>
 
 						<t:Table id="rebatesTable"
-								rows="{/Rebates}"
+								rows="{/RebatesView}"
 								busyIndicatorDelay="0"
 								selectionMode='None'>
 							<t:columns>
@@ -424,7 +427,7 @@
 								  />
 					</Panel>
 
-					<Panel expandable="true" width="auto" class="sapUiResponsiveMargin" expanded="true">
+					<!-- <Panel expandable="true" width="auto" class="sapUiResponsiveMargin" expanded="true">
 					<headerToolbar>
 						<OverflowToolbar style="Clear">
 							<Title text="Uploaded Files" />
@@ -446,19 +449,19 @@
 										fileName="{FileName}"
 										mediaType="{MediaType}"
 										visibleEdit="false"
-										url="/catalog/Attachments({ID})/Content"
+										url="/app/whc/v2/catalog/Attachments({ID})/Content"
 										enabledRemove="{appView>/editmode}"
 										removePressed=".onAttachmentDelete"
 										uploadState="Complete">
 								</upload:UploadSetItem>
 							</upload:items>
 						</upload:UploadSet>
-					</Panel>
+					</Panel> -->
 					<Panel headerText="Tableau test" expandable="true" width="auto" class="sapUiResponsiveMargin" expanded="true">
 						<custom:Tableau id="idTableauChart" src="{= ${TypeID} === 'New Proposal' ? 'https://tableau-ncsa.aws.cnb/t/CPROD/views/WHCContractProposal/ContractProposal?ORIGINAL_ORDERING_ACCOUNT_NUM=BHO3064937&amp;:embed=y&amp;:showVizHome=n&amp;:tabs=n&amp;:toolbar=n&amp;:apiID=host1#navType=0&amp;navSrc=Parse%22' :
 						 													   'https://tableau-ncsa.aws.cnb/t/CPROD/views/WHCContractRenewalV1/WHCContractRenewal?Vistex%20ID=0060062019&amp;:embed=y&amp;:showVizHome=n&amp;:tabs=n&amp;:toolbar=n&amp;:apiID=host20#navType=0&amp;navSrc=Parse' }" 
 										width="100%" 
-										heigth="1500px"/>
+										height="1500px"/>
 					</Panel>
 				</IconTabFilter>
 				</items>
@@ -468,7 +471,7 @@
 			<OverflowToolbar>
 				<ToolbarSpacer />
 				<Button type="Accept" text="Save" press="onSave"/>
-				<Button type="Reject" text="Cancel" press="onFooterCancelPress()"/>
+				<Button type="Reject" text="Cancel" press="onFooterCancelPress"/>
 			</OverflowToolbar>
 		</f:footer>
 	</f:DynamicPage>

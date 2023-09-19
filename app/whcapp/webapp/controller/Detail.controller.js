@@ -31,18 +31,6 @@ sap.ui.define([
 			// activate automatic message generation for complete view
 			this.oMessageManager.registerObject(this.getView(), true);
 			this.oDynamicPage = this.byId("detailPage");
-
-			let oMultiInput1 = this.byId("multiInputMemberBHO");
-			oMultiInput1.setTokens([
-				new Token({ text: "Contract customer 11", key: "Contract customer 11" }),
-				new Token({ text: "Contract customer 12", key: "Contract customer 12" })
-			]);
-
-			let oMultiInput2 = this.byId("multiInput2");
-			oMultiInput2.setTokens([
-				new Token({ text: "Contract customer 11", key: "Contract customer 11" }),
-				new Token({ text: "Contract customer 12", key: "Contract customer 12" })
-			]);
 		},
 		_onObjectMatched: async function (oEvent) {
 			this.id = oEvent.getParameter("arguments").id;
@@ -52,11 +40,12 @@ sap.ui.define([
 				this._bindView()
 				this.filterDiscountsTable();
 				this.bindRebatesTable();
+				this.bindAllContractMembers();
 			});
 		},
 		_bindView: async function () {
-			const path = this.getModel().createKey("/Contracts", {
-				ID: this.id
+			const path = this.getModel().createKey("/ContractsView", {
+				ContractsViewID: this.id
 			});
 
 			// Set busy indicator during view binding
@@ -68,9 +57,9 @@ sap.ui.define([
 
 			this.getView().bindElement({
 				path: path,
-				parameters: {
-					expand: "ContractCustomers"
-				},
+				// parameters: {
+				// 	expand: "ContractCustomers"
+				// },
 				events: {
 					// 	change: this._onBindingChange.bind(this),
 					dataRequested: function () {
@@ -83,28 +72,45 @@ sap.ui.define([
 			});
 		},
 
-		filterDiscountsTable: async function () {
+		filterDiscountsTable: async function (proposedContractLength) {
 			const discountTable = this.byId("discountsTable");
-			const template = discountTable.getBindingInfo("items").template;
 			const contract = await this.getContractById();
+			const year = proposedContractLength || contract?.ProposedContractLength;
 			const filter = [
-				new Filter("ContractID", FilterOperator.EQ, this.id),
-				new Filter("Year", FilterOperator.LE, contract?.ProposedContractLength),
+				new Filter("ContractID", FilterOperator.EQ, contract?.ID),
+				new Filter("Year", FilterOperator.LE, year),
+				new Filter("isCurrent", FilterOperator.EQ, contract?.isCurrent),
+				new Filter("ContractsViewID", FilterOperator.EQ, this.id)
 			]
 
 			discountTable.getBinding("items").filter(filter);
 		},
 
-		bindRebatesTable: async function () {
+		bindRebatesTable: async function (proposedContractLength) {
 			const rebatesTable = this.byId("rebatesTable");
 			const contract = await this.getContractById();
+			const year = proposedContractLength || contract?.ProposedContractLength;
+			let oneSecondLaterValidFromDate = new Date(contract?.ValidFrom);
+			oneSecondLaterValidFromDate.setSeconds(oneSecondLaterValidFromDate.getSeconds() + 1);
+
+			const filters = [
+				new Filter("ContractsViewID", "EQ", contract?.ContractsViewID),
+				new Filter("Year", "LE", year)
+			];
+
+			// for history data we need additional filter
+			if(!contract.isCurrent){
+				const oFilterStartDate = new Filter("ValidFrom", FilterOperator.GE, contract?.ValidFrom);
+				const oFilterEndDate = new Filter("ValidFrom", FilterOperator.LE, oneSecondLaterValidFromDate);
+				filters.push(new Filter({
+					filters: [oFilterStartDate, oFilterEndDate],
+					and: true
+				}));
+			}
 
 			rebatesTable.bindRows({
-				path: "/Rebates",
-				filters: [
-					new Filter("ContractID", "EQ", this.id),
-					new Filter("Year", "LE", contract?.ProposedContractLength),
-				],
+				path: "/RebatesView",
+				filters: filters,
 				sorter: [ 
 					new Sorter({
 						path: "Year",
@@ -127,12 +133,103 @@ sap.ui.define([
 
 		getContractById: function () {
 			return new Promise((resolve, reject) => {
-				this.getModel().read("/Contracts", {
+				this.getModel().read("/ContractsView", {
 					filters: [
-						new Filter("ID", "EQ", this.id)
+						new Filter("ContractsViewID", "EQ", this.id)
 					],
 					success: function (res) {
 						resolve(res?.results[0]);
+					},
+					error: function (error) {
+						reject(error);
+					}
+				})
+			});
+		},
+
+		bindAllContractMembers: async function(){
+			await this.bindContractParentMembers();
+			await this.bindContractMembers();
+		},
+
+		bindContractParentMembers: async function (){
+			let oMultiInput = this.byId('multiInput2');
+			let oMembersTable = this.byId('mainCustomersTable');
+			const contract = await this.getContractById();
+			let contractCustomers = await this.getContractCustomersById();
+			let tokens = [];
+			let oneSecondLaterValidFromDate = new Date(contract?.ValidFrom);
+			oneSecondLaterValidFromDate.setSeconds(oneSecondLaterValidFromDate.getSeconds() + 1);
+
+			//bind table data
+			const membersTableTemplate = oMembersTable.getBindingInfo("items").template;
+			oMembersTable.bindItems({
+				path: "/ContractCustomersView",
+				filters: [
+					new Filter("ContractID", "EQ", this.id),
+					new Filter("IsParent", "EQ", true)
+				],
+				template: membersTableTemplate
+			});
+
+			contractCustomers = contractCustomers.filter(customer => customer.IsParent === true);
+
+			// for history data we need additional filter
+			if(!contract.isCurrent){
+				contractCustomers = contractCustomers.filter(customer => customer.ValidFrom > contract?.ValidFrom && customer.ValidFrom <= oneSecondLaterValidFromDate);
+			}
+
+			//add tokens
+			contractCustomers.forEach(customer => {
+				tokens.push(new Token({ text: customer.Name, key: customer.BHOID }));
+			});
+
+			oMultiInput.setTokens(tokens);
+		},
+
+		bindContractMembers: async function (){
+			let oMultiInput = this.byId('multiInputMemberBHO');
+			let oMembersTable = this.byId('customersTable');
+			const contract = await this.getContractById();
+			let contractCustomers = await this.getContractCustomersById();
+			let tokens = [];
+			let oneSecondLaterValidFromDate = new Date(contract?.ValidFrom);
+			oneSecondLaterValidFromDate.setSeconds(oneSecondLaterValidFromDate.getSeconds() + 1);
+
+			//bind table data
+			const membersTableTemplate = oMembersTable.getBindingInfo("items").template;
+			oMembersTable.bindItems({
+				path: "/ContractCustomersView",
+				filters: [
+					new Filter("ContractID", "EQ", this.id),
+					new Filter("IsParent", "EQ", false)
+				],
+				template: membersTableTemplate
+			});
+
+			contractCustomers = contractCustomers.filter(customer => customer.IsParent === false);
+
+			// for history data we need additional filter
+			if(!contract.isCurrent){
+				contractCustomers = contractCustomers.filter(customer => customer.ValidFrom > contract?.ValidFrom && customer.ValidFrom <= oneSecondLaterValidFromDate);
+			}
+
+			//add tokens
+			contractCustomers.forEach(customer => {
+				tokens.push(new Token({ text: customer.Name, key: customer.BHOID }));
+			});
+
+			oMultiInput.setTokens(tokens);
+		},
+
+		getContractCustomersById: function(){
+			return new Promise((resolve, reject) => {
+				this.getModel().read("/ContractCustomersView", {
+					filters: [
+						new Filter("ContractID", "EQ", this.id)
+					],
+					success: function (res) {
+						resolve(res?.results);
 					},
 					error: function (error) {
 						reject(error);
@@ -147,6 +244,9 @@ sap.ui.define([
 			this.oDynamicPage.setShowFooter(true);
 		},
 		onFooterCancelPress: function () {
+			this.getModel().resetChanges();
+			this.filterDiscountsTable();
+			this.bindRebatesTable();
 			const editmode = this.getModel("appView").getProperty("/editmode");
 			this.getModel("appView").setProperty("/editmode", !editmode);
 			this.oDynamicPage.setShowFooter(false);
@@ -169,15 +269,61 @@ sap.ui.define([
 			}
 		},
 		onAddMainCustomerButtonPress: function (event) {
+			let oMultiInput2 = this.byId("multiInput2");
 			const searchWidgetEl = document.getElementById("searchWidget");
 			searchWidgetEl.start();
 			searchWidgetEl.addEventListener(`veeva-network:CT_SEARCH:select`, (ev) => {
 				const entity = ev.detail.entity;
-				MessageToast.show(`ID of selected customer: ${entity.entityId} - ${entity.entity.whc_legal_name__c}`);//or corporate_name__v instead of whc_legal...
+
+				let newCustomerObject = {
+					"BHOID": entity.entity.Bayer_ID__c,
+					"Name": entity.entity.whc_legal_name__c,
+					"ContractID": this.id,
+					"IsParent": true
+				}
+
+				this.getOwnerComponent().getModel().createEntry("/ContractCustomersView", {
+					properties: newCustomerObject
+				});
+
+				let tokens = oMultiInput2.getTokens();
+				tokens.push(new Token({ text: entity.entity.whc_legal_name__c, key: entity.entity.Bayer_ID__c }))
+
+				oMultiInput2.setTokens(tokens);
+
 				searchWidgetEl.close();
 			}, { once: true });
 
 		},
+
+		onAddCustomerButtonPress: function (event) {
+			let oMultiInput1 = this.byId("multiInputMemberBHO");
+			const searchWidgetEl = document.getElementById("searchWidget");
+			searchWidgetEl.start();
+			searchWidgetEl.addEventListener(`veeva-network:CT_SEARCH:select`, (ev) => {
+				const entity = ev.detail.entity;
+
+				let newCustomerObject = {
+					"BHOID": entity.entity.Bayer_ID__c,
+					"Name": entity.entity.whc_legal_name__c,
+					"ContractID": this.id,
+					"IsParent": false
+				}
+
+				this.getOwnerComponent().getModel().createEntry("/ContractCustomersView", {
+					properties: newCustomerObject
+				});
+
+				let tokens = oMultiInput1.getTokens();
+				tokens.push(new Token({ text: entity.entity.whc_legal_name__c, key: entity.entity.Bayer_ID__c }))
+
+				oMultiInput1.setTokens(tokens);
+
+				searchWidgetEl.close();
+			}, { once: true });
+
+		},
+
 		onShowWacButtonPress: async function () {
 			let that = this;
 
@@ -225,6 +371,8 @@ sap.ui.define([
 				input.setValueState("None");
                 input.setValueStateText("");
                 input.closeValueStateMessage();
+				this.filterDiscountsTable(value);
+				this.bindRebatesTable(value);
 			}
 		},
 
@@ -232,7 +380,7 @@ sap.ui.define([
 			const uploader = this.byId("UploadSet");
 			const item = event.getParameter("item")
 			const id = await this.createAttachmentEntry(this.id,item);
-			item.setUploadUrl(`/catalog/Attachments(${id})/Content`);
+			item.setUploadUrl(window.location.host.search('app') > -1 ? `/app/whc/v2/catalog/Attachments(${id})/Content` : `/whc/v2/catalog/Attachments(${id})/Content`);
 			uploader.uploadItem(item);
 		},
 		onUploadCompleted: function (event) {
@@ -282,6 +430,9 @@ sap.ui.define([
 
 		onSave: async function () {
 			try {
+				const draftStatusID = await this.getStatusID('Draft');
+				const context = this.getView().getBindingContext();
+				this.getView().getModel().setProperty("StatusID",draftStatusID,context);
 				await this.submitChanges();
 				
 			} catch (error) {
@@ -397,9 +548,9 @@ sap.ui.define([
 			// Get DATA
 			const contract = await this.getContract(this.id);
 			const fileName = `proposal-${contract.Name.replace(/ /g, '-')}-${new Date().toJSON()}.pdf`;
-			const discounts = await this.getDiscounts(this.id, contract.ProposedContractLength);
+			const discounts = await this.getDiscounts(contract);
 			const discountItems = discounts.results.map(item => ["Y"+item.Year, item.Units, item.Myrena, item.Kyleena, item.Skyla]);
-			const rebates = await this.getRebates(this.id, contract.ProposedContractLength);
+			const rebates = await this.getRebates(contract);
 			const sortedRebates = rebates.results.sort((a, b) => {
 				if (a.Year < b.Year) {
 					return -1;
@@ -564,11 +715,45 @@ sap.ui.define([
 
 			// Tableau
 			const tableauChartHtml = this.byId("idTableauChart").getDomRef();
-			const canvasImage = await html2canvas(tableauChartHtml);
+			const iFrameUrl = this.byId("idTableauChart").getSrc();
+			const proxyIframe = await this.printIframe(iFrameUrl);
+			const canvasImage = await html2canvas(proxyIframe);
 			doc.addImage(canvasImage, "PNG", marginLeft, tableHeight, 180, 100); // Adjust the coordinates and size as needed
 
 			// print
 			doc.save(fileName);	
+		},
+
+		/**
+		 * Load iframe from cross-origin via proxy iframe
+		 * and then invokes the print dialog.
+		 * It is not possible to call window.print() on the target iframe directly
+		 * because of cross-origin policy.
+		 * 
+		 * Downside is that the iframe stays loaded. 
+		 */
+		printIframe: function(url) {
+			return new Promise((resolve, reject) => {
+				const proxyIframe = document.createElement('iframe');
+				const body = document.getElementsByTagName('body')[0];
+				const div = document.createElement('div');
+				div.style.width = '500px';
+				div.style.height = '500px';
+				
+				proxyIframe.style.width = '100%';
+				proxyIframe.style.height = '100%';
+				proxyIframe.style.display = 'none';
+
+				div.appendChild(proxyIframe);
+				body.appendChild(div);
+			
+				var contentWindow = proxyIframe.contentWindow;
+				contentWindow.document.open();
+				// Set dimensions according to your needs.
+				// You may need to calculate the dynamically after the content has loaded
+				contentWindow.document.write('<iframe src="' + url + '" onload="' + resolve(div) + '" width="1000" height="1800" frameborder="0" marginheight="0" marginwidth="0">');
+				contentWindow.document.close();
+			});
 		},
 
 
@@ -589,7 +774,7 @@ sap.ui.define([
 
 		getContract: async function (contractId) {
 			const path =this.getModel().createKey("/ContractsView", {
-				ID: contractId
+				ContractsViewID: contractId
             });
             let context = this.getModel().getContext(path);
 			if(!context.getObject()){
@@ -610,13 +795,15 @@ sap.ui.define([
 			return context.getObject();
 		},
 
-		getDiscounts: async function (contractId, contractLength) {
+		getDiscounts: async function (contract) {
 		
             return new Promise((resolve, reject) => {
-				this.getModel().read("/DiscountTableView", {
+				this.getModel().read("/DiscountsView", {
 					filters: [
-						new Filter("ContractID", "EQ", contractId),
-						new Filter("Year", "LE", contractLength),
+						new Filter("ContractID", FilterOperator.EQ, contract?.ID),
+						new Filter("Year", FilterOperator.LE, contract?.ProposedContractLength),
+						new Filter("isCurrent", FilterOperator.EQ, contract?.isCurrent),
+						new Filter("ContractsViewID", FilterOperator.EQ, contract?.ContractsViewID)
 					],
 					success: function (res) {
 						resolve(res)
@@ -627,14 +814,46 @@ sap.ui.define([
 				});
 			});
 		},
-
-		getRebates: async function (contractId, contractLength) {
-			return new Promise((resolve, reject) => {
-				this.getModel().read("/Rebates", {
+		getStatusID: async function (statusText) {
+		
+            return new Promise((resolve, reject) => {
+				this.getModel().read("/WHCStatus", {
 					filters: [
-						new Filter("ContractID", "EQ", contractId),
-						new Filter("Year", "LE", contractLength),
+						new Filter("StatusText", FilterOperator.EQ, statusText)
 					],
+					success: function (res) {
+						resolve(res?.results?.[0]?.ID)
+					},
+					error: function (err) {
+						reject(err)
+					}
+				});
+			});
+		},
+
+		getRebates: async function (contract) {
+
+			let oneSecondLaterValidFromDate = new Date(contract?.ValidFrom);
+			oneSecondLaterValidFromDate.setSeconds(oneSecondLaterValidFromDate.getSeconds() + 1);
+
+			const filters = [
+				new Filter("ContractsViewID", "EQ", contract?.ContractsViewID),
+				new Filter("Year", "LE", contract?.ProposedContractLength)
+			];
+
+			// for history data we need additional filter
+			if(!contract.isCurrent){
+				const oFilterStartDate = new Filter("ValidFrom", FilterOperator.GE, contract?.ValidFrom);
+				const oFilterEndDate = new Filter("ValidFrom", FilterOperator.LE, oneSecondLaterValidFromDate);
+				filters.push(new Filter({
+					filters: [oFilterStartDate, oFilterEndDate],
+					and: true
+				}));
+			}
+
+			return new Promise((resolve, reject) => {
+				this.getModel().read("/RebatesView", {
+					filters: filters,
 					success: function (res) {
 						resolve(res)
 					},
