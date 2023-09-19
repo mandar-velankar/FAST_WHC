@@ -1,0 +1,56 @@
+@hostname=localhost
+@port=4004
+@host={{hostname}}:{{port}}
+@service=/v2/catalog
+
+
+### Rebates  - Get All Rebates
+GET http://{{host}}{{service}}/Rebates
+Authorization: Basic YXJ0aW9t
+
+
+### Rebates  - Get Contract by ID - ODATA V2
+GET http://{{host}}{{service}}/Rebates(guid'12946ea7-fb94-4a26-80df-9ecbbd351eea')
+Authorization: Basic YXJ0aW9t
+
+###Rebates  - Create new Contract
+POST http://{{host}}{{service}}/Rebates
+Authorization: Basic YXJ0aW9t
+Content-Type: application/json
+
+{
+    "Year": 3,
+    "Level": 1,
+    "Unit": "",
+    "Discount": null,
+    "RebateLevels_Unit_Level_1": null,
+    "RebateLevels_Discount_Level_1": null,
+    "RebateLevels_Unit_Level_2": null,
+    "RebateLevels_Discount_Level_2": null,
+    "RebateLevels_Unit_Level_3": null,
+    "RebateLevels_Discount_Level_3": null,
+    "ContractID": "e88f4e1d-9ce0-4f57-846d-a9630463ea63"
+}
+
+###Rebates  - Update Contract
+PUT http://{{host}}{{service}}/Rebates(guid'12946ea7-fb94-4a26-80df-9ecbbd351eea')
+Authorization: Basic YXJ0aW9t
+Content-Type: application/json
+
+{
+    "Year": 3,
+    "Level": 1,
+    "Unit": "",
+    "Discount": null,
+    "RebateLevels_Unit_Level_1": null,
+    "RebateLevels_Discount_Level_1": null,
+    "RebateLevels_Unit_Level_2": null,
+    "RebateLevels_Discount_Level_2": null,
+    "RebateLevels_Unit_Level_3": null,
+    "RebateLevels_Discount_Level_3": null,
+    "ContractID": "e88f4e1d-9ce0-4f57-846d-a9630463ea63"
+}
+
+### Rebates  - Delete contract by ID
+DELETE http://{{host}}{{service}}/Rebates(guid'8512e1ce-a990-4d90-b958-a5526c08a689')
+Authorization: Basic YXJ0aW9t

@@ -66,20 +66,20 @@ sap.ui.define([
             setModelChangeGroups: function(oModel){
                 oModel.setDeferredGroups(oModel.getDeferredGroups().concat([
                     "NewProposal",
-                    "UpdateProposal"
+                    "UpdateContract"
                 ]));
                 oModel.setChangeGroups({
                     "ContractFormView": {
                         groupId: "NewProposal",  
                     },
-                    "Contracts": {
-                        groupId: "UpdateProposal"
+                    "ContractsView": {
+                        groupId: "UpdateContract",  
                     },
-                    "DiscountTableView": {
-                        groupId: "UpdateProposal"
+                    "RebatesView": {
+                        groupId: "UpdateContract",  
                     },
-                    "Rebates": {
-                        groupId: "UpdateProposal"
+                    "DiscountsView": {
+                        groupId: "UpdateContract",  
                     }
                 });
             }
