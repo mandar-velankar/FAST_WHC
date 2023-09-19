@@ -715,11 +715,45 @@ sap.ui.define([
 
 			// Tableau
 			const tableauChartHtml = this.byId("idTableauChart").getDomRef();
-			const canvasImage = await html2canvas(tableauChartHtml);
+			const iFrameUrl = this.byId("idTableauChart").getSrc();
+			const proxyIframe = await this.printIframe(iFrameUrl);
+			const canvasImage = await html2canvas(proxyIframe);
 			doc.addImage(canvasImage, "PNG", marginLeft, tableHeight, 180, 100); // Adjust the coordinates and size as needed
 
 			// print
 			doc.save(fileName);	
+		},
+
+		/**
+		 * Load iframe from cross-origin via proxy iframe
+		 * and then invokes the print dialog.
+		 * It is not possible to call window.print() on the target iframe directly
+		 * because of cross-origin policy.
+		 * 
+		 * Downside is that the iframe stays loaded. 
+		 */
+		printIframe: function(url) {
+			return new Promise((resolve, reject) => {
+				const proxyIframe = document.createElement('iframe');
+				const body = document.getElementsByTagName('body')[0];
+				const div = document.createElement('div');
+				div.style.width = '500px';
+				div.style.height = '500px';
+				
+				proxyIframe.style.width = '100%';
+				proxyIframe.style.height = '100%';
+				proxyIframe.style.display = 'none';
+
+				div.appendChild(proxyIframe);
+				body.appendChild(div);
+			
+				var contentWindow = proxyIframe.contentWindow;
+				contentWindow.document.open();
+				// Set dimensions according to your needs.
+				// You may need to calculate the dynamically after the content has loaded
+				contentWindow.document.write('<iframe src="' + url + '" onload="' + resolve(div) + '" width="1000" height="1800" frameborder="0" marginheight="0" marginwidth="0">');
+				contentWindow.document.close();
+			});
 		},
 
 
