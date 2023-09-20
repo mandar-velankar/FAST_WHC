@@ -36,7 +36,7 @@ sap.ui.define([
 			this.id = oEvent.getParameter("arguments").id;
 			this.getModel("appView").setProperty("/layout", "TwoColumnsMidExpanded");
 
-			this.getModel().metadataLoaded().then(()=>{
+			this.getModel().metadataLoaded().then(async ()=>{
 				this._bindView()
 				this.filterDiscountsTable();
 				this.bindRebatesTable();
@@ -156,7 +156,7 @@ sap.ui.define([
 			let oMultiInput = this.byId('multiInput2');
 			let oMembersTable = this.byId('mainCustomersTable');
 			const contract = await this.getContractById();
-			let contractCustomers = await this.getContractCustomersById();
+			let contractCustomers = await this.getContractCustomersById(contract);
 			let tokens = [];
 			let oneSecondLaterValidFromDate = new Date(contract?.ValidFrom);
 			oneSecondLaterValidFromDate.setSeconds(oneSecondLaterValidFromDate.getSeconds() + 1);
@@ -166,7 +166,7 @@ sap.ui.define([
 			oMembersTable.bindItems({
 				path: "/ContractCustomersView",
 				filters: [
-					new Filter("ContractID", "EQ", this.id),
+					new Filter("ContractID", "EQ", contract.ID),
 					new Filter("IsParent", "EQ", true)
 				],
 				template: membersTableTemplate
@@ -181,7 +181,7 @@ sap.ui.define([
 
 			//add tokens
 			contractCustomers.forEach(customer => {
-				tokens.push(new Token({ text: customer.Name, key: customer.BHOID }));
+				tokens.push(new Token({ text: customer.Name, key: customer.ID }));
 			});
 
 			oMultiInput.setTokens(tokens);
@@ -191,7 +191,7 @@ sap.ui.define([
 			let oMultiInput = this.byId('multiInputMemberBHO');
 			let oMembersTable = this.byId('customersTable');
 			const contract = await this.getContractById();
-			let contractCustomers = await this.getContractCustomersById();
+			let contractCustomers = await this.getContractCustomersById(contract);
 			let tokens = [];
 			let oneSecondLaterValidFromDate = new Date(contract?.ValidFrom);
 			oneSecondLaterValidFromDate.setSeconds(oneSecondLaterValidFromDate.getSeconds() + 1);
@@ -201,7 +201,7 @@ sap.ui.define([
 			oMembersTable.bindItems({
 				path: "/ContractCustomersView",
 				filters: [
-					new Filter("ContractID", "EQ", this.id),
+					new Filter("ContractID", "EQ", contract.ID),
 					new Filter("IsParent", "EQ", false)
 				],
 				template: membersTableTemplate
@@ -216,17 +216,30 @@ sap.ui.define([
 
 			//add tokens
 			contractCustomers.forEach(customer => {
-				tokens.push(new Token({ text: customer.Name, key: customer.BHOID }));
+				tokens.push(new Token({ text: customer.Name, key: customer.ID }));
 			});
 
 			oMultiInput.setTokens(tokens);
 		},
 
-		getContractCustomersById: function(){
+		onTokenUpdate: async function (event){
+			if(event.getParameter('type') === 'removed'){
+				const removedTokens = event.getParameter("removedTokens");
+
+				//get path to remove
+				//remove
+				removedTokens.forEach(removedToken => {
+					this.getOwnerComponent().getModel().remove(`/ContractCustomersView('${removedToken.getProperty('key')}')`)
+				});
+
+			}
+		},
+
+		getContractCustomersById: function(contract){
 			return new Promise((resolve, reject) => {
 				this.getModel().read("/ContractCustomersView", {
 					filters: [
-						new Filter("ContractID", "EQ", this.id)
+						new Filter("ContractID", "EQ", contract.ID)
 					],
 					success: function (res) {
 						resolve(res?.results);
@@ -268,9 +281,10 @@ sap.ui.define([
 				this.getModel("appView").setProperty("/layout", this.getModel("appView").getProperty("/previousLayout"));
 			}
 		},
-		onAddMainCustomerButtonPress: function (event) {
+		onAddMainCustomerButtonPress: async function (event) {
 			let oMultiInput2 = this.byId("multiInput2");
 			const searchWidgetEl = document.getElementById("searchWidget");
+			let contract = await this.getContractById(this.id);
 			searchWidgetEl.start();
 			searchWidgetEl.addEventListener(`veeva-network:CT_SEARCH:select`, (ev) => {
 				const entity = ev.detail.entity;
@@ -278,7 +292,7 @@ sap.ui.define([
 				let newCustomerObject = {
 					"BHOID": entity.entity.Bayer_ID__c,
 					"Name": entity.entity.whc_legal_name__c,
-					"ContractID": this.id,
+					"ContractID": contract.ID,
 					"IsParent": true
 				}
 
@@ -292,13 +306,21 @@ sap.ui.define([
 				oMultiInput2.setTokens(tokens);
 
 				searchWidgetEl.close();
+
+				return new Promise((resolve, reject) => {
+					this.getModel().submitChanges({
+						error: this.contractSavedError.bind(this)
+					});
+				})
+
 			}, { once: true });
 
 		},
 
-		onAddCustomerButtonPress: function (event) {
+		onAddCustomerButtonPress: async function (event) {
 			let oMultiInput1 = this.byId("multiInputMemberBHO");
 			const searchWidgetEl = document.getElementById("searchWidget");
+			let contract = await this.getContractById(this.id);
 			searchWidgetEl.start();
 			searchWidgetEl.addEventListener(`veeva-network:CT_SEARCH:select`, (ev) => {
 				const entity = ev.detail.entity;
@@ -306,7 +328,7 @@ sap.ui.define([
 				let newCustomerObject = {
 					"BHOID": entity.entity.Bayer_ID__c,
 					"Name": entity.entity.whc_legal_name__c,
-					"ContractID": this.id,
+					"ContractID": contract.ID,
 					"IsParent": false
 				}
 
@@ -457,7 +479,7 @@ sap.ui.define([
 		contractSavedSuccess: function (event) {
 			const hasErrorMessages = this.oMessageManager.getMessageModel().getData();
 			if (hasErrorMessages.length < 1) {
-				MessageBox.success("Contract Updated: " + this.getView().getBindingContext().getProperty("ID"));
+				MessageBox.success("Contract updated successfully");
 				this.getModel("appView").setProperty("/editmode", false);
 				this.oDynamicPage.setShowFooter(false);
 				this.filterDiscountsTable();

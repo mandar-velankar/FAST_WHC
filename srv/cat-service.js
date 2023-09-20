@@ -7,6 +7,7 @@ module.exports = (srv) => {
         Discounts,
         Rebates,
         WHCProducts,
+        WHCTypes,
         ContractCustomers,
         DiscountProducts,
         Discounts_History,
@@ -112,6 +113,7 @@ module.exports = (srv) => {
         const newID = uuidv4();
         const whcProducts = await SELECT.from(WHCProducts);
         let contract = await SELECT.one.from(Contracts).where({ID: req.data?.ID});
+        let type = await SELECT.one.from(WHCTypes).where({Type: req.data?.Type});
 
         const mappedContract = {
             BackgroundInfo: req.data.BackgroundInfo,
@@ -122,7 +124,7 @@ module.exports = (srv) => {
             ProposedContractLength: req.data.ProposedContractLength,
             Remarks: req.data.Remarks,
             StatusID: req.data.StatusID,
-            TypeID: req.data.TypeID,
+            TypeID: type?.ID,
             VistexID: req.data.VistexID
         }
         if (contract) {
@@ -174,7 +176,7 @@ module.exports = (srv) => {
     
     srv.on(["CREATE", "UPDATE"], ["ContractCustomersView"], async (req) => {
         const newID = uuidv4();
-        let contractCustomer = await SELECT.one.from(ContractCustomers).where({ID: req.data?.ID});
+        let contractCustomer = await SELECT.one.from(ContractCustomers).where({ID: req.data?.ContractID});
 
         const mappedContractCustomer = {
             BHOID: req.data.BHOID,
@@ -197,6 +199,10 @@ module.exports = (srv) => {
         return contractCustomer;
     })
 
+    srv.on(["DELETE"], ["ContractCustomersView"], async (req) => {
+        return await DELETE.from(ContractCustomers).where({ID: req.data?.ContractCustomerViewID});
+    })
+
     const updateMappedProducts = async function (req, products) {
         if (products.length > 0) {
             const productPromises = products.map(async product => {
@@ -213,7 +219,7 @@ module.exports = (srv) => {
         const promises = whcProducts.map(async prod => {
             const mappedProduct = {
                 ProductName: prod.ProductName,
-                WAC: prod.WAC,
+                WAC: "",
                 DiscountID: discount.ID
             };
             return await INSERT.into(DiscountProducts).entries(mappedProduct);

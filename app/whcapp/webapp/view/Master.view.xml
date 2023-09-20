@@ -121,7 +121,7 @@
                         <ColumnListItem type="Active">
                             <cells>
                                 <Text text="{Name}" />
-                                <Text text="{TypeID}" />
+                                <Text text="{Type}" />
                                 <Text text="{Status}" />
                                 <Text text="{modifiedBy}" />
                                 <Text text="{
