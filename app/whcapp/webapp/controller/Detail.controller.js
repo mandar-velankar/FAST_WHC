@@ -35,14 +35,37 @@ sap.ui.define([
 		_onObjectMatched: async function (oEvent) {
 			this.id = oEvent.getParameter("arguments").id;
 			this.getModel("appView").setProperty("/layout", "TwoColumnsMidExpanded");
+			this.masterTable = oEvent.getParameter("view").byId('masterTable');
 
-			this.getModel().metadataLoaded().then(async ()=>{
+			this.getModel().metadataLoaded().then(()=>{
+				this.filterMasterTable(this.masterTable, this.id);
 				this._bindView()
 				this.filterDiscountsTable();
 				this.bindRebatesTable();
 				this.bindAllContractMembers();
 			});
 		},
+
+		filterMasterTable: function(table, contractID){
+			table.getModel("masterView").setProperty("/showHighlight", true);
+			const binding = table.getBinding("items");
+			this.previousMasterTableApplicationFilters = binding.aApplicationFilters;
+			binding.aApplicationFilters = [];
+			const filters = [
+				new Filter({
+                    path: "ID",
+                    operator: FilterOperator.EQ,
+                    value1: contractID.split("-").splice(0,5).join("-"),
+                    caseSensitive: false
+                })
+			];
+			const sorter = new Sorter({
+				path: "modifiedAt",
+				descending: true
+			});
+			binding.filter(filters).sort(sorter);
+		},
+
 		_bindView: async function () {
 			const path = this.getModel().createKey("/ContractsView", {
 				ContractsViewID: this.id
@@ -267,6 +290,8 @@ sap.ui.define([
 		onCloseDetailPress: function () {
 			this.getModel("appView").setProperty("/actionButtonsInfo/midColumn/fullScreen", false);
 			this.getView().unbindElement();
+			this.masterTable.getBinding("items").aApplicationFilters = this.previousMasterTableApplicationFilters;
+			this.masterTable.getModel("masterView").setProperty("/showHighlight", false);
 			this.getRouter().navTo("master");
 		},
 		toggleFullScreen: function () {

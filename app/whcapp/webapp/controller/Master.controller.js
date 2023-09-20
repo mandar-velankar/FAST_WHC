@@ -16,7 +16,8 @@ sap.ui.define([
 			const viewModel = new JSONModel({
 				delay: 0,
 				title: this.getResourceBundle().getText("masterTitleCount", [0]),
-				noDataText: this.getResourceBundle().getText("masterListNoDataText")
+				noDataText: this.getResourceBundle().getText("masterListNoDataText"),
+                showHighlight: false
 			});
 
 			this.setModel(viewModel, "masterView");
