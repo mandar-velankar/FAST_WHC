@@ -213,7 +213,7 @@ module.exports = (srv) => {
         const promises = whcProducts.map(async prod => {
             const mappedProduct = {
                 ProductName: prod.ProductName,
-                WAC: prod.WAC,
+                WAC: "",
                 DiscountID: discount.ID
             };
             return await INSERT.into(DiscountProducts).entries(mappedProduct);
