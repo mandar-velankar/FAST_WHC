@@ -192,3 +192,10 @@ type RebateLevels {
         Unit_Level_3: Integer;
         Discount_Level_3: Double;
 }
+
+entity VistexData {
+  VistexID          : String;
+  ParentBHOID       : String;
+  MemberBHOID       : String;
+  ParentAccoutName  : String;
+}
