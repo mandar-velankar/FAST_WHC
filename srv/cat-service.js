@@ -176,7 +176,7 @@ module.exports = (srv) => {
     
     srv.on(["CREATE", "UPDATE"], ["ContractCustomersView"], async (req) => {
         const newID = uuidv4();
-        let contractCustomer = await SELECT.one.from(ContractCustomers).where({ID: req.data?.ID});
+        let contractCustomer = await SELECT.one.from(ContractCustomers).where({ID: req.data?.ContractID});
 
         const mappedContractCustomer = {
             BHOID: req.data.BHOID,
@@ -197,6 +197,10 @@ module.exports = (srv) => {
         }
         
         return contractCustomer;
+    })
+
+    srv.on(["DELETE"], ["ContractCustomersView"], async (req) => {
+        return await DELETE.from(ContractCustomers).where({ID: req.data?.ContractCustomerViewID});
     })
 
     const updateMappedProducts = async function (req, products) {

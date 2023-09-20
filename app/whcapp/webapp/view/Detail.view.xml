@@ -111,7 +111,7 @@
 								</form:content>
 							</form:SimpleForm>
 						
-							<l:ResponsiveSplitter height="100%">
+							<l:ResponsiveSplitter >
 								<l:PaneContainer>
 								<l:SplitPane requiredParentWidth="200">
 										<Table id="mainCustomersTable" 
@@ -131,11 +131,16 @@
 														id="multiInput2"
 														suggestionItems="{
 															path: '/ContractCustomersView',
-															sorter: { path: 'Name' }
+															sorter: { path: 'Name' },
+															filters: [
+																{ path : 'ContractID', operator : 'EQ', value1 : '{ID}'},
+																{ path : 'IsParent', operator : 'EQ', value1 : true }
+															]
 														}"
 														showValueHelp="false"
-														enabled="{= ${appView>/editmode}}">
-														<core:Item key="{Name}" text="{Name}" />
+														enabled="{= ${appView>/editmode}}"
+														tokenUpdate="onTokenUpdate">
+														<core:Item key="{ID}" text="{Name}" />
 													</MultiInput>
 												</content>
 											</OverflowToolbar>
@@ -178,8 +183,9 @@
 															]
 														}"
 														showValueHelp="false"
-														enabled="{= ${appView>/editmode}}">
-														<core:Item key="{Name}" text="{Name}" />
+														enabled="{= ${appView>/editmode}}"
+														tokenUpdate="onTokenUpdate">
+														<core:Item key="{ContractCustomerViewID}" text="{Name}" />
 													</MultiInput>
 												</content>
 											</OverflowToolbar>
