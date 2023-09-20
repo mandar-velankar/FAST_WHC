@@ -457,7 +457,7 @@ sap.ui.define([
 		contractSavedSuccess: function (event) {
 			const hasErrorMessages = this.oMessageManager.getMessageModel().getData();
 			if (hasErrorMessages.length < 1) {
-				MessageBox.success("Contract Updated: " + this.getView().getBindingContext().getProperty("ID"));
+				MessageBox.success("Contract updated successfully");
 				this.getModel("appView").setProperty("/editmode", false);
 				this.oDynamicPage.setShowFooter(false);
 				this.filterDiscountsTable();
