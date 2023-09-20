@@ -272,7 +272,7 @@ sap.ui.define([
 			const oBoundContext = oForm.getElementBinding().getBoundContext();
 			const newProposalObj = oBoundContext.getObject();
 
-			newProposalObj.TypeID = this.byId('idGroupType').getSelectedButton().getText();
+			newProposalObj.Type = this.byId('idGroupType').getSelectedButton().getText();
 			const oNewBindingCtx = oDefaultModel.createEntry("/ContractsView", {
 				properties: newProposalObj
 			});
