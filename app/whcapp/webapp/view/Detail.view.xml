@@ -115,7 +115,14 @@
 								<l:PaneContainer>
 								<l:SplitPane requiredParentWidth="200">
 										<Table id="mainCustomersTable" 
-											items="{/ContractCustomersView}"
+											items="{
+															path: '/ContractCustomersView',
+															sorter: { path: 'Name' },
+															filters: [
+																{ path : 'ContractID', operator : 'EQ', value1 : '{ID}'},
+																{ path : 'IsParent', operator : 'EQ', value1 : true }
+															]
+														}"
 											growing="true"
 											growingThreshold="15"
 											growingScrollToLoad="false"
@@ -126,34 +133,30 @@
 												<content>
 													<Title text="Parent BHO ID" level="H2"/>
 													<Button text="+" type="Emphasized" press=".onAddMainCustomerButtonPress" enabled="{= ${appView>/editmode}}" visible="{= ${appView>/editmode}}"/>
-													<MultiInput width="70%"
-														showClearIcon="true"
-														id="multiInput2"
-														suggestionItems="{
-															path: '/ContractCustomersView',
-															sorter: { path: 'Name' },
-															filters: [
-																{ path : 'ContractID', operator : 'EQ', value1 : '{ID}'},
-																{ path : 'IsParent', operator : 'EQ', value1 : true }
-															]
-														}"
-														showValueHelp="false"
-														enabled="{= ${appView>/editmode}}"
-														tokenUpdate="onTokenUpdate">
-														<core:Item key="{ID}" text="{Name}" />
-													</MultiInput>
 												</content>
 											</OverflowToolbar>
 										</headerToolbar>
 											<columns>
-												<Column>
+												<Column width="20%">
+													<Text text="BHO ID" />
+												</Column>
+												<Column width="75%">
 													<Text text="Name" />
+												</Column>
+												<Column width="5%">
+													<Text text="" />
 												</Column>
 											</columns>
 											<items>
 												<ColumnListItem>
 													<cells>
+														<Text text="{BHOID}" />
+													</cells>
+													<cells>
 														<Text text="{Name}" />
+													</cells>
+													<cells>
+														<Button icon="sap-icon://delete" press="onDeleteBHO" visible="{= ${appView>/editmode}}"/>
 													</cells>
 												</ColumnListItem>
 											</items>
@@ -161,7 +164,14 @@
 									</l:SplitPane>
 									<l:SplitPane requiredParentWidth="700">
 										<Table id="customersTable" 
-											   items = "{/ContractCustomersView}"
+											   items = "{
+															path: '/ContractCustomersView',
+															sorter: { path: 'Name' },
+															filters: [
+																{ path : 'ContractID', operator : 'EQ', value1 : '{ID}'},
+																{ path : 'IsParent', operator : 'EQ', value1 : true }
+															]
+														}"
 											   growing="true"
 											   growingThreshold="15"
 											   growingScrollToLoad="false"
@@ -172,35 +182,32 @@
 												<content>
 													<Title text="Member BHO ID" level="H2"/>
 													<Button text="+" type="Emphasized" press=".onAddCustomerButtonPress" enabled="{= ${appView>/editmode}}" visible="{= ${appView>/editmode}}"/>
-													<MultiInput width="70%"
-														showClearIcon="true"
-														id="multiInputMemberBHO"
-														suggestionItems="{
-															path: '/ContractCustomersView',
-															sorter: { path: 'Name' },
-															filters: [
-																{path: 'IsParent', operator: 'EQ', value1: false}
-															]
-														}"
-														showValueHelp="false"
-														enabled="{= ${appView>/editmode}}"
-														tokenUpdate="onTokenUpdate">
-														<core:Item key="{ContractCustomerViewID}" text="{Name}" />
-													</MultiInput>
 												</content>
 											</OverflowToolbar>
 										</headerToolbar>
 										<MultiInput id="multiId" showValueHelp="false">
 										</MultiInput>
 											<columns>
-												<Column>
+												<Column width="20%">
+													<Text text="BHO ID" />
+												</Column>
+												<Column width="70%">
 													<Text text="Name" />
+												</Column>
+												<Column width="10%">
+													<Text text="" />
 												</Column>
 											</columns>
 											<items>
 												<ColumnListItem>
 													<cells>
+														<Text text="{BHOID}" />
+													</cells>
+													<cells>
 														<Text text="{Name}" />
+													</cells>
+													<cells>
+														<Button icon="sap-icon://delete" press="onDeleteBHO" visible="{= ${appView>/editmode}}"/>
 													</cells>
 												</ColumnListItem>
 											</items>
