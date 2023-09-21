@@ -11,6 +11,7 @@ service CatalogService {
     entity Discounts as projection on whc.Discounts;
     entity Rebates as projection on whc.Rebates;
     entity RebatesHistory as projection on whc.Rebates_History;
+    entity VistexData as projection on whc.VistexData;
 
     entity ContractsView as select from Contracts {
         key ID || '-' || replace(TO_NVARCHAR(ValidTo, 'YYYY-MM-DD HH24:MI:SS.FF3') || 'Z', ' ', 'T') as ContractsViewID:String,
