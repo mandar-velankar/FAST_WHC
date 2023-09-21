@@ -101,6 +101,7 @@ entity Discounts : cuid, managed {
   Discount        : Double;
   ProductID       : String;
   ContractID      : String;
+  SelectedDiscountType: String;
   Contracts       : Association to Contracts on Contracts.ID = ContractID;
   Products        : Composition of many DiscountProducts
                       on Products.Discount = $self;                   
@@ -116,6 +117,7 @@ entity Discounts_History : managed {
   Discount        : Double;
   ProductID       : String;
   ContractID      : String;
+  SelectedDiscountType: String;
   Contracts       : Association to Contracts_History on Contracts.ID = ContractID;
   Products         : Composition of many DiscountProducts_History
                       on Products.Discount = $self;  

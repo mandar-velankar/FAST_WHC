@@ -246,7 +246,7 @@
 							<Title text="Discounts" />
 							<ToolbarSpacer />
 							<Label text='Type:'/>
-							<Select id = "idDiscountType" change="onFormatDiscountTableValues" enabled="{= ${appView>/editmode}}">
+							<Select id = "idDiscountType" change="onFormatDiscountTableValues" selectedKey="{detailView>/selectedDiscountType}" enabled="{= ${appView>/editmode}}">
 								<items>
 									<core:Item key = "Value" text="Value"></core:Item>
 									<core:Item key = "Percentage" text="Percentage"></core:Item>
@@ -254,43 +254,9 @@
 							</Select>
 						</OverflowToolbar>
 					</headerToolbar>
-					<Table id="discountsTable" 
-						items="{
-							path:'/DiscountsView'
-						}"
-						growing="true"
-						growingThreshold="15"
-						growingScrollToLoad="false"
-						busyIndicatorDelay="0">
-						<columns>
-							<Column>
-								<Text text="Year" />
-							</Column>
-							<Column>
-								<Text text="Units" />
-							</Column>
-							<Column>
-								<Text text="Mirena" />
-							</Column>
-							<Column>
-								<Text text="Kyleena" />
-							</Column>
-							<Column>
-								<Text text="Skyla" />
-							</Column>
-						</columns>
-						<items>
-							<ColumnListItem>
-								<cells>
-									<Text text="Y{Year}" />
-									<Input value="{Units}" enabled="{= ${appView>/editmode}}"/>
-									<Input value="{Mirena}" enabled="{= ${appView>/editmode}}"/>
-									<Input value="{Kyleena}" enabled="{= ${appView>/editmode}}"/>
-									<Input value="{Skyla}" enabled="{= ${appView>/editmode}}"/>
-								</cells>
-							</ColumnListItem>
-						</items>
-					</Table>
+					 <VBox id="idDiscountVbox" class="sapUiNoMargin">
+                        <!-- PriceConditionFragments dynamically loaded from Controller:loadPriceConditionFragment  -->
+                    </VBox>
 					</Panel>
 
 					<Panel expandable="true" width="auto" class="sapUiResponsiveMargin" expanded="true">

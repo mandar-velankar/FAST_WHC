@@ -54,12 +54,17 @@ module.exports = (srv) => {
                 Kyleena: "",
                 Skyla: "",
                 isCurrent: isCurrent,
-                ContractsViewID: contarctsViewId
+                ContractsViewID: contarctsViewId,
+                SelectedDiscountType: discount.SelectedDiscountType
             };
 
             discountProducts.forEach(product => {
                 const productName = product.ProductName;
-                mappedDiscount[productName] = product.WAC
+                if (discount.SelectedDiscountType === "Value") {
+                    mappedDiscount[productName] = !Number(product.WAC) ? "" : parseInt(product.WAC * 100);
+                }else {
+                    mappedDiscount[productName] = product.WAC
+                }
             });
 
             discountItems.push(mappedDiscount);
@@ -85,7 +90,8 @@ module.exports = (srv) => {
             ID: req.data.DiscountID,
             Units: req.data.Units,
             Discount: req.data.Discount,
-            ProductID: req.data.ProductID
+            ProductID: req.data.ProductID,
+            SelectedDiscountType: req.data.SelectedDiscountType
         }
 
 
@@ -206,7 +212,7 @@ module.exports = (srv) => {
     const updateMappedProducts = async function (req, products) {
         if (products.length > 0) {
             const productPromises = products.map(async product => {
-                product.WAC = req.data[product.ProductName]
+                product.WAC = !isNaN(Number(req.data[product.ProductName])) ? req.data[product.ProductName] + "" : "";
                 delete product.ValidFrom;
                 delete product.ValidTo;
                 return await UPDATE(DiscountProducts).with(product).where({ID: product.ID});
@@ -237,7 +243,7 @@ module.exports = (srv) => {
                 ContractID: contractId,
                 Year: i,
                 Type: 2,
-                Units: 0
+                SelectedDiscountType: "Value"
             }
             newDiscounts.push(discount);
 
