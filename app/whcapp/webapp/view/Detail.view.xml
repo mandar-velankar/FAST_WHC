@@ -104,8 +104,8 @@
 									<Label text='Proposal Name '/>
 									<Input id="idProposalName" value="{Name}"  enabled="{= ${appView>/editmode}}"/>
 
-									<Label text='Vistex ID ' visible="{= ${TypeID} === 'Amendment' || ${TypeID} === 'Renewal Contract' }"/>
-									<Input id="idVistexInput" value="{VistexID}"  enabled="{= ${appView>/editmode}}" visible="{= ${TypeID} === 'Amendment' || ${TypeID} === 'Renewal Contract' }"/>
+									<Label text='Vistex ID ' visible="{= ${Type} === 'Amendment' || ${Type} === 'Renewal Contract' }"/>
+									<Input id="idVistexInput" value="{VistexID}"  enabled="{= ${appView>/editmode}}" visible="{= ${Type} === 'Amendment' || ${Type} === 'Renewal Contract' }"/>
 
 									<Button id="wacButtonId" text="WAC" type="Emphasized" press=".onShowWacButtonPress" />
 								</form:content>
