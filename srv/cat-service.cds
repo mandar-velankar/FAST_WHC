@@ -77,11 +77,12 @@ service CatalogService {
         ContractID: UUID;
         DiscountID: UUID;
         Units: Integer;
-        Mirena: String;
-        Kyleena: String;
-        Skyla: String;
+        Mirena: Double;
+        Kyleena: Double;
+        Skyla: Double;
         ContractValidFrom: Timestamp;
         ContractValidTo: Timestamp;
+        SelectedDiscountType: String;
     }
 
 

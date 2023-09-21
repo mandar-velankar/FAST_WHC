@@ -35,14 +35,41 @@ sap.ui.define([
 		_onObjectMatched: async function (oEvent) {
 			this.id = oEvent.getParameter("arguments").id;
 			this.getModel("appView").setProperty("/layout", "TwoColumnsMidExpanded");
+			this.masterTable = oEvent.getParameter("view").byId('masterTable');
 
-			this.getModel().metadataLoaded().then(async ()=>{
+				
+			this.getModel().metadataLoaded().then( async ()=>{
+				this.filterMasterTable(this.masterTable, this.id);
+				const selectedDiscountType = await this.getSavedDiscountType(this.id);
+				this.getModel("detailView").setProperty("/selectedDiscountType", selectedDiscountType)
+				await this.loadDiscountFragment(selectedDiscountType);
 				this._bindView()
 				this.filterDiscountsTable();
 				this.bindRebatesTable();
 				this.bindAllContractMembers();
 			});
 		},
+
+		filterMasterTable: function(table, contractID){
+			table.getModel("masterView").setProperty("/showHighlight", true);
+			const binding = table.getBinding("items");
+			this.previousMasterTableApplicationFilters = binding.aApplicationFilters;
+			binding.aApplicationFilters = [];
+			const filters = [
+				new Filter({
+                    path: "ID",
+                    operator: FilterOperator.EQ,
+                    value1: contractID.split("-").splice(0,5).join("-"),
+                    caseSensitive: false
+                })
+			];
+			const sorter = new Sorter({
+				path: "modifiedAt",
+				descending: true
+			});
+			binding.filter(filters).sort(sorter);
+		},
+
 		_bindView: async function () {
 			const path = this.getModel().createKey("/ContractsView", {
 				ContractsViewID: this.id
@@ -256,7 +283,10 @@ sap.ui.define([
 			this.getModel("appView").setProperty("/editmode", !editmode);
 			this.oDynamicPage.setShowFooter(true);
 		},
-		onFooterCancelPress: function () {
+		onFooterCancelPress: async function () {
+			const savedDiscountType = await this.getSavedDiscountType(this.id);
+			this.getModel("detailView").setProperty("/selectedDiscountType", savedDiscountType);
+			await this.loadDiscountFragment(savedDiscountType);
 			this.getModel().resetChanges();
 			this.filterDiscountsTable();
 			this.bindRebatesTable();
@@ -267,6 +297,8 @@ sap.ui.define([
 		onCloseDetailPress: function () {
 			this.getModel("appView").setProperty("/actionButtonsInfo/midColumn/fullScreen", false);
 			this.getView().unbindElement();
+			this.masterTable.getBinding("items").aApplicationFilters = this.previousMasterTableApplicationFilters;
+			this.masterTable.getModel("masterView").setProperty("/showHighlight", false);
 			this.getRouter().navTo("master");
 		},
 		toggleFullScreen: function () {
@@ -455,6 +487,7 @@ sap.ui.define([
 				const draftStatusID = await this.getStatusID('Draft');
 				const context = this.getView().getBindingContext();
 				this.getView().getModel().setProperty("StatusID",draftStatusID,context);
+				this.calculateDiscountProductsPercentage();
 				await this.submitChanges();
 				
 			} catch (error) {
@@ -523,35 +556,39 @@ sap.ui.define([
 			  }
 		},
 
-		onFormatDiscountTableValues: function (event) {
+		onFormatDiscountTableValues: async function (event) {
+			const contract = this.getView().getBindingContext().getObject();
 			const discountTable = this.byId("discountsTable");
 			const items = discountTable.getItems();
-			const selectedType = event.getParameter("selectedItem").getProperty("text");
-
+			const selectedType = event?.getParameter("selectedItem")?.getProperty("text") || this.getModel("detailView").getProperty("/selectedDiscountType");
+			this.getModel("detailView").setProperty("/selectedDiscountType", selectedType);
 			switch (selectedType) {
 				case "Value":
+					await this.loadDiscountFragment("Value");
+					this.filterDiscountsTable(contract?.ProposedContractLength);
 					items.map(item => {
-						const obj = item.getBindingContext().getObject();
-						const path = item.getBindingContext().getPath();
-						const Mirena = formatter.parsePercentage(obj.Mirena);
-						const Kyleena = formatter.parsePercentage(obj.Kyleena);
-						const Skyla = formatter.parsePercentage(obj.Skyla);
-						this.getModel().setProperty(`${path}/Mirena`, Mirena ? Math.trunc(Mirena * 100) + "" : Mirena);
-						this.getModel().setProperty(`${path}/Kyleena`, Kyleena ? Math.trunc(Kyleena * 100) + "" : Kyleena);
-						this.getModel().setProperty(`${path}/Skyla`, Skyla ? Math.trunc(Skyla * 100) + "" : Skyla);
-					})
+						const context = item.getBindingContext();
+						const obj = context.getObject();
+						const Mirena = parseInt(obj.Mirena * 100);
+						const Kyleena = parseInt(obj.Kyleena * 100);
+						const Skyla = parseInt(obj.Skyla * 100);
+
+						this.getModel().setProperty('Mirena', !Mirena ? "" : Mirena, context);
+						this.getModel().setProperty('Kyleena', !Kyleena ? "" : Kyleena, context);
+						this.getModel().setProperty('Skyla', !Skyla ? "" : Skyla, context);
+					});
 					break;
 				case "Percentage":
+					await this.loadDiscountFragment("Percentage");
+					this.filterDiscountsTable(contract?.ProposedContractLength);
 					items.map(item => {
-						const obj = item.getBindingContext().getObject();
-						const path = item.getBindingContext().getPath();
-						const Mirena = formatter.formatPercentage(obj.Mirena);
-						const Kyleena = formatter.formatPercentage(obj.Kyleena);
-						const Skyla = formatter.formatPercentage(obj.Skyla);
-						this.getModel().setProperty(`${path}/Mirena`, Mirena);
-						this.getModel().setProperty(`${path}/Kyleena`, Kyleena);
-						this.getModel().setProperty(`${path}/Skyla`, Skyla);
-					})
+						const context = item.getBindingContext();
+						const obj = context.getObject();
+
+						this.getModel().setProperty('Mirena', obj.Mirena / 100, context);
+						this.getModel().setProperty('Kyleena', obj.Kyleena / 100, context);
+						this.getModel().setProperty('Skyla', obj.Skyla / 100, context);
+					});
 					break;
 				default:
 					break;
@@ -884,6 +921,43 @@ sap.ui.define([
 					}
 				});
 			});
+		},
+
+		getSavedDiscountType: async function (contractViewID) {
+			const contract = await this.getContract(contractViewID);
+			const discounts = await this.getDiscounts(contract);
+			return discounts?.results?.[0]?.SelectedDiscountType || "Value";
+		},
+
+		calculateDiscountProductsPercentage: function () {
+			const discountTable = this.byId("discountsTable");
+			const items = discountTable.getItems();
+			const selectedDiscountType = this.getModel("detailView").getProperty("/selectedDiscountType");
+
+			items.map(item => {
+				const context = item.getBindingContext();
+				const obj = context.getObject();
+				if (selectedDiscountType === "Value") {
+					this.getModel().setProperty('Mirena', obj.Mirena / 100, context);
+					this.getModel().setProperty('Kyleena', obj.Kyleena / 100, context);
+					this.getModel().setProperty('Skyla', obj.Skyla / 100, context);
+				}
+				this.getModel().setProperty('SelectedDiscountType', selectedDiscountType, context);
+			})		
+		},
+
+		loadDiscountFragment: function(discountType){
+			const vbox = this.byId("idDiscountVbox");
+			vbox.destroyItems();
+			return Fragment.load({
+				id: this.getView().getId(),
+				name: `com.bayer.tender.whcapp.view.fragments.DiscountType${discountType}`,
+				controller: this
+			}).then(function (table) {
+
+				vbox.addItem(table);
+				return table;
+			}.bind(this));
 		},
 	});
 
