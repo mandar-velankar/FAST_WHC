@@ -367,11 +367,17 @@ sap.ui.define([
 		onProposedContractLengthChange: function (event) {
 			let input = event.getSource(),
 			value = input?.getValue();
-
+			if (!value) {
+				this.filterDiscountsTable(value);
+				this.bindRebatesTable(value);
+				return;
+			}
 			if (value < 1 || value > 6) {
 				input.setValueState("Error");
                 input.setValueStateText("Proposed Contract Length should not be greater than 6 years");
                 input.openValueStateMessage();
+				this.filterDiscountsTable("");
+				this.bindRebatesTable("");
 			}else {
 				input.setValueState("None");
                 input.setValueStateText("");

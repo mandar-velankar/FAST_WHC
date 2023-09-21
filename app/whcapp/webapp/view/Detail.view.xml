@@ -230,7 +230,16 @@
 							<Input id="idBaseLineUnitsInput" value="{BaseLineUnits}"  enabled="{= ${appView>/editmode}}" width='20%' liveChange="onBaseLineUnitChange" type="Number"/>
 
 							<Label text='Base Line Discount '/>
-							<Input id="idBaseLineDiscountInput" value="{BaseLineDiscount}"  enabled="{= ${appView>/editmode}}" type="Number" description="%" width='40%'/>
+							<Input 
+								id="idBaseLineDiscountInput" 
+								value="{
+									path: 'BaseLineDiscount',
+									type: 'com.bayer.tender.whcapp.model.datatypes.CustomPercentageType' 
+								}"  
+								enabled="{= ${appView>/editmode}}" 
+								description="%" 
+								width='40%'
+							/>
 
 							<Label text='Proposed Contract Length '/>
 							<Input id="idProposedContractLengthInput" value="{ProposedContractLength}"  enabled="{= ${appView>/editmode}}" width='20%' liveChange="onProposedContractLengthChange" type="Number"/>
