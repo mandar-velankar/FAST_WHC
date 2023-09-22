@@ -484,12 +484,14 @@ sap.ui.define([
 
 		},
 
-		onMenuAction: function (event) {
+		onMenuAction: async function (event) {
 			let selectedItem = event.getParameter("item");
 			let selectedText = selectedItem.getText();
 		  
 			// Update the "Status" Text element's text property based on the selected menu item
 			let statusText = this.getView().byId("idStatus");
+
+
 			switch (selectedText) {
 				case "Save Draft":
 					statusText.setText("Draft");
@@ -511,7 +513,18 @@ sap.ui.define([
 				  	break;
 				default:
 				  	break;
-			  }
+			}
+
+			const draftStatusID = await this.getStatusID(statusText.getText());
+			const context = this.getView().getBindingContext();
+			this.getView().getModel().setProperty("StatusID",draftStatusID,context);
+			this.getView().getModel().setProperty("Status",statusText.getText(),context);
+
+			return new Promise((resolve, reject) => {
+				this.getModel().submitChanges({
+					error: this.contractSavedError.bind(this)
+				});
+			})
 		},
 
 		onFormatDiscountTableValues: async function (event) {
