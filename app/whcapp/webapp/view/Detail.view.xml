@@ -431,7 +431,7 @@
 								httpRequestMethod="Put"
 								afterItemAdded="onAfterItemAdded"
 								uploadCompleted="onUploadCompleted"
-								items="{path: 'Attachments', templateShareable: false}">
+								items="{path: '/Attachments', templateShareable: false}">
 							<upload:items>
 								<upload:UploadSetItem
 										fileName="{FileName}"
