@@ -63,7 +63,7 @@
 				<FlexBox justifyContent="Start">
 					<VBox justifyContent="Center">
 						<Label text="Status" textAlign="Center" width="100%"/>
-						<Text id="idStatus" text="{Status/Status}"/>
+						<Text id="idStatus" text="{Status}"/>
 						<Text id="idStatusId" text="{StatusID}" visible="false"/>
                     </VBox>
 				</FlexBox>
@@ -133,6 +133,7 @@
 												<content>
 													<Title text="Parent BHO ID" level="H2"/>
 													<Button text="+" type="Emphasized" press=".onAddMainCustomerButtonPress" enabled="{= ${appView>/editmode}}" visible="{= ${appView>/editmode}}"/>
+													<Button id="btnManualBHOParent" text="Add Manually" type="Emphasized" press=".onAddNonVeevaBHO" enabled="{= ${appView>/editmode}}" visible="{= ${appView>/editmode}}"/>
 												</content>
 											</OverflowToolbar>
 										</headerToolbar>
@@ -182,6 +183,7 @@
 												<content>
 													<Title text="Member BHO ID" level="H2"/>
 													<Button text="+" type="Emphasized" press=".onAddCustomerButtonPress" enabled="{= ${appView>/editmode}}" visible="{= ${appView>/editmode}}"/>
+													<Button id="btnManualBHO" text="Add Manually" type="Emphasized" press=".onAddNonVeevaBHO" enabled="{= ${appView>/editmode}}" visible="{= ${appView>/editmode}}"/>
 												</content>
 											</OverflowToolbar>
 										</headerToolbar>
