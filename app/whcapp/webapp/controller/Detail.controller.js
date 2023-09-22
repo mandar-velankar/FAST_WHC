@@ -180,11 +180,8 @@ sap.ui.define([
 		},
 
 		bindContractParentMembers: async function (){
-			let oMultiInput = this.byId('multiInput2');
 			let oMembersTable = this.byId('mainCustomersTable');
 			const contract = await this.getContractById();
-			let contractCustomers = await this.getContractCustomersById(contract);
-			let tokens = [];
 			let oneSecondLaterValidFromDate = new Date(contract?.ValidFrom);
 			oneSecondLaterValidFromDate.setSeconds(oneSecondLaterValidFromDate.getSeconds() + 1);
 
@@ -198,28 +195,11 @@ sap.ui.define([
 				],
 				template: membersTableTemplate
 			});
-
-			contractCustomers = contractCustomers.filter(customer => customer.IsParent === true);
-
-			// for history data we need additional filter
-			if(!contract.isCurrent){
-				contractCustomers = contractCustomers.filter(customer => customer.ValidFrom > contract?.ValidFrom && customer.ValidFrom <= oneSecondLaterValidFromDate);
-			}
-
-			//add tokens
-			contractCustomers.forEach(customer => {
-				tokens.push(new Token({ text: customer.Name, key: customer.ID }));
-			});
-
-			oMultiInput.setTokens(tokens);
 		},
 
 		bindContractMembers: async function (){
-			let oMultiInput = this.byId('multiInputMemberBHO');
 			let oMembersTable = this.byId('customersTable');
 			const contract = await this.getContractById();
-			let contractCustomers = await this.getContractCustomersById(contract);
-			let tokens = [];
 			let oneSecondLaterValidFromDate = new Date(contract?.ValidFrom);
 			oneSecondLaterValidFromDate.setSeconds(oneSecondLaterValidFromDate.getSeconds() + 1);
 
@@ -233,33 +213,10 @@ sap.ui.define([
 				],
 				template: membersTableTemplate
 			});
-
-			contractCustomers = contractCustomers.filter(customer => customer.IsParent === false);
-
-			// for history data we need additional filter
-			if(!contract.isCurrent){
-				contractCustomers = contractCustomers.filter(customer => customer.ValidFrom > contract?.ValidFrom && customer.ValidFrom <= oneSecondLaterValidFromDate);
-			}
-
-			//add tokens
-			contractCustomers.forEach(customer => {
-				tokens.push(new Token({ text: customer.Name, key: customer.ID }));
-			});
-
-			oMultiInput.setTokens(tokens);
 		},
 
-		onTokenUpdate: async function (event){
-			if(event.getParameter('type') === 'removed'){
-				const removedTokens = event.getParameter("removedTokens");
-
-				//get path to remove
-				//remove
-				removedTokens.forEach(removedToken => {
-					this.getOwnerComponent().getModel().remove(`/ContractCustomersView('${removedToken.getProperty('key')}')`)
-				});
-
-			}
+		onDeleteBHO: async function (event){
+			this.getOwnerComponent().getModel().remove(`/ContractCustomersView('${this.getOwnerComponent().getModel().getProperty(event.getSource().getParent().getBindingContextPath()).ID}')`);
 		},
 
 		getContractCustomersById: function(contract){
@@ -314,7 +271,6 @@ sap.ui.define([
 			}
 		},
 		onAddMainCustomerButtonPress: async function (event) {
-			let oMultiInput2 = this.byId("multiInput2");
 			const searchWidgetEl = document.getElementById("searchWidget");
 			let contract = await this.getContractById(this.id);
 			searchWidgetEl.start();
@@ -332,11 +288,6 @@ sap.ui.define([
 					properties: newCustomerObject
 				});
 
-				let tokens = oMultiInput2.getTokens();
-				tokens.push(new Token({ text: entity.entity.whc_legal_name__c, key: entity.entity.Bayer_ID__c }))
-
-				oMultiInput2.setTokens(tokens);
-
 				searchWidgetEl.close();
 
 				return new Promise((resolve, reject) => {
@@ -350,7 +301,6 @@ sap.ui.define([
 		},
 
 		onAddCustomerButtonPress: async function (event) {
-			let oMultiInput1 = this.byId("multiInputMemberBHO");
 			const searchWidgetEl = document.getElementById("searchWidget");
 			let contract = await this.getContractById(this.id);
 			searchWidgetEl.start();
@@ -368,12 +318,13 @@ sap.ui.define([
 					properties: newCustomerObject
 				});
 
-				let tokens = oMultiInput1.getTokens();
-				tokens.push(new Token({ text: entity.entity.whc_legal_name__c, key: entity.entity.Bayer_ID__c }))
-
-				oMultiInput1.setTokens(tokens);
-
 				searchWidgetEl.close();
+
+				return new Promise((resolve, reject) => {
+					this.getModel().submitChanges({
+						error: this.contractSavedError.bind(this)
+					});
+				})
 			}, { once: true });
 
 		},
@@ -416,11 +367,17 @@ sap.ui.define([
 		onProposedContractLengthChange: function (event) {
 			let input = event.getSource(),
 			value = input?.getValue();
-
+			if (!value) {
+				this.filterDiscountsTable(value);
+				this.bindRebatesTable(value);
+				return;
+			}
 			if (value < 1 || value > 6) {
 				input.setValueState("Error");
                 input.setValueStateText("Proposed Contract Length should not be greater than 6 years");
                 input.openValueStateMessage();
+				this.filterDiscountsTable("");
+				this.bindRebatesTable("");
 			}else {
 				input.setValueState("None");
                 input.setValueStateText("");

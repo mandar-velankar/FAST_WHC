@@ -115,7 +115,14 @@
 								<l:PaneContainer>
 								<l:SplitPane requiredParentWidth="200">
 										<Table id="mainCustomersTable" 
-											items="{/ContractCustomersView}"
+											items="{
+															path: '/ContractCustomersView',
+															sorter: { path: 'Name' },
+															filters: [
+																{ path : 'ContractID', operator : 'EQ', value1 : '{ID}'},
+																{ path : 'IsParent', operator : 'EQ', value1 : true }
+															]
+														}"
 											growing="true"
 											growingThreshold="15"
 											growingScrollToLoad="false"
@@ -126,34 +133,30 @@
 												<content>
 													<Title text="Parent BHO ID" level="H2"/>
 													<Button text="+" type="Emphasized" press=".onAddMainCustomerButtonPress" enabled="{= ${appView>/editmode}}" visible="{= ${appView>/editmode}}"/>
-													<MultiInput width="70%"
-														showClearIcon="true"
-														id="multiInput2"
-														suggestionItems="{
-															path: '/ContractCustomersView',
-															sorter: { path: 'Name' },
-															filters: [
-																{ path : 'ContractID', operator : 'EQ', value1 : '{ID}'},
-																{ path : 'IsParent', operator : 'EQ', value1 : true }
-															]
-														}"
-														showValueHelp="false"
-														enabled="{= ${appView>/editmode}}"
-														tokenUpdate="onTokenUpdate">
-														<core:Item key="{ID}" text="{Name}" />
-													</MultiInput>
 												</content>
 											</OverflowToolbar>
 										</headerToolbar>
 											<columns>
-												<Column>
+												<Column width="20%">
+													<Text text="BHO ID" />
+												</Column>
+												<Column width="75%">
 													<Text text="Name" />
+												</Column>
+												<Column width="5%">
+													<Text text="" />
 												</Column>
 											</columns>
 											<items>
 												<ColumnListItem>
 													<cells>
+														<Text text="{BHOID}" />
+													</cells>
+													<cells>
 														<Text text="{Name}" />
+													</cells>
+													<cells>
+														<Button icon="sap-icon://delete" press="onDeleteBHO" visible="{= ${appView>/editmode}}"/>
 													</cells>
 												</ColumnListItem>
 											</items>
@@ -161,7 +164,14 @@
 									</l:SplitPane>
 									<l:SplitPane requiredParentWidth="700">
 										<Table id="customersTable" 
-											   items = "{/ContractCustomersView}"
+											   items = "{
+															path: '/ContractCustomersView',
+															sorter: { path: 'Name' },
+															filters: [
+																{ path : 'ContractID', operator : 'EQ', value1 : '{ID}'},
+																{ path : 'IsParent', operator : 'EQ', value1 : true }
+															]
+														}"
 											   growing="true"
 											   growingThreshold="15"
 											   growingScrollToLoad="false"
@@ -172,35 +182,32 @@
 												<content>
 													<Title text="Member BHO ID" level="H2"/>
 													<Button text="+" type="Emphasized" press=".onAddCustomerButtonPress" enabled="{= ${appView>/editmode}}" visible="{= ${appView>/editmode}}"/>
-													<MultiInput width="70%"
-														showClearIcon="true"
-														id="multiInputMemberBHO"
-														suggestionItems="{
-															path: '/ContractCustomersView',
-															sorter: { path: 'Name' },
-															filters: [
-																{path: 'IsParent', operator: 'EQ', value1: false}
-															]
-														}"
-														showValueHelp="false"
-														enabled="{= ${appView>/editmode}}"
-														tokenUpdate="onTokenUpdate">
-														<core:Item key="{ContractCustomerViewID}" text="{Name}" />
-													</MultiInput>
 												</content>
 											</OverflowToolbar>
 										</headerToolbar>
 										<MultiInput id="multiId" showValueHelp="false">
 										</MultiInput>
 											<columns>
-												<Column>
+												<Column width="20%">
+													<Text text="BHO ID" />
+												</Column>
+												<Column width="70%">
 													<Text text="Name" />
+												</Column>
+												<Column width="10%">
+													<Text text="" />
 												</Column>
 											</columns>
 											<items>
 												<ColumnListItem>
 													<cells>
+														<Text text="{BHOID}" />
+													</cells>
+													<cells>
 														<Text text="{Name}" />
+													</cells>
+													<cells>
+														<Button icon="sap-icon://delete" press="onDeleteBHO" visible="{= ${appView>/editmode}}"/>
 													</cells>
 												</ColumnListItem>
 											</items>
@@ -223,7 +230,16 @@
 							<Input id="idBaseLineUnitsInput" value="{BaseLineUnits}"  enabled="{= ${appView>/editmode}}" width='20%' liveChange="onBaseLineUnitChange" type="Number"/>
 
 							<Label text='Base Line Discount '/>
-							<Input id="idBaseLineDiscountInput" value="{BaseLineDiscount}"  enabled="{= ${appView>/editmode}}" type="Number" description="%" width='40%'/>
+							<Input 
+								id="idBaseLineDiscountInput" 
+								value="{
+									path: 'BaseLineDiscount',
+									type: 'com.bayer.tender.whcapp.model.datatypes.CustomPercentageType' 
+								}"  
+								enabled="{= ${appView>/editmode}}" 
+								description="%" 
+								width='40%'
+							/>
 
 							<Label text='Proposed Contract Length '/>
 							<Input id="idProposedContractLengthInput" value="{ProposedContractLength}"  enabled="{= ${appView>/editmode}}" width='20%' liveChange="onProposedContractLengthChange" type="Number"/>
@@ -399,7 +415,7 @@
 								  />
 					</Panel>
 
-					<!-- <Panel expandable="true" width="auto" class="sapUiResponsiveMargin" expanded="true">
+				   <Panel expandable="true" width="auto" class="sapUiResponsiveMargin" expanded="true">
 					<headerToolbar>
 						<OverflowToolbar style="Clear">
 							<Title text="Uploaded Files" />
@@ -428,7 +444,7 @@
 								</upload:UploadSetItem>
 							</upload:items>
 						</upload:UploadSet>
-					</Panel> -->
+					</Panel>
 					<Panel headerText="Tableau test" expandable="true" width="auto" class="sapUiResponsiveMargin" expanded="true">
 						<custom:Tableau id="idTableauChart" src="{= ${TypeID} === 'New Proposal' ? 'https://tableau-ncsa-test.aws.cnb/t/CPROD/views/WHCContractProposal/ContractProposal?ORIGINAL_ORDERING_ACCOUNT_NUM=BHO3064937&amp;:embed=y&amp;:showVizHome=n&amp;:tabs=n&amp;:toolbar=n&amp;:apiID=host1#navType=0&amp;navSrc=Parse%22' :
 						 													   'https://tableau-ncsa-test.aws.cnb/t/CPROD/views/WHCContractRenewalV1/WHCContractRenewal?Vistex%20ID=0060062019&amp;:embed=y&amp;:showVizHome=n&amp;:tabs=n&amp;:toolbar=n&amp;:apiID=host20#navType=0&amp;navSrc=Parse' }" 

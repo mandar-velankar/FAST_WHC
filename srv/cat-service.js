@@ -112,7 +112,7 @@ module.exports = (srv) => {
     })
 
     srv.before(["UPDATE"], ["ContractsView"], async (req) => {
-        (!req.data.ProposedContractLength || (req.data.ProposedContractLength < 0 || req.data.ProposedContractLength > 6)) && req.error({ code: 400, message: "Proposed Contract Length should not be greater than 6 years", target: "ProposedContractLength" });
+        (req.data.ProposedContractLength < 0 || req.data.ProposedContractLength > 6) && req.error({ code: 400, message: "Proposed Contract Length should not be greater than 6 years", target: "ProposedContractLength" });
     })
     
     srv.on(["CREATE", "UPDATE"], ["ContractsView"], async (req) => {
