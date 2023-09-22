@@ -133,6 +133,7 @@
 												<content>
 													<Title text="Parent BHO ID" level="H2"/>
 													<Button text="+" type="Emphasized" press=".onAddMainCustomerButtonPress" enabled="{= ${appView>/editmode}}" visible="{= ${appView>/editmode}}"/>
+													<Button id="btnManualBHOParent" text="Add Manually" type="Emphasized" press=".onAddNonVeevaBHO" enabled="{= ${appView>/editmode}}" visible="{= ${appView>/editmode}}"/>
 												</content>
 											</OverflowToolbar>
 										</headerToolbar>
@@ -182,6 +183,7 @@
 												<content>
 													<Title text="Member BHO ID" level="H2"/>
 													<Button text="+" type="Emphasized" press=".onAddCustomerButtonPress" enabled="{= ${appView>/editmode}}" visible="{= ${appView>/editmode}}"/>
+													<Button id="btnManualBHO" text="Add Manually" type="Emphasized" press=".onAddNonVeevaBHO" enabled="{= ${appView>/editmode}}" visible="{= ${appView>/editmode}}"/>
 												</content>
 											</OverflowToolbar>
 										</headerToolbar>

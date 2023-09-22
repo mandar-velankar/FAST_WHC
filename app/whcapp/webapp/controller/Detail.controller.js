@@ -8,8 +8,11 @@ sap.ui.define([
 	"sap/ui/model/Filter",
 	"sap/ui/model/FilterOperator",
 	"sap/ui/model/Sorter",
-	"../model/formatter"
-], function (BaseController, JSONModel, Token, Fragment,MessageToast, MessageBox, Filter, FilterOperator, Sorter, formatter) {
+	"../model/formatter",
+	"sap/m/Dialog",
+	"sap/m/MultiInput",
+	"sap/m/Button",
+], function (BaseController, JSONModel, Token, Fragment,MessageToast, MessageBox, Filter, FilterOperator, Sorter, formatter, Dialog, MultiInput, Button) {
 	"use strict";
 
 	return BaseController.extend("com.bayer.tender.whcapp.controller.Detail", {
@@ -217,6 +220,77 @@ sap.ui.define([
 
 		onDeleteBHO: async function (event){
 			this.getOwnerComponent().getModel().remove(`/ContractCustomersView('${this.getOwnerComponent().getModel().getProperty(event.getSource().getParent().getBindingContextPath()).ID}')`);
+		},
+
+		onAddNonVeevaBHO: async function (event){
+			const that = this;
+			const isParent = event.getSource().getId()?.includes('Parent');
+
+			let dialog = new Dialog({
+				title: "Create",
+				type: "Message",
+				content: [
+					new MultiInput({
+						showValueHelp: false,
+						showSuggestion: false
+					}),
+				],
+				beginButton: new Button({
+							text: "Save",
+							press: function () {
+								dialog.close();
+							}.bind(this)
+				}),
+				endButton: new Button({
+							text: "Cancel",
+							press: function () {
+								dialog.close();
+							}
+				}),
+				afterClose: async function (event) {
+					if(event.getParameters().origin.getText() === 'Save'){
+						//save tokens as ContractMembers
+						await that.saveManuallyAddedCustomerTokens(isParent, dialog);
+					}
+					dialog.destroy();
+				}
+			});
+
+			var bhoInputValidator = function(args){
+				var text = args.text;
+
+				return new Token({key: text, text: text});
+			};
+			dialog.open();
+			dialog.getContent()[0]?.addValidator(bhoInputValidator);
+		},
+
+		saveManuallyAddedCustomerTokens: async function(isParent, dialog){
+			let contract = await this.getContractById(this.id);
+			let bhoInputfield = dialog.getContent()[0];
+			if(bhoInputfield){
+				let tokens = bhoInputfield.getTokens();
+				tokens.forEach(token => {
+					let newCustomerObject = {
+						"BHOID": token.getProperty('text'),
+						"ContractID": contract.ID,
+						"IsParent": isParent
+					}
+	
+					this.getOwnerComponent().getModel().createEntry("/ContractCustomersView", {
+						properties: newCustomerObject
+					});
+	
+				});
+
+				if(tokens?.length > 0){
+					return new Promise((resolve, reject) => {
+						this.getModel().submitChanges({
+							error: this.contractSavedError.bind(this)
+						});
+					})
+				}
+			}
 		},
 
 		getContractCustomersById: function(contract){
