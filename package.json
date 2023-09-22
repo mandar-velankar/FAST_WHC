@@ -21,7 +21,7 @@
         "sqlite3": "^5"
     },
     "scripts": {
-        "start": "cds-serve && node ./srv/cors-proxy",
+        "start": "cds-serve & node srv/cors-proxy.js",
         "watch": "cds watch",
         "watch:hybrid": "cds bind --exec npm run watch --profile hybrid",
         "watch:as": "cds bind --exec npm run watch --profile artiom",
