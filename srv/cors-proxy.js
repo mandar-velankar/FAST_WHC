@@ -1,3 +1,4 @@
+const cds = require('@sap/cds');
 const cors_proxy = require('cors-anywhere');
 const whitelist = ["", "*"];
 
