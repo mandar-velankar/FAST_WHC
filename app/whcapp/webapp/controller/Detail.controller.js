@@ -389,9 +389,10 @@ sap.ui.define([
 
 		onAfterItemAdded:async function(event){
 			const uploader = this.byId("UploadSet");
-			const item = event.getParameter("item")
-			const id = await this.createAttachmentEntry(this.id,item);
-			item.setUploadUrl(window.location.host.search('app') > -1 ? `/app/whc/v2/catalog/Attachments(${id})/Content` : `/whc/v2/catalog/Attachments(${id})/Content`);
+			const item = event.getParameter("item");
+			const contract = await this.getContract(this.id);
+			const id = await this.createAttachmentEntry(contract.ID,item);
+			item.setUploadUrl(window.location.host.search('app') > -1 ? `/app/whc/v2/catalog/Attachments(${contract.ID})/Content` : `/whc/v2/catalog/Attachments(${id})/Content`);
 			uploader.uploadItem(item);
 		},
 		onUploadCompleted: function (event) {
