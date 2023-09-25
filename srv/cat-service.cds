@@ -31,7 +31,6 @@ service CatalogService {
         Status.StatusText as Status,
         ContractCustomers.Name as ParentAccountName: String,
         ContractCustomers.IsParent,
-        ContractCustomers: redirected to ContractCustomers,
         @Core.Computed: false
         true as isCurrent: Boolean,
         createdAt,
@@ -58,7 +57,6 @@ service CatalogService {
         Status.StatusText as Status,
         ContractCustomers.Name as ParentAccountName: String,
         ContractCustomers.IsParent,
-        ContractCustomers: redirected to ContractCustomersHistory,
         @Core.Computed: false
         false as isCurrent: Boolean,
         createdAt,

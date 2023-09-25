@@ -19,7 +19,7 @@ entity Contracts : cuid, managed {
   BaseLineDiscount  : Double;
   ProposedContractLength : Integer;
   ContractCustomers : Association to many ContractCustomers
-                        on ContractCustomers.ContractID = ID;
+                        on ContractCustomers.ContractID = ID and ContractCustomers.IsParent = true;
   Status            : Association to WHCStatus
                         on Status.ID = StatusID;
   ContractType      : Association to WHCTypes
@@ -45,7 +45,7 @@ entity Contracts_History : managed {
   BaseLineDiscount  : Double;
   ProposedContractLength : Integer;
   ContractCustomers : Association to many ContractCustomers_History
-                        on ContractCustomers.ContractID = ID;
+                        on ContractCustomers.ContractID = ID  and ContractCustomers.IsParent = true;
   Status            : Association to WHCStatus
                         on Status.ID = StatusID;
   ContractType      : Association to WHCTypes
