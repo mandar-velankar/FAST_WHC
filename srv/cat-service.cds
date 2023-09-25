@@ -145,62 +145,45 @@ service CatalogService {
     }group by ID;
 
 
-    entity ContractCustomersView as select from ContractCustomers as contractcust
-        inner join Contracts as contracts on contracts.ID = contractcust.ContractID
-        left outer join VistexData as vistex on vistex.VistexID = contracts.VistexID
-    {
-        key contractcust.ID || '-' || replace(TO_NVARCHAR(contractcust.ValidTo, 'YYYY-MM-DD HH24:MI:SS.FF3') || 'Z', ' ', 'T') as ContractCustomerViewID:String,
-        contractcust.ID,
-        contractcust.ValidFrom,
-        contractcust.ValidTo,
-        case
-            when contracts.ContractType.Type = 'New Proposal' 
-                then contractcust.BHOID
-            when contractcust.IsParent = true 
-                then ifnull(vistex.ParentBHOID, contractcust.BHOID)
-                else ifnull(vistex.MemberBHOID, contractcust.BHOID)
-        end as BHOID:String,
-        contractcust.Name,
-        contractcust.ContractID,
-        contractcust.IsParent,
-        contracts.ValidFrom as ContractValidFrom: Timestamp,
-        contracts.ValidTo as ContractValidTo: Timestamp,
-        contractcust.ContractID || '-' || replace(TO_NVARCHAR(contracts.ValidFrom, 'YYYY-MM-DD HH24:MI:SS.FF3') || 'Z', ' ', 'T') || '-' || replace(TO_NVARCHAR(contracts.ValidTo, 'YYYY-MM-DD HH24:MI:SS.FF3') || 'Z', ' ', 'T') as ContractsViewID:String,
+    entity ContractCustomersView as select from ContractCustomers {
+        key ID || '-' || replace(TO_NVARCHAR(ValidTo, 'YYYY-MM-DD HH24:MI:SS.FF3') || 'Z', ' ', 'T') as ContractCustomerViewID:String,
+        ID,
+        ValidFrom,
+        ValidTo,
+        BHOID,
+        Name,
+        ContractID,
+        IsParent,
+        Contract.ValidFrom as ContractValidFrom: Timestamp,
+        Contract.ValidTo as ContractValidTo: Timestamp,
+        ContractID || '-9999-12-31T23:59:59.999Z' as ContractsViewID:String,
         @Core.Computed: false
         true as isCurrent: Boolean,
-        contractcust.createdAt,
-        contractcust.createdBy,
-        contractcust.modifiedAt,
-        contractcust.modifiedBy
+        createdAt,
+        createdBy,
+        modifiedAt,
+        modifiedBy
     }
     union 
     select from MostRecentContractCustomersIDs as mcc
-    left outer join ContractCustomersHistory as c on mcc.ID = c.ID and mcc.MaxValidTo = c.ValidTo
-    inner join ContractsHistory as ch on ch.ID = c.ContractID
-    left outer join VistexData as vistex on vistex.VistexID = ch.VistexID{
-        key c.ID || '-' || replace(TO_NVARCHAR(c.ValidFrom, 'YYYY-MM-DD HH24:MI:SS.FF3') || 'Z', ' ', 'T') || '-' || replace(TO_NVARCHAR(c.ValidTo, 'YYYY-MM-DD HH24:MI:SS.FF3') || 'Z', ' ', 'T') as ContractCustomerViewID:String,
+    left outer join ContractCustomersHistory as c on mcc.ID = c.ID and mcc.MaxValidTo = c.ValidTo{
+        key c.ID || '-' || replace(TO_NVARCHAR(ValidFrom, 'YYYY-MM-DD HH24:MI:SS.FF3') || 'Z', ' ', 'T') || '-' || replace(TO_NVARCHAR(ValidTo, 'YYYY-MM-DD HH24:MI:SS.FF3') || 'Z', ' ', 'T') as ContractCustomerViewID:String,
         c.ID,
-        c.ValidFrom,
-        c.ValidTo,
-        case
-            when ch.ContractType.Type = 'New Proposal' 
-                then c.BHOID
-            when c.IsParent = true 
-                then ifnull(vistex.ParentBHOID, c.BHOID)
-                else ifnull(vistex.MemberBHOID, c.BHOID)
-        END as BHOID:String,
-        c.Name,
-        c.ContractID,
-        c.IsParent,
-        ch.ValidFrom as ContractValidFrom: Timestamp,
-        ch.ValidTo as ContractValidTo: Timestamp,
-        c.ContractID || '-' || replace(TO_NVARCHAR(ch.ValidFrom, 'YYYY-MM-DD HH24:MI:SS.FF3') || 'Z', ' ', 'T') || '-' || replace(TO_NVARCHAR(ch.ValidTo, 'YYYY-MM-DD HH24:MI:SS.FF3') || 'Z', ' ', 'T') as ContractsViewID:String,
+        ValidFrom,
+        ValidTo,
+        BHOID,
+        Name,
+        ContractID,
+        IsParent,
+        Contract.ValidFrom as ContractValidFrom: Timestamp,
+        Contract.ValidTo as ContractValidTo: Timestamp,
+        ContractID || '-' || replace(TO_NVARCHAR(Contract.ValidFrom, 'YYYY-MM-DD HH24:MI:SS.FF3') || 'Z', ' ', 'T') as ContractsViewID:String,
         @Core.Computed: false
         true as isCurrent: Boolean,
-        c.createdAt,
-        c.createdBy,
-        c.modifiedAt,
-        c.modifiedBy
-    } where ch.Status.StatusText = 'Approved';
+        createdAt,
+        createdBy,
+        modifiedAt,
+        modifiedBy
+    } where Contract.Status.StatusText = 'Approved';
     entity DiscountProducts as projection on whc.DiscountProducts;
 }

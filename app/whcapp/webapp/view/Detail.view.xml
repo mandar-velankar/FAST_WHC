@@ -43,7 +43,7 @@
 					<Button id="deleteContractButtonId" icon="sap-icon://delete" text="Delete" type="Reject" press="onDeleteContractPress" enabled="true" />
 					<Button id="refreshButtonId" icon="sap-icon://refresh" type="Emphasized" press="onRefresh" enabled="true"/>
 					<Button id="printButtonId" text="Print" type="Emphasized" press=".onPrintButtonPress" enabled="true"/>
-					<MenuButton id="idButtonAction" text="Set Status" buttonMode="Split" useDefaultActionOnly="false" visible="true" type="Emphasized" enabled="{= !${appView>/editmode}}">
+					<MenuButton id="idButtonAction" text="Set Status" buttonMode="Split" useDefaultActionOnly="false" visible="true" type="Emphasized" enabled="{= !${appView>/editmode} &amp;&amp; ${Status} !== 'Approved' }">
 							<menu>
 								<Menu itemSelected="onMenuAction">
 									<MenuItem text="Save Draft" visible="{accessControl>/whcproposalcreator}" press=".onSave"/>
@@ -105,7 +105,7 @@
 									<Input id="idProposalName" value="{Name}"  enabled="{= ${appView>/editmode}}"/>
 
 									<Label text='Vistex ID ' visible="{= ${Type} === 'Amendment' || ${Type} === 'Renewal Contract' }"/>
-									<Input id="idVistexInput" value="{VistexID}"  enabled="{= ${appView>/editmode}}" visible="{= ${Type} === 'Amendment' || ${Type} === 'Renewal Contract' }" liveChange="onVistexIdChange"/>
+									<Input id="idVistexInput" value="{VistexID}"  enabled="{= ${appView>/editmode}}" visible="{= ${Type} === 'Amendment' || ${Type} === 'Renewal Contract' }"/>
 
 									<Button id="wacButtonId" text="WAC" type="Emphasized" press=".onShowWacButtonPress" />
 								</form:content>
@@ -439,9 +439,10 @@
 										fileName="{FileName}"
 										mediaType="{MediaType}"
 										visibleEdit="false"
-										url="/app/whc/v2/catalog/Attachments({ID})/Content"
+										url="/v2/catalog/Attachments({ID})/Content"
 										enabledRemove="{appView>/editmode}"
 										removePressed=".onAttachmentDelete"
+										openPressed=".onAttachmentDownload"
 										uploadState="Complete">
 								</upload:UploadSetItem>
 							</upload:items>

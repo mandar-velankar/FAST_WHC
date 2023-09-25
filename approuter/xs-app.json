@@ -10,21 +10,21 @@
       "source": "/v4/(.*)$",
       "target": "$1",
       "authenticationType": "basic",
-      "destination": "fast-whc-api",
+      "destination": "srv-api",
       "csrfProtection": false
     },
     {
       "source": "/v2/(.*)$",
       "target": "/v2/$1",
       "authenticationType": "basic",
-      "destination": "fast-whc-api",
+      "destination": "srv-api",
       "csrfProtection": false
     },
     {
       "source": "^/(.*)$",
       "target": "/v2/$1",
       "authenticationType": "basic",
-      "destination": "fast-whc-api",
+      "destination": "srv-api",
       "csrfProtection": true
     }
   ]

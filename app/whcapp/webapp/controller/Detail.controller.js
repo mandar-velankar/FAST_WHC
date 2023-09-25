@@ -50,6 +50,7 @@ sap.ui.define([
 				this.filterDiscountsTable();
 				this.bindRebatesTable();
 				this.bindAllContractMembers();
+				this.bindAttachments();
 			});
 		},
 
@@ -188,14 +189,26 @@ sap.ui.define([
 			let oneSecondLaterValidFromDate = new Date(contract?.ValidFrom);
 			oneSecondLaterValidFromDate.setSeconds(oneSecondLaterValidFromDate.getSeconds() + 1);
 
+			const filters = [
+				new Filter("ContractsViewID", "EQ", contract?.ContractsViewID),
+				new Filter("IsParent", "EQ", true)
+			];
+
+			// for history data we need additional filter
+			if(!contract.isCurrent){
+				const oFilterStartDate = new Filter("ValidFrom", FilterOperator.GE, contract?.ValidFrom);
+				const oFilterEndDate = new Filter("ValidFrom", FilterOperator.LE, oneSecondLaterValidFromDate);
+				filters.push(new Filter({
+					filters: [oFilterStartDate, oFilterEndDate],
+					and: true
+				}));
+			}
+
 			//bind table data
 			const membersTableTemplate = oMembersTable.getBindingInfo("items").template;
 			oMembersTable.bindItems({
 				path: "/ContractCustomersView",
-				filters: [
-					new Filter("ContractID", "EQ", contract.ID),
-					new Filter("IsParent", "EQ", true)
-				],
+				filters: filters,
 				template: membersTableTemplate
 			});
 		},
@@ -206,14 +219,26 @@ sap.ui.define([
 			let oneSecondLaterValidFromDate = new Date(contract?.ValidFrom);
 			oneSecondLaterValidFromDate.setSeconds(oneSecondLaterValidFromDate.getSeconds() + 1);
 
+			const filters = [
+				new Filter("ContractsViewID", "EQ", contract?.ContractsViewID),
+				new Filter("IsParent", "EQ", false)
+			];
+
+			// for history data we need additional filter
+			if(!contract.isCurrent){
+				const oFilterStartDate = new Filter("ValidFrom", FilterOperator.GE, contract?.ValidFrom);
+				const oFilterEndDate = new Filter("ValidFrom", FilterOperator.LE, oneSecondLaterValidFromDate);
+				filters.push(new Filter({
+					filters: [oFilterStartDate, oFilterEndDate],
+					and: true
+				}));
+			}
+
 			//bind table data
 			const membersTableTemplate = oMembersTable.getBindingInfo("items").template;
 			oMembersTable.bindItems({
 				path: "/ContractCustomersView",
-				filters: [
-					new Filter("ContractID", "EQ", contract.ID),
-					new Filter("IsParent", "EQ", false)
-				],
+				filters: filters,
 				template: membersTableTemplate
 			});
 		},
@@ -461,12 +486,20 @@ sap.ui.define([
 			}
 		},
 
+		bindAttachments: async function(event){
+			const contract = await this.getContract(this.id);
+			const uploader = this.byId("UploadSet");
+			await uploader.getBinding('items')?.filter(new Filter('Contract_ID', 'EQ', contract.ID));
+		},
+
 		onAfterItemAdded:async function(event){
 			const uploader = this.byId("UploadSet");
 			const item = event.getParameter("item");
 			const contract = await this.getContract(this.id);
 			const id = await this.createAttachmentEntry(contract.ID,item);
-			item.setUploadUrl(window.location.host.search('app') > -1 ? `/app/whc/v2/catalog/Attachments(${contract.ID})/Content` : `/whc/v2/catalog/Attachments(${id})/Content`);
+			item.setUploadUrl(window.location.host.search('/app') > -1 ? `/app/whc/catalog/Attachments(ID=${id})/Content` : 
+							  window.location.host.search('port4004') > -1 ? `/catalog/Attachments(ID=${id})/Content` :
+							  `/whc/catalog/Attachments(ID=${id})/Content`);
 			uploader.uploadItem(item);
 		},
 		onUploadCompleted: function (event) {
@@ -490,6 +523,20 @@ sap.ui.define([
 	
 			event.preventDefault();
 		},
+
+		onAttachmentDownload: function (event) {
+			const downloadItem = event.getParameter("item");
+			const uploader = this.byId("UploadSet");
+			let item = uploader.getItems()?.find(item => item === downloadItem);
+
+			item?.setUrl(window.location.host.search('/app') > -1 ? `/app/whc/v2/catalog/Attachments(guid'${item.getBindingContext().getProperty('ID')}')/Content` : 
+						 window.location.host.search('port4004') > -1 ? `/v2/catalog/Attachments(guid'${item.getBindingContext().getProperty('ID')}')/Content` :
+						 `/whc/v2/catalog/Attachments(guid'${item.getBindingContext().getProperty('ID')}')/Content`)
+
+			downloadItem.download();
+			event.preventDefault();
+		},
+
 		createAttachmentEntry: async function (id, file) {
 			return new Promise((resolve, reject) => {
 				this.getModel().create("/Attachments", {
@@ -517,14 +564,9 @@ sap.ui.define([
 		onSave: async function () {
 			try {
 				const draftStatusID = await this.getStatusID('Draft');
-				let contract = await this.getContractById(this.id);
 				const context = this.getView().getBindingContext();
 				this.getView().getModel().setProperty("StatusID",draftStatusID,context);
 				this.calculateDiscountProductsPercentage();
-				if(!(contract.Type === 'New Proposal')){
-					await this.onSaveParentBHOID();
-					await this.onSaveMemberBHOID();
-				}
 				await this.submitChanges();
 				
 			} catch (error) {
@@ -1010,117 +1052,6 @@ sap.ui.define([
 				return table;
 			}.bind(this));
 		},
-
-		getVistexData: async function () {
-			return new Promise((resolve, reject) => {
-				this.getModel().read("/VistexData", {
-					success: function (res) {
-						resolve(res)
-					},
-					error: function (err) {
-						reject(err)
-					}
-				});
-			});
-		},
-
-		onVistexIdChange: async function(event){
-
-			// Get the user-input VistexId
-			let vistexId = event.getParameter("value");
-			const vistexData = await this.getVistexData();
-			const vistexItems = vistexData.results.filter(item => item.VistexID === vistexId);
-
-			// Update the MultiInput fields with fetched data
-			let mainCustomersTable = this.getView().byId("mainCustomersTable");
-			let customersTable = this.getView().byId("customersTable");
-
-			// Clear the existing items in the tables
-			mainCustomersTable.removeAllItems();
-			customersTable.removeAllItems();
-
-			//  // Clear the existing items in the tables
-			//  mainCustomersTable.unbindItems();
-			//  customersTable.unbindItems();
-			// Create a Set to store unique ParentBHOID values
-			let uniqueParentBHOIDs = new Set();
-		 
-			 // Add tokens for MemberBhoid and ParentBhoid based on vistexItems
-			 vistexItems.forEach(function (vistexItem) {
-				if (!uniqueParentBHOIDs.has(vistexItem.ParentBHOID)) {
-				 mainCustomersTable.addItem(
-					 new sap.m.ColumnListItem({
-						 cells: [
-							 new sap.m.Text({ text: vistexItem.ParentBHOID })
-							 // Add more cells for other properties if needed
-						 ]
-					 })
-				 );
-					 // Add the ParentBHOID to the Set to avoid duplicates
-					 uniqueParentBHOIDs.add(vistexItem.ParentBHOID);
-				}
-		 
-				 customersTable.addItem(
-					 new sap.m.ColumnListItem({
-						 cells: [
-							 new sap.m.Text({ text: vistexItem.MemberBHOID })
-							 // Add more cells for other properties if needed
-						 ]
-					 })
-				 );
-			 });
-		
-		},
-
-		// onSaveParentBHOID: async function () {
-		// 	let contract = await this.getContractById(this.id);
-		// 	const mainCustomersTable = this.getView().byId("mainCustomersTable");
-		// 	const mainCustomerItems = mainCustomersTable.getItems();
-
-		// 	for(const mainCustomerItem of mainCustomerItems){
-
-		// 		this.getOwnerComponent().getModel().createEntry("/ContractCustomersView", {
-		// 			properties: {
-		// 				"BHOID": mainCustomerItem?.getAggregation("cells")[0]?.getText(),
-		// 				"Name": '',
-		// 				"ContractID": contract.ID,
-		// 				"IsParent": true
-		// 			}
-		// 		});
-			
-		// 	}
-		// 		return new Promise((resolve, reject) => {
-		// 			this.getModel().submitChanges({
-		// 				error: this.contractSavedError.bind(this)
-		// 			});
-		// 		})
-		// },
-
-		// onSaveMemberBHOID: async function () {
-			
-		// 	let contract = await this.getContractById(this.id);
-		// 	const customersTable = this.getView().byId("customersTable");
-		// 	const customerItems = customersTable.getItems();
-
-		// 	for(const customerItem of customerItems){
-
-		// 		this.getOwnerComponent().getModel().createEntry("/ContractCustomersView", {
-		// 			properties: {
-		// 				"BHOID": customerItem?.getAggregation("cells")[0]?.getText(),
-		// 				"Name": '',
-		// 				"ContractID": contract.ID,
-		// 				"IsParent": false
-		// 			}
-		// 		});
-			
-		// 	}
-		// 		return new Promise((resolve, reject) => {
-		// 			this.getModel().submitChanges({
-		// 				error: this.contractSavedError.bind(this)
-		// 			});
-		// 		})
-	
-		// },
 	});
 
 });
