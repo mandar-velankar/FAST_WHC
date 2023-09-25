@@ -439,9 +439,10 @@
 										fileName="{FileName}"
 										mediaType="{MediaType}"
 										visibleEdit="false"
-										url="/app/whc/v2/catalog/Attachments({ID})/Content"
+										url="/v2/catalog/Attachments({ID})/Content"
 										enabledRemove="{appView>/editmode}"
 										removePressed=".onAttachmentDelete"
+										openPressed=".onAttachmentDownload"
 										uploadState="Complete">
 								</upload:UploadSetItem>
 							</upload:items>

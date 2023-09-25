@@ -50,6 +50,7 @@ sap.ui.define([
 				this.filterDiscountsTable();
 				this.bindRebatesTable();
 				this.bindAllContractMembers();
+				this.bindAttachments();
 			});
 		},
 
@@ -485,12 +486,20 @@ sap.ui.define([
 			}
 		},
 
+		bindAttachments: async function(event){
+			const contract = await this.getContract(this.id);
+			const uploader = this.byId("UploadSet");
+			await uploader.getBinding('items')?.filter(new Filter('Contract_ID', 'EQ', contract.ID));
+		},
+
 		onAfterItemAdded:async function(event){
 			const uploader = this.byId("UploadSet");
 			const item = event.getParameter("item");
 			const contract = await this.getContract(this.id);
 			const id = await this.createAttachmentEntry(contract.ID,item);
-			item.setUploadUrl(window.location.host.search('app') > -1 ? `/app/whc/v2/catalog/Attachments(${contract.ID})/Content` : `/whc/v2/catalog/Attachments(${id})/Content`);
+			item.setUploadUrl(window.location.host.search('/app') > -1 ? `/app/whc/catalog/Attachments(ID=${id})/Content` : 
+							  window.location.host.search('port4004') > -1 ? `/catalog/Attachments(ID=${id})/Content` :
+							  `/whc/catalog/Attachments(ID=${id})/Content`);
 			uploader.uploadItem(item);
 		},
 		onUploadCompleted: function (event) {
@@ -514,6 +523,20 @@ sap.ui.define([
 	
 			event.preventDefault();
 		},
+
+		onAttachmentDownload: function (event) {
+			const downloadItem = event.getParameter("item");
+			const uploader = this.byId("UploadSet");
+			let item = uploader.getItems()?.find(item => item === downloadItem);
+
+			item?.setUrl(window.location.host.search('/app') > -1 ? `/app/whc/v2/catalog/Attachments(guid'${item.getBindingContext().getProperty('ID')}')/Content` : 
+						 window.location.host.search('port4004') > -1 ? `/v2/catalog/Attachments(guid'${item.getBindingContext().getProperty('ID')}')/Content` :
+						 `/whc/v2/catalog/Attachments(guid'${item.getBindingContext().getProperty('ID')}')/Content`)
+
+			downloadItem.download();
+			event.preventDefault();
+		},
+
 		createAttachmentEntry: async function (id, file) {
 			return new Promise((resolve, reject) => {
 				this.getModel().create("/Attachments", {
