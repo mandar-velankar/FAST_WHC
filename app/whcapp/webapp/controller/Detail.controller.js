@@ -549,6 +549,7 @@ sap.ui.define([
 				this.oDynamicPage.setShowFooter(false);
 				this.filterDiscountsTable();
 				this.bindRebatesTable();
+				this.getModel().resetChanges();
 				this.getModel().refresh();
 			}
 			this.getModel("detailView").setProperty("/busy", false);
