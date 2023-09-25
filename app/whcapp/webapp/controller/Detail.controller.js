@@ -188,14 +188,26 @@ sap.ui.define([
 			let oneSecondLaterValidFromDate = new Date(contract?.ValidFrom);
 			oneSecondLaterValidFromDate.setSeconds(oneSecondLaterValidFromDate.getSeconds() + 1);
 
+			const filters = [
+				new Filter("ContractsViewID", "EQ", contract?.ContractsViewID),
+				new Filter("IsParent", "EQ", true)
+			];
+
+			// for history data we need additional filter
+			if(!contract.isCurrent){
+				const oFilterStartDate = new Filter("ValidFrom", FilterOperator.GE, contract?.ValidFrom);
+				const oFilterEndDate = new Filter("ValidFrom", FilterOperator.LE, oneSecondLaterValidFromDate);
+				filters.push(new Filter({
+					filters: [oFilterStartDate, oFilterEndDate],
+					and: true
+				}));
+			}
+
 			//bind table data
 			const membersTableTemplate = oMembersTable.getBindingInfo("items").template;
 			oMembersTable.bindItems({
 				path: "/ContractCustomersView",
-				filters: [
-					new Filter("ContractID", "EQ", contract.ID),
-					new Filter("IsParent", "EQ", true)
-				],
+				filters: filters,
 				template: membersTableTemplate
 			});
 		},
@@ -206,14 +218,26 @@ sap.ui.define([
 			let oneSecondLaterValidFromDate = new Date(contract?.ValidFrom);
 			oneSecondLaterValidFromDate.setSeconds(oneSecondLaterValidFromDate.getSeconds() + 1);
 
+			const filters = [
+				new Filter("ContractsViewID", "EQ", contract?.ContractsViewID),
+				new Filter("IsParent", "EQ", false)
+			];
+
+			// for history data we need additional filter
+			if(!contract.isCurrent){
+				const oFilterStartDate = new Filter("ValidFrom", FilterOperator.GE, contract?.ValidFrom);
+				const oFilterEndDate = new Filter("ValidFrom", FilterOperator.LE, oneSecondLaterValidFromDate);
+				filters.push(new Filter({
+					filters: [oFilterStartDate, oFilterEndDate],
+					and: true
+				}));
+			}
+
 			//bind table data
 			const membersTableTemplate = oMembersTable.getBindingInfo("items").template;
 			oMembersTable.bindItems({
 				path: "/ContractCustomersView",
-				filters: [
-					new Filter("ContractID", "EQ", contract.ID),
-					new Filter("IsParent", "EQ", false)
-				],
+				filters: filters,
 				template: membersTableTemplate
 			});
 		},
