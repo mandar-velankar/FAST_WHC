@@ -43,7 +43,7 @@
 					<Button id="deleteContractButtonId" icon="sap-icon://delete" text="Delete" type="Reject" press="onDeleteContractPress" enabled="true" />
 					<Button id="refreshButtonId" icon="sap-icon://refresh" type="Emphasized" press="onRefresh" enabled="true"/>
 					<Button id="printButtonId" text="Print" type="Emphasized" press=".onPrintButtonPress" enabled="true"/>
-					<MenuButton id="idButtonAction" text="Set Status" buttonMode="Split" useDefaultActionOnly="false" visible="true" type="Emphasized" enabled="{= !${appView>/editmode}}">
+					<MenuButton id="idButtonAction" text="Set Status" buttonMode="Split" useDefaultActionOnly="false" visible="true" type="Emphasized" enabled="{= !${appView>/editmode} &amp;&amp; ${Status} !== 'Approved' }">
 							<menu>
 								<Menu itemSelected="onMenuAction">
 									<MenuItem text="Save Draft" visible="{accessControl>/whcproposalcreator}" press=".onSave"/>
