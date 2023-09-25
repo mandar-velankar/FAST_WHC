@@ -1,0 +1,31 @@
+{
+  "welcomeFile": "/index.html",
+  "authenticationMethod": "route",
+  "logout": {
+    "logoutEndpoint": "/do/logout"
+  },
+  "routes": [
+    
+    {
+      "source": "/v4/(.*)$",
+      "target": "$1",
+      "authenticationType": "basic",
+      "destination": "fast-whc-api",
+      "csrfProtection": false
+    },
+    {
+      "source": "/v2/(.*)$",
+      "target": "/v2/$1",
+      "authenticationType": "basic",
+      "destination": "fast-whc-api",
+      "csrfProtection": false
+    },
+    {
+      "source": "^/(.*)$",
+      "target": "/v2/$1",
+      "authenticationType": "basic",
+      "destination": "fast-whc-api",
+      "csrfProtection": true
+    }
+  ]
+}
