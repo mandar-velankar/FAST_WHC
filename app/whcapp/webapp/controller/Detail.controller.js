@@ -497,9 +497,9 @@ sap.ui.define([
 			const item = event.getParameter("item");
 			const contract = await this.getContract(this.id);
 			const id = await this.createAttachmentEntry(contract.ID,item);
-			item.setUploadUrl(window.location.host.search('/app') > -1 ? `/app/whc/catalog/Attachments(ID=${id})/Content` : 
-							  window.location.host.search('port4004') > -1 ? `/catalog/Attachments(ID=${id})/Content` :
-							  `/whc/catalog/Attachments(ID=${id})/Content`);
+			item.setUploadUrl(//window.location.host.search('/app') > -1 ? `/app/whc/v2/catalog/Attachments(ID=${id})/Content` : 
+							  window.location.host.search('port4004') > -1 ? `/v2/catalog/Attachments(ID=${id})/Content` :
+							  `/app/whc/v2/catalog/Attachments(ID=${id})/Content`);
 			uploader.uploadItem(item);
 		},
 		onUploadCompleted: function (event) {
@@ -529,9 +529,9 @@ sap.ui.define([
 			const uploader = this.byId("UploadSet");
 			let item = uploader.getItems()?.find(item => item === downloadItem);
 
-			item?.setUrl(window.location.host.search('/app') > -1 ? `/app/whc/v2/catalog/Attachments(guid'${item.getBindingContext().getProperty('ID')}')/Content` : 
+			item?.setUrl(//window.location.host.search('/app') > -1 ? `/app/whc/v2/catalog/Attachments(guid'${item.getBindingContext().getProperty('ID')}')/Content` : 
 						 window.location.host.search('port4004') > -1 ? `/v2/catalog/Attachments(guid'${item.getBindingContext().getProperty('ID')}')/Content` :
-						 `/whc/v2/catalog/Attachments(guid'${item.getBindingContext().getProperty('ID')}')/Content`)
+						 `/app/whc/v2/catalog/Attachments(guid'${item.getBindingContext().getProperty('ID')}')/Content`)
 
 			downloadItem.download();
 			event.preventDefault();
