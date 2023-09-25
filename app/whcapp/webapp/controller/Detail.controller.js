@@ -517,14 +517,9 @@ sap.ui.define([
 		onSave: async function () {
 			try {
 				const draftStatusID = await this.getStatusID('Draft');
-				let contract = await this.getContractById(this.id);
 				const context = this.getView().getBindingContext();
 				this.getView().getModel().setProperty("StatusID",draftStatusID,context);
 				this.calculateDiscountProductsPercentage();
-				if(!(contract.Type === 'New Proposal')){
-					await this.onSaveParentBHOID();
-					await this.onSaveMemberBHOID();
-				}
 				await this.submitChanges();
 				
 			} catch (error) {
@@ -1010,117 +1005,6 @@ sap.ui.define([
 				return table;
 			}.bind(this));
 		},
-
-		getVistexData: async function () {
-			return new Promise((resolve, reject) => {
-				this.getModel().read("/VistexData", {
-					success: function (res) {
-						resolve(res)
-					},
-					error: function (err) {
-						reject(err)
-					}
-				});
-			});
-		},
-
-		onVistexIdChange: async function(event){
-
-			// Get the user-input VistexId
-			let vistexId = event.getParameter("value");
-			const vistexData = await this.getVistexData();
-			const vistexItems = vistexData.results.filter(item => item.VistexID === vistexId);
-
-			// Update the MultiInput fields with fetched data
-			let mainCustomersTable = this.getView().byId("mainCustomersTable");
-			let customersTable = this.getView().byId("customersTable");
-
-			// Clear the existing items in the tables
-			mainCustomersTable.removeAllItems();
-			customersTable.removeAllItems();
-
-			//  // Clear the existing items in the tables
-			//  mainCustomersTable.unbindItems();
-			//  customersTable.unbindItems();
-			// Create a Set to store unique ParentBHOID values
-			let uniqueParentBHOIDs = new Set();
-		 
-			 // Add tokens for MemberBhoid and ParentBhoid based on vistexItems
-			 vistexItems.forEach(function (vistexItem) {
-				if (!uniqueParentBHOIDs.has(vistexItem.ParentBHOID)) {
-				 mainCustomersTable.addItem(
-					 new sap.m.ColumnListItem({
-						 cells: [
-							 new sap.m.Text({ text: vistexItem.ParentBHOID })
-							 // Add more cells for other properties if needed
-						 ]
-					 })
-				 );
-					 // Add the ParentBHOID to the Set to avoid duplicates
-					 uniqueParentBHOIDs.add(vistexItem.ParentBHOID);
-				}
-		 
-				 customersTable.addItem(
-					 new sap.m.ColumnListItem({
-						 cells: [
-							 new sap.m.Text({ text: vistexItem.MemberBHOID })
-							 // Add more cells for other properties if needed
-						 ]
-					 })
-				 );
-			 });
-		
-		},
-
-		// onSaveParentBHOID: async function () {
-		// 	let contract = await this.getContractById(this.id);
-		// 	const mainCustomersTable = this.getView().byId("mainCustomersTable");
-		// 	const mainCustomerItems = mainCustomersTable.getItems();
-
-		// 	for(const mainCustomerItem of mainCustomerItems){
-
-		// 		this.getOwnerComponent().getModel().createEntry("/ContractCustomersView", {
-		// 			properties: {
-		// 				"BHOID": mainCustomerItem?.getAggregation("cells")[0]?.getText(),
-		// 				"Name": '',
-		// 				"ContractID": contract.ID,
-		// 				"IsParent": true
-		// 			}
-		// 		});
-			
-		// 	}
-		// 		return new Promise((resolve, reject) => {
-		// 			this.getModel().submitChanges({
-		// 				error: this.contractSavedError.bind(this)
-		// 			});
-		// 		})
-		// },
-
-		// onSaveMemberBHOID: async function () {
-			
-		// 	let contract = await this.getContractById(this.id);
-		// 	const customersTable = this.getView().byId("customersTable");
-		// 	const customerItems = customersTable.getItems();
-
-		// 	for(const customerItem of customerItems){
-
-		// 		this.getOwnerComponent().getModel().createEntry("/ContractCustomersView", {
-		// 			properties: {
-		// 				"BHOID": customerItem?.getAggregation("cells")[0]?.getText(),
-		// 				"Name": '',
-		// 				"ContractID": contract.ID,
-		// 				"IsParent": false
-		// 			}
-		// 		});
-			
-		// 	}
-		// 		return new Promise((resolve, reject) => {
-		// 			this.getModel().submitChanges({
-		// 				error: this.contractSavedError.bind(this)
-		// 			});
-		// 		})
-	
-		// },
 	});
 
 });

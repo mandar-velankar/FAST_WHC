@@ -52,11 +52,6 @@ modules:
     - npm install
     - npm run build:cf
     supported-platforms: []
-- name: FAST-API-AppRouter
-  type: nodejs
-  path: approuter
-  requires:
-    - name: uaa_FAST
 resources:
 - name: com-bayer-tender-whcapp-db
   type: com.sap.xs.hdi-container
