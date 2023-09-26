@@ -612,6 +612,7 @@ sap.ui.define([
 		  
 			// Update the "Status" Text element's text property based on the selected menu item
 			let statusText = this.getView().byId("idStatus");
+			let statusButton = this.getView().byId("idButtonAction");
 
 
 			switch (selectedText) {
@@ -641,12 +642,13 @@ sap.ui.define([
 			const context = this.getView().getBindingContext();
 			this.getView().getModel().setProperty("StatusID",draftStatusID,context);
 			this.getView().getModel().setProperty("Status",statusText.getText(),context);
+			statusButton.setText('Set Status');
 
 			return new Promise((resolve, reject) => {
 				this.getModel().submitChanges({
 					error: this.contractSavedError.bind(this)
 				});
-			})
+			});
 		},
 
 		onFormatDiscountTableValues: async function (event) {
