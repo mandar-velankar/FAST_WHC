@@ -3,6 +3,7 @@ sap.ui.define([
 	"sap/ui/model/json/JSONModel",
 	"sap/m/Token",
 	"sap/ui/core/Fragment",
+	"sap/ui/core/Item",
 	"sap/m/MessageToast",
 	"sap/m/MessageBox",
 	"sap/ui/model/Filter",
@@ -12,7 +13,7 @@ sap.ui.define([
 	"sap/m/Dialog",
 	"sap/m/MultiInput",
 	"sap/m/Button",
-], function (BaseController, JSONModel, Token, Fragment,MessageToast, MessageBox, Filter, FilterOperator, Sorter, formatter, Dialog, MultiInput, Button) {
+], function (BaseController, JSONModel, Token, Fragment, Item, MessageToast, MessageBox, Filter, FilterOperator, Sorter, formatter, Dialog, MultiInput, Button) {
 	"use strict";
 
 	return BaseController.extend("com.bayer.tender.whcapp.controller.Detail", {
@@ -504,6 +505,10 @@ sap.ui.define([
 			const item = event.getParameter("item");
 			const contract = await this.getContract(this.id);
 			const id = await this.createAttachmentEntry(contract.ID,item);
+
+			if(window.location.host.search('port4004') === -1){
+				uploader.addHeaderField(new Item({key: "X-CSRF-Token", text: this.getOwnerComponent().getModel().getSecurityToken()}));
+			}
 			item.setUploadUrl(//window.location.host.search('/app') > -1 ? `/app/whc/v2/catalog/Attachments(ID=${id})/Content` : 
 							  window.location.host.search('port4004') > -1 ? `/v2/catalog/Attachments(ID=${id})/Content` :
 							  `/app/whc/v2/catalog/Attachments(ID=${id})/Content`);
@@ -618,13 +623,15 @@ sap.ui.define([
 		onBindTableauSrcURL: function () {
 			let tableau = this.byId("idTableauChart");
 			let contract = this.getOwnerComponent().getModel().getProperty(`/ContractsView('${this.id}')`);
-			if(contract.Type === 'New Proposal'){
-				//get parent bho (there's only one)
-				let parentBHO = this.getView().byId('mainCustomersTable').getItems()[0]?.getBindingContext()?.getObject();
-				if(parentBHO)
-					tableau.setSrc(`https://tableau-ncsa.aws.cnb/t/CPROD/views/WHCContractProposal/ContractProposal?ORIGINAL_ORDERING_ACCOUNT_NUM=${parentBHO.BHOID}&amp;:embed=y&amp;:showVizHome=n&amp;:tabs=n&amp;:toolbar=n&amp;:apiID=host1#navType=0&amp;navSrc=Parse%22`);
-			} else {
-				tableau.setSrc(`https://tableau-ncsa.aws.cnb/t/CPROD/views/WHCContractRenewalV1/WHCContractRenewal?Vistex%20ID=${contract.VistexID}&amp;:embed=y&amp;:showVizHome=n&amp;:tabs=n&amp;:toolbar=n&amp;:apiID=host20#navType=0&amp;navSrc=Parse`)
+			if(contract.Type){
+				if(contract.Type === 'New Proposal'){
+					//get parent bho (there's only one)
+					let parentBHO = this.getView().byId('mainCustomersTable').getItems()[0]?.getBindingContext()?.getObject();
+					if(parentBHO)
+						tableau.setSrc(`https://tableau-ncsa.aws.cnb/t/CPROD/views/WHCContractProposal/ContractProposal?ORIGINAL_ORDERING_ACCOUNT_NUM=${parentBHO.BHOID}&amp;:embed=y&amp;:showVizHome=n&amp;:tabs=n&amp;:toolbar=n&amp;:apiID=host1#navType=0&amp;navSrc=Parse%22`);
+				} else {
+					tableau.setSrc(`https://tableau-ncsa.aws.cnb/t/CPROD/views/WHCContractRenewalV1/WHCContractRenewal?Vistex%20ID=${contract.VistexID}&amp;:embed=y&amp;:showVizHome=n&amp;:tabs=n&amp;:toolbar=n&amp;:apiID=host20#navType=0&amp;navSrc=Parse`)
+				}
 			}
 		},
 
