@@ -216,6 +216,7 @@ sap.ui.define([
 		onMainCustomersBindingFinished: async function (event){
 			this.getView().byId("btnAddBHOParent")?.setVisible(!this.getView().byId('mainCustomersTable').getBinding('items').getLength() > 0 && this.getModel("appView").getProperty("/editmode"));
 			this.getView().byId("btnManualBHOParent")?.setVisible(!this.getView().byId('mainCustomersTable').getBinding('items').getLength() > 0 && this.getModel("appView").getProperty("/editmode"));
+			this.onBindTableauSrcURL();
 		},
 
 		bindContractMembers: async function (){
@@ -574,7 +575,6 @@ sap.ui.define([
 				this.getView().getModel().setProperty("StatusID",draftStatusID,context);
 				this.calculateDiscountProductsPercentage();
 				await this.submitChanges();
-				
 			} catch (error) {
 				console.error(error);
 			}
@@ -602,14 +602,30 @@ sap.ui.define([
 				this.oDynamicPage.setShowFooter(false);
 				this.filterDiscountsTable();
 				this.bindRebatesTable();
+				this.onBindTableauSrcURL();
 				this.getModel().resetChanges();
 				this.getModel().refresh();
 			}
 			this.getModel("detailView").setProperty("/busy", false);
+
+			
 		},
 
 		contractSavedError: function (error) {
 
+		},
+
+		onBindTableauSrcURL: function () {
+			let tableau = this.byId("idTableauChart");
+			let contract = this.getOwnerComponent().getModel().getProperty(`/ContractsView('${this.id}')`);
+			if(contract.Type === 'New Proposal'){
+				//get parent bho (there's only one)
+				let parentBHO = this.getView().byId('mainCustomersTable').getItems()[0]?.getBindingContext()?.getObject();
+				if(parentBHO)
+					tableau.setSrc(`https://tableau-ncsa.aws.cnb/t/CPROD/views/WHCContractProposal/ContractProposal?ORIGINAL_ORDERING_ACCOUNT_NUM=${parentBHO.BHOID}&amp;:embed=y&amp;:showVizHome=n&amp;:tabs=n&amp;:toolbar=n&amp;:apiID=host1#navType=0&amp;navSrc=Parse%22`);
+			} else {
+				tableau.setSrc(`https://tableau-ncsa.aws.cnb/t/CPROD/views/WHCContractRenewalV1/WHCContractRenewal?Vistex%20ID=${contract.VistexID}&amp;:embed=y&amp;:showVizHome=n&amp;:tabs=n&amp;:toolbar=n&amp;:apiID=host20#navType=0&amp;navSrc=Parse`)
+			}
 		},
 
 		onMenuAction: async function (event) {
