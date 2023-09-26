@@ -714,9 +714,9 @@ sap.ui.define([
 			});
 			const rebateItems = sortedRebates.map(item => ["Y"+item.Year, item.RebateLevels_Unit_Level_1, item.RebateLevels_Discount_Level_1, item.RebateLevels_Unit_Level_2, item.RebateLevels_Discount_Level_2, item.RebateLevels_Unit_Level_3, item.RebateLevels_Discount_Level_3]);
 			const mainCustomersTable = this.byId("mainCustomersTable");
-			const mainCustomersTableItemNames = mainCustomersTable.getItems().map(item => [item.getBindingContext().getObject().Name]);
+			const mainCustomersTableItemNames = mainCustomersTable.getItems().map(item => [item.getBindingContext().getObject().BHOID]);
 			const customersTable = this.byId("customersTable");
-			const customersTableItemNames = customersTable.getItems().map(item => [item.getBindingContext().getObject().Name]);
+			const customersTableItemNames = customersTable.getItems().map(item => [item.getBindingContext().getObject().BHOID]);
 			const whcProducts = await this.getWHCProducts();
 			const wacItems = whcProducts.results.map(item => [item.ProductName, item.WAC]);
 
