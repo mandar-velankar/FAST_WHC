@@ -213,6 +213,11 @@ sap.ui.define([
 			});
 		},
 
+		onMainCustomersBindingFinished: async function (event){
+			this.getView().byId("btnAddBHOParent")?.setVisible(!this.getView().byId('mainCustomersTable').getBinding('items').getLength() > 0 && this.getModel("appView").getProperty("/editmode"));
+			this.getView().byId("btnManualBHOParent")?.setVisible(!this.getView().byId('mainCustomersTable').getBinding('items').getLength() > 0 && this.getModel("appView").getProperty("/editmode"));
+		},
+
 		bindContractMembers: async function (){
 			let oMembersTable = this.byId('customersTable');
 			const contract = await this.getContractById();
@@ -337,6 +342,7 @@ sap.ui.define([
 		onEdit: function () {
 			const editmode = this.getModel("appView").getProperty("/editmode");
 			this.getModel("appView").setProperty("/editmode", !editmode);
+			this.onMainCustomersBindingFinished();
 			this.oDynamicPage.setShowFooter(true);
 		},
 		onFooterCancelPress: async function () {
