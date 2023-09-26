@@ -709,7 +709,7 @@ sap.ui.define([
 			const contract = await this.getContract(this.id);
 			const fileName = `proposal-${contract.Name.replace(/ /g, '-')}-${new Date().toJSON()}.pdf`;
 			const discounts = await this.getDiscounts(contract);
-			const discountItems = discounts.results.map(item => ["Y"+item.Year, item.Units, item.Myrena, item.Kyleena, item.Skyla]);
+			const discountItems = discounts.results.map(item => ["Y"+item.Year, item.Units, item.Mirena, item.Kyleena, item.Skyla]);
 			const rebates = await this.getRebates(contract);
 			const sortedRebates = rebates.results.sort((a, b) => {
 				if (a.Year < b.Year) {
@@ -720,7 +720,7 @@ sap.ui.define([
 				}
 				return 0;
 			});
-			const rebateItems = sortedRebates.map(item => ["Y"+item.Year, item.RebateLevels_Unit_Level_1, item.RebateLevels_Discount_Level_1, item.RebateLevels_Unit_Level_2, item.RebateLevels_Discount_Level_2, item.RebateLevels_Unit_Level_3, item.RebateLevels_Discount_Level_3]);
+			const rebateItems = sortedRebates.map(item => ["Y"+item.Year, item.RebateLevels_Unit_Level_1, item.RebateLevels_Discount_Level_1*100+"%", item.RebateLevels_Unit_Level_2, item.RebateLevels_Discount_Level_2*100+"%", item.RebateLevels_Unit_Level_3, item.RebateLevels_Discount_Level_3*100+"%"]);
 			const mainCustomersTable = this.byId("mainCustomersTable");
 			const mainCustomersTableItemNames = mainCustomersTable.getItems().map(item => [item.getBindingContext().getObject().BHOID]);
 			const customersTable = this.byId("customersTable");
