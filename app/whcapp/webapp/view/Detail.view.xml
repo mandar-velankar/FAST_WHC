@@ -127,13 +127,14 @@
 											growingThreshold="15"
 											growingScrollToLoad="false"
 											busyIndicatorDelay="0"
+											updateFinished=".onMainCustomersBindingFinished"
 										>
 										<headerToolbar>
 											<OverflowToolbar>
 												<content>
 													<Title text="Parent BHO ID" level="H2"/>
-													<Button text="+" type="Emphasized" press=".onAddMainCustomerButtonPress" enabled="{= ${appView>/editmode}}" visible="{= ${appView>/editmode}}"/>
-													<Button id="btnManualBHOParent" text="Add Manually" type="Emphasized" press=".onAddNonVeevaBHO" enabled="{= ${appView>/editmode}}" visible="{= ${appView>/editmode}}"/>
+													<Button id="btnAddBHOParent" text="+" type="Emphasized" press=".onAddMainCustomerButtonPress" enabled="{= ${appView>/editmode}}" />
+													<Button id="btnManualBHOParent" text="Add Manually" type="Emphasized" press=".onAddNonVeevaBHO" enabled="{= ${appView>/editmode}}" />
 												</content>
 											</OverflowToolbar>
 										</headerToolbar>

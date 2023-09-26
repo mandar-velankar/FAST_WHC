@@ -28,7 +28,7 @@ modules:
   - name: com-bayer-tender-whcapp-db
   parameters:
     buildpack: nodejs_buildpack
-- name: FAST-API-AppRouter
+- name: FAST-API-AppRouter-WHC
   type: nodejs
   path: approuter
   requires:

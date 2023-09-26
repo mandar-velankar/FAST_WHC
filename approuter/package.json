@@ -1,5 +1,5 @@
 {
-  "name": "FAST-API-AppRouter",
+  "name": "FAST-API-AppRouter-WHC",
   "description": "",
   "scripts": {
     "start": "node node_modules/@sap/approuter/approuter.js"
