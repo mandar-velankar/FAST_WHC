@@ -195,7 +195,7 @@ type RebateLevels {
         Discount_Level_3: Double;
 }
 
-entity VistexData {
+entity VistexData: cuid {
   VistexID          : String;
   ParentBHOID       : String;
   MemberBHOID       : String;
