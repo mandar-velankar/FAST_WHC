@@ -46,7 +46,7 @@
 					<MenuButton id="idButtonAction" text="Set Status" buttonMode="Split" useDefaultActionOnly="false" visible="true" type="Emphasized" enabled="{= !${appView>/editmode} &amp;&amp; ${Status} !== 'Approved' }">
 							<menu>
 								<Menu itemSelected="onMenuAction">
-									<MenuItem text="Save Draft" visible="{accessControl>/whcproposalcreator}" press=".onSave"/>
+									<!--<MenuItem text="Save Draft" visible="{accessControl>/whcproposalcreator}" press=".onSave"/>-->
 									<MenuItem text="Submit to Workshop" visible="{accessControl>/whcproposalcreator}" />
 									<MenuItem text="Approve" visible="{accessControl>/whcapprover}" />
 									<MenuItem text="Reject" visible="{accessControl>/whcapprover}" />
