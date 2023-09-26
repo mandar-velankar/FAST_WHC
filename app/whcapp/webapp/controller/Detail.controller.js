@@ -3,6 +3,7 @@ sap.ui.define([
 	"sap/ui/model/json/JSONModel",
 	"sap/m/Token",
 	"sap/ui/core/Fragment",
+	"sap/ui/core/Item",
 	"sap/m/MessageToast",
 	"sap/m/MessageBox",
 	"sap/ui/model/Filter",
@@ -12,7 +13,7 @@ sap.ui.define([
 	"sap/m/Dialog",
 	"sap/m/MultiInput",
 	"sap/m/Button",
-], function (BaseController, JSONModel, Token, Fragment,MessageToast, MessageBox, Filter, FilterOperator, Sorter, formatter, Dialog, MultiInput, Button) {
+], function (BaseController, JSONModel, Token, Fragment, Item, MessageToast, MessageBox, Filter, FilterOperator, Sorter, formatter, Dialog, MultiInput, Button) {
 	"use strict";
 
 	return BaseController.extend("com.bayer.tender.whcapp.controller.Detail", {
@@ -216,6 +217,7 @@ sap.ui.define([
 		onMainCustomersBindingFinished: async function (event){
 			this.getView().byId("btnAddBHOParent")?.setVisible(!this.getView().byId('mainCustomersTable').getBinding('items').getLength() > 0 && this.getModel("appView").getProperty("/editmode"));
 			this.getView().byId("btnManualBHOParent")?.setVisible(!this.getView().byId('mainCustomersTable').getBinding('items').getLength() > 0 && this.getModel("appView").getProperty("/editmode"));
+			this.onBindTableauSrcURL();
 		},
 
 		bindContractMembers: async function (){
@@ -503,6 +505,10 @@ sap.ui.define([
 			const item = event.getParameter("item");
 			const contract = await this.getContract(this.id);
 			const id = await this.createAttachmentEntry(contract.ID,item);
+
+			if(window.location.host.search('port4004') === -1){
+				uploader.addHeaderField(new Item({key: "X-CSRF-Token", text: this.getOwnerComponent().getModel().getSecurityToken()}));
+			}
 			item.setUploadUrl(//window.location.host.search('/app') > -1 ? `/app/whc/v2/catalog/Attachments(ID=${id})/Content` : 
 							  window.location.host.search('port4004') > -1 ? `/v2/catalog/Attachments(ID=${id})/Content` :
 							  `/app/whc/v2/catalog/Attachments(ID=${id})/Content`);
@@ -570,11 +576,14 @@ sap.ui.define([
 		onSave: async function () {
 			try {
 				const draftStatusID = await this.getStatusID('Draft');
+				let contract = await this.getContractById(this.id);
 				const context = this.getView().getBindingContext();
 				this.getView().getModel().setProperty("StatusID",draftStatusID,context);
 				this.calculateDiscountProductsPercentage();
+				if(!(contract.Type === 'New Proposal')){
+					this.mapBHOIdsPendingChanges(contract);
+				}
 				await this.submitChanges();
-				
 			} catch (error) {
 				console.error(error);
 			}
@@ -602,14 +611,33 @@ sap.ui.define([
 				this.oDynamicPage.setShowFooter(false);
 				this.filterDiscountsTable();
 				this.bindRebatesTable();
+				this.onBindTableauSrcURL();
+				this.bindAllContractMembers();
 				this.getModel().resetChanges();
 				this.getModel().refresh();
 			}
 			this.getModel("detailView").setProperty("/busy", false);
+
+			
 		},
 
 		contractSavedError: function (error) {
 
+		},
+
+		onBindTableauSrcURL: function () {
+			let tableau = this.byId("idTableauChart");
+			let contract = this.getOwnerComponent().getModel().getProperty(`/ContractsView('${this.id}')`);
+			if(contract.Type){
+				if(contract.Type === 'New Proposal'){
+					//get parent bho (there's only one)
+					let parentBHO = this.getView().byId('mainCustomersTable').getItems()[0]?.getBindingContext()?.getObject();
+					if(parentBHO)
+						tableau.setSrc(`https://tableau-ncsa.aws.cnb/t/CPROD/views/WHCContractProposal/ContractProposal?ORIGINAL_ORDERING_ACCOUNT_NUM=${parentBHO.BHOID}&amp;:embed=y&amp;:showVizHome=n&amp;:tabs=n&amp;:toolbar=n&amp;:apiID=host1#navType=0&amp;navSrc=Parse%22`);
+				} else {
+					tableau.setSrc(`https://tableau-ncsa.aws.cnb/t/CPROD/views/WHCContractRenewalV1/WHCContractRenewal?Vistex%20ID=${contract.VistexID}&amp;:embed=y&amp;:showVizHome=n&amp;:tabs=n&amp;:toolbar=n&amp;:apiID=host20#navType=0&amp;navSrc=Parse`)
+				}
+			}
 		},
 
 		onMenuAction: async function (event) {
@@ -1060,6 +1088,95 @@ sap.ui.define([
 				return table;
 			}.bind(this));
 		},
+
+		getVistexData: async function () {
+			return new Promise((resolve, reject) => {
+				this.getModel().read("/VistexData", {
+					success: function (res) {
+						resolve(res)
+					},
+					error: function (err) {
+						reject(err)
+					}
+				});
+			});
+		},
+
+		onVistexIdChange: async function(event){
+
+			// Get the user-input VistexId
+			let vistexId = event.getParameter("value");
+			const vistexData = await this.getVistexData();
+			const vistexItems = vistexData.results.filter(item => item.VistexID === vistexId);
+
+			// Update the MultiInput fields with fetched data
+			let mainCustomersTable = this.getView().byId("mainCustomersTable");
+			let customersTable = this.getView().byId("customersTable");
+
+			// Clear the existing items in the tables
+			mainCustomersTable.removeAllItems();
+			customersTable.removeAllItems();
+
+			//  // Clear the existing items in the tables
+			//  mainCustomersTable.unbindItems();
+			//  customersTable.unbindItems();
+			// Create a Set to store unique ParentBHOID values
+			let uniqueParentBHOIDs = new Set();
+		 
+			 // Add tokens for MemberBhoid and ParentBhoid based on vistexItems
+			 vistexItems.forEach(function (vistexItem) {
+				if (!uniqueParentBHOIDs.has(vistexItem.ParentBHOID)) {
+				 mainCustomersTable.addItem(
+					 new sap.m.ColumnListItem({
+						 cells: [
+							 new sap.m.Text({ text: vistexItem.ParentBHOID })
+						 ]
+					 })
+				 );
+					 // Add the ParentBHOID to the Set to avoid duplicates
+					 uniqueParentBHOIDs.add(vistexItem.ParentBHOID);
+				}
+		 
+				 customersTable.addItem(
+					 new sap.m.ColumnListItem({
+						 cells: [
+							 new sap.m.Text({ text: vistexItem.MemberBHOID })
+						 ]
+					 })
+				 );
+			 });
+		
+		},
+
+		mapBHOIdsPendingChanges: function (contract) {
+			const mainCustomersTable = this.getView().byId("mainCustomersTable");
+			const mainCustomerItems = mainCustomersTable.getItems();
+			const customersTable = this.getView().byId("customersTable");
+			const customerItems = customersTable.getItems();
+			let contractcustomer = [];
+			
+			const createContractEntry = (BHOID, IsParent) => {
+				return this.getOwnerComponent().getModel().createEntry("/ContractCustomersView", {
+					properties: {
+						"BHOID": BHOID,
+						"Name": '',
+						"ContractID": contract.ID,
+						"IsParent": IsParent
+					}
+    			});
+  			};
+
+			for (const mainCustomerItem of mainCustomerItems) {
+				contractcustomer.push(createContractEntry(mainCustomerItem?.getAggregation("cells")[0]?.getText(), true));
+			}
+
+			for (const customerItem of customerItems) {
+				contractcustomer.push(createContractEntry(customerItem?.getAggregation("cells")[0]?.getText(), false));
+			}
+
+		}
+
+		
 	});
 
 });
