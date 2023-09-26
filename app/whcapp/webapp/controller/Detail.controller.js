@@ -576,9 +576,13 @@ sap.ui.define([
 		onSave: async function () {
 			try {
 				const draftStatusID = await this.getStatusID('Draft');
+				let contract = await this.getContractById(this.id);
 				const context = this.getView().getBindingContext();
 				this.getView().getModel().setProperty("StatusID",draftStatusID,context);
 				this.calculateDiscountProductsPercentage();
+				if(!(contract.Type === 'New Proposal')){
+					this.mapBHOIdsPendingChanges(contract);
+				}
 				await this.submitChanges();
 			} catch (error) {
 				console.error(error);
@@ -608,6 +612,7 @@ sap.ui.define([
 				this.filterDiscountsTable();
 				this.bindRebatesTable();
 				this.onBindTableauSrcURL();
+				this.bindAllContractMembers();
 				this.getModel().resetChanges();
 				this.getModel().refresh();
 			}
@@ -1083,6 +1088,95 @@ sap.ui.define([
 				return table;
 			}.bind(this));
 		},
+
+		getVistexData: async function () {
+			return new Promise((resolve, reject) => {
+				this.getModel().read("/VistexData", {
+					success: function (res) {
+						resolve(res)
+					},
+					error: function (err) {
+						reject(err)
+					}
+				});
+			});
+		},
+
+		onVistexIdChange: async function(event){
+
+			// Get the user-input VistexId
+			let vistexId = event.getParameter("value");
+			const vistexData = await this.getVistexData();
+			const vistexItems = vistexData.results.filter(item => item.VistexID === vistexId);
+
+			// Update the MultiInput fields with fetched data
+			let mainCustomersTable = this.getView().byId("mainCustomersTable");
+			let customersTable = this.getView().byId("customersTable");
+
+			// Clear the existing items in the tables
+			mainCustomersTable.removeAllItems();
+			customersTable.removeAllItems();
+
+			//  // Clear the existing items in the tables
+			//  mainCustomersTable.unbindItems();
+			//  customersTable.unbindItems();
+			// Create a Set to store unique ParentBHOID values
+			let uniqueParentBHOIDs = new Set();
+		 
+			 // Add tokens for MemberBhoid and ParentBhoid based on vistexItems
+			 vistexItems.forEach(function (vistexItem) {
+				if (!uniqueParentBHOIDs.has(vistexItem.ParentBHOID)) {
+				 mainCustomersTable.addItem(
+					 new sap.m.ColumnListItem({
+						 cells: [
+							 new sap.m.Text({ text: vistexItem.ParentBHOID })
+						 ]
+					 })
+				 );
+					 // Add the ParentBHOID to the Set to avoid duplicates
+					 uniqueParentBHOIDs.add(vistexItem.ParentBHOID);
+				}
+		 
+				 customersTable.addItem(
+					 new sap.m.ColumnListItem({
+						 cells: [
+							 new sap.m.Text({ text: vistexItem.MemberBHOID })
+						 ]
+					 })
+				 );
+			 });
+		
+		},
+
+		mapBHOIdsPendingChanges: function (contract) {
+			const mainCustomersTable = this.getView().byId("mainCustomersTable");
+			const mainCustomerItems = mainCustomersTable.getItems();
+			const customersTable = this.getView().byId("customersTable");
+			const customerItems = customersTable.getItems();
+			let contractcustomer = [];
+			
+			const createContractEntry = (BHOID, IsParent) => {
+				return this.getOwnerComponent().getModel().createEntry("/ContractCustomersView", {
+					properties: {
+						"BHOID": BHOID,
+						"Name": '',
+						"ContractID": contract.ID,
+						"IsParent": IsParent
+					}
+    			});
+  			};
+
+			for (const mainCustomerItem of mainCustomerItems) {
+				contractcustomer.push(createContractEntry(mainCustomerItem?.getAggregation("cells")[0]?.getText(), true));
+			}
+
+			for (const customerItem of customerItems) {
+				contractcustomer.push(createContractEntry(customerItem?.getAggregation("cells")[0]?.getText(), false));
+			}
+
+		}
+
+		
 	});
 
 });
