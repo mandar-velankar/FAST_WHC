@@ -2,5 +2,10 @@
   "src/gen/**/*.hdbview",
   "src/gen/**/*.hdbindex",
   "src/gen/**/*.hdbconstraint",
-  "src/gen/**/*.hdbtable"
+  "src/gen/**/*.hdbtable",
+  "src/gen/**/*.hdbtabledata",
+  "src/gen/data/com.bayer.SXTENDER.whc-Contracts.hdbtabledata$0.expand",
+  "src/gen/data/com.bayer.SXTENDER.whc-Rebates.hdbtabledata$0.expand",
+  "src/gen/data/com.bayer.SXTENDER.whc-Discounts.hdbtabledata$0.expand",
+  "src/gen/data/com.bayer.SXTENDER.whc-ContractCustomers.hdbtabledata$0.expand"
 ]
