@@ -737,7 +737,7 @@ sap.ui.define([
 			const contract = await this.getContract(this.id);
 			const fileName = `proposal-${contract.Name.replace(/ /g, '-')}-${new Date().toJSON()}.pdf`;
 			const discounts = await this.getDiscounts(contract);
-			const discountItems = discounts.results.map(item => ["Y"+item.Year, item.Units, item.Mirena, item.Kyleena, item.Skyla]);
+			const discountItems = discounts.results.map(item => ["Y"+item.Year, item.Units, item.Mirena*100+"%", item.Kyleena*100+"%", item.Skyla*100+"%"]);
 			const rebates = await this.getRebates(contract);
 			const sortedRebates = rebates.results.sort((a, b) => {
 				if (a.Year < b.Year) {
