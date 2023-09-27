@@ -3,13 +3,17 @@ sap.ui.define([
 	"sap/ui/model/json/JSONModel",
 	"sap/m/Token",
 	"sap/ui/core/Fragment",
+	"sap/ui/core/Item",
 	"sap/m/MessageToast",
 	"sap/m/MessageBox",
 	"sap/ui/model/Filter",
 	"sap/ui/model/FilterOperator",
 	"sap/ui/model/Sorter",
-	"../model/formatter"
-], function (BaseController, JSONModel, Token, Fragment,MessageToast, MessageBox, Filter, FilterOperator, Sorter, formatter) {
+	"../model/formatter",
+	"sap/m/Dialog",
+	"sap/m/MultiInput",
+	"sap/m/Button",
+], function (BaseController, JSONModel, Token, Fragment, Item, MessageToast, MessageBox, Filter, FilterOperator, Sorter, formatter, Dialog, MultiInput, Button) {
 	"use strict";
 
 	return BaseController.extend("com.bayer.tender.whcapp.controller.Detail", {
@@ -31,32 +35,49 @@ sap.ui.define([
 			// activate automatic message generation for complete view
 			this.oMessageManager.registerObject(this.getView(), true);
 			this.oDynamicPage = this.byId("detailPage");
-
-			let oMultiInput1 = this.byId("multiInputMemberBHO");
-			oMultiInput1.setTokens([
-				new Token({ text: "Contract customer 11", key: "Contract customer 11" }),
-				new Token({ text: "Contract customer 12", key: "Contract customer 12" })
-			]);
-
-			let oMultiInput2 = this.byId("multiInput2");
-			oMultiInput2.setTokens([
-				new Token({ text: "Contract customer 11", key: "Contract customer 11" }),
-				new Token({ text: "Contract customer 12", key: "Contract customer 12" })
-			]);
 		},
 		_onObjectMatched: async function (oEvent) {
 			this.id = oEvent.getParameter("arguments").id;
 			this.getModel("appView").setProperty("/layout", "TwoColumnsMidExpanded");
+			this.masterTable = oEvent.getParameter("view").byId('masterTable');
 
-			this.getModel().metadataLoaded().then(()=>{
+				
+			this.getModel().metadataLoaded().then( async ()=>{
+				this.filterMasterTable(this.masterTable, this.id);
+				const selectedDiscountType = await this.getSavedDiscountType(this.id);
+				this.getModel("detailView").setProperty("/selectedDiscountType", selectedDiscountType)
+				await this.loadDiscountFragment(selectedDiscountType);
 				this._bindView()
 				this.filterDiscountsTable();
 				this.bindRebatesTable();
+				this.bindAllContractMembers();
+				this.bindAttachments();
 			});
 		},
+
+		filterMasterTable: function(table, contractID){
+			table.getModel("masterView").setProperty("/showHighlight", true);
+			const binding = table.getBinding("items");
+			this.previousMasterTableApplicationFilters = binding.aApplicationFilters;
+			binding.aApplicationFilters = [];
+			const filters = [
+				new Filter({
+                    path: "ID",
+                    operator: FilterOperator.EQ,
+                    value1: contractID.split("-").splice(0,5).join("-"),
+                    caseSensitive: false
+                })
+			];
+			const sorter = new Sorter({
+				path: "modifiedAt",
+				descending: true
+			});
+			binding.filter(filters).sort(sorter);
+		},
+
 		_bindView: async function () {
-			const path = this.getModel().createKey("/Contracts", {
-				ID: this.id
+			const path = this.getModel().createKey("/ContractsView", {
+				ContractsViewID: this.id
 			});
 
 			// Set busy indicator during view binding
@@ -68,9 +89,9 @@ sap.ui.define([
 
 			this.getView().bindElement({
 				path: path,
-				parameters: {
-					expand: "ContractCustomers"
-				},
+				// parameters: {
+				// 	expand: "ContractCustomers"
+				// },
 				events: {
 					// 	change: this._onBindingChange.bind(this),
 					dataRequested: function () {
@@ -83,43 +104,70 @@ sap.ui.define([
 			});
 		},
 
-		filterDiscountsTable: async function () {
+		filterDiscountsTable: async function (proposedContractLength) {
 			const discountTable = this.byId("discountsTable");
-			const template = discountTable.getBindingInfo("items").template;
 			const contract = await this.getContractById();
+			const year = proposedContractLength || contract?.ProposedContractLength;
 			const filter = [
-				new Filter("Contracts_ID", FilterOperator.EQ, this.id),
-				new Filter("Year", FilterOperator.LE, contract?.ProposedContractLength),
+				new Filter("ContractID", FilterOperator.EQ, contract?.ID),
+				new Filter("Year", FilterOperator.LE, year),
+				new Filter("isCurrent", FilterOperator.EQ, contract?.isCurrent),
+				new Filter("ContractsViewID", FilterOperator.EQ, this.id)
 			]
 
 			discountTable.getBinding("items").filter(filter);
 		},
 
-		bindRebatesTable: async function () {
+		bindRebatesTable: async function (proposedContractLength) {
 			const rebatesTable = this.byId("rebatesTable");
 			const contract = await this.getContractById();
+			const year = proposedContractLength || contract?.ProposedContractLength;
+			let oneSecondLaterValidFromDate = new Date(contract?.ValidFrom);
+			oneSecondLaterValidFromDate.setSeconds(oneSecondLaterValidFromDate.getSeconds() + 1);
+
+			const filters = [
+				new Filter("ContractsViewID", "EQ", contract?.ContractsViewID),
+				new Filter("Year", "LE", year)
+			];
+
+			// for history data we need additional filter
+			if(!contract.isCurrent){
+				const oFilterStartDate = new Filter("ValidFrom", FilterOperator.GE, contract?.ValidFrom);
+				const oFilterEndDate = new Filter("ValidFrom", FilterOperator.LE, oneSecondLaterValidFromDate);
+				filters.push(new Filter({
+					filters: [oFilterStartDate, oFilterEndDate],
+					and: true
+				}));
+			}
 
 			rebatesTable.bindRows({
-				path: "/Rebates",
-				filters: [
-					new Filter("Contracts_ID", "EQ", this.id),
-					new Filter("Year", "LE", contract?.ProposedContractLength),
-				],
+				path: "/RebatesView",
+				filters: filters,
 				sorter: [ 
 					new Sorter({
 						path: "Year",
 						descending: false
 					})
 				],
+				events: {
+					dataRequested: function () {
+						
+					},
+					dataReceived: this.rebatesDataReceived.bind(this)
+				}
 			});
-
+		},
+		rebatesDataReceived: function (event) {
+			const rebatesTable = this.byId("rebatesTable");
+			const rebates = event.getParameter("data")?.results;
+			if (rebates.length > 0) rebatesTable.setVisibleRowCount(rebates.length);
 		},
 
 		getContractById: function () {
 			return new Promise((resolve, reject) => {
-				this.getModel().read("/Contracts", {
+				this.getModel().read("/ContractsView", {
 					filters: [
-						new Filter("ID", "EQ", this.id)
+						new Filter("ContractsViewID", "EQ", this.id)
 					],
 					success: function (res) {
 						resolve(res?.results[0]);
@@ -131,12 +179,181 @@ sap.ui.define([
 			});
 		},
 
+		bindAllContractMembers: async function(){
+			await this.bindContractParentMembers();
+			await this.bindContractMembers();
+		},
+
+		bindContractParentMembers: async function (){
+			let oMembersTable = this.byId('mainCustomersTable');
+			const contract = await this.getContractById();
+			let oneSecondLaterValidFromDate = new Date(contract?.ValidFrom);
+			oneSecondLaterValidFromDate.setSeconds(oneSecondLaterValidFromDate.getSeconds() + 1);
+
+			const filters = [
+				new Filter("ContractsViewID", "EQ", contract?.ContractsViewID),
+				new Filter("IsParent", "EQ", true)
+			];
+
+			// for history data we need additional filter
+			if(!contract.isCurrent){
+				const oFilterStartDate = new Filter("ValidFrom", FilterOperator.GE, contract?.ValidFrom);
+				const oFilterEndDate = new Filter("ValidFrom", FilterOperator.LE, oneSecondLaterValidFromDate);
+				filters.push(new Filter({
+					filters: [oFilterStartDate, oFilterEndDate],
+					and: true
+				}));
+			}
+
+			//bind table data
+			const membersTableTemplate = oMembersTable.getBindingInfo("items").template;
+			oMembersTable.bindItems({
+				path: "/ContractCustomersView",
+				filters: filters,
+				template: membersTableTemplate
+			});
+		},
+
+		onMainCustomersBindingFinished: async function (event){
+			this.getView().byId("btnAddBHOParent")?.setVisible(!this.getView().byId('mainCustomersTable').getBinding('items').getLength() > 0 && this.getModel("appView").getProperty("/editmode"));
+			this.getView().byId("btnManualBHOParent")?.setVisible(!this.getView().byId('mainCustomersTable').getBinding('items').getLength() > 0 && this.getModel("appView").getProperty("/editmode"));
+			this.onBindTableauSrcURL();
+		},
+
+		bindContractMembers: async function (){
+			let oMembersTable = this.byId('customersTable');
+			const contract = await this.getContractById();
+			let oneSecondLaterValidFromDate = new Date(contract?.ValidFrom);
+			oneSecondLaterValidFromDate.setSeconds(oneSecondLaterValidFromDate.getSeconds() + 1);
+
+			const filters = [
+				new Filter("ContractsViewID", "EQ", contract?.ContractsViewID),
+				new Filter("IsParent", "EQ", false)
+			];
+
+			// for history data we need additional filter
+			if(!contract.isCurrent){
+				const oFilterStartDate = new Filter("ValidFrom", FilterOperator.GE, contract?.ValidFrom);
+				const oFilterEndDate = new Filter("ValidFrom", FilterOperator.LE, oneSecondLaterValidFromDate);
+				filters.push(new Filter({
+					filters: [oFilterStartDate, oFilterEndDate],
+					and: true
+				}));
+			}
+
+			//bind table data
+			const membersTableTemplate = oMembersTable.getBindingInfo("items").template;
+			oMembersTable.bindItems({
+				path: "/ContractCustomersView",
+				filters: filters,
+				template: membersTableTemplate
+			});
+		},
+
+		onDeleteBHO: async function (event){
+			this.getOwnerComponent().getModel().remove(`/ContractCustomersView('${this.getOwnerComponent().getModel().getProperty(event.getSource().getParent().getBindingContextPath()).ID}')`);
+		},
+
+		onAddNonVeevaBHO: async function (event){
+			const that = this;
+			const isParent = event.getSource().getId()?.includes('Parent');
+
+			let dialog = new Dialog({
+				title: "Create",
+				type: "Message",
+				content: [
+					new MultiInput({
+						showValueHelp: false,
+						showSuggestion: false
+					}),
+				],
+				beginButton: new Button({
+							text: "Save",
+							press: function () {
+								dialog.close();
+							}.bind(this)
+				}),
+				endButton: new Button({
+							text: "Cancel",
+							press: function () {
+								dialog.close();
+							}
+				}),
+				afterClose: async function (event) {
+					if(event.getParameters().origin.getText() === 'Save'){
+						//save tokens as ContractMembers
+						await that.saveManuallyAddedCustomerTokens(isParent, dialog);
+					}
+					dialog.destroy();
+				}
+			});
+
+			var bhoInputValidator = function(args){
+				var text = args.text;
+
+				return new Token({key: text, text: text});
+			};
+			dialog.open();
+			dialog.getContent()[0]?.addValidator(bhoInputValidator);
+		},
+
+		saveManuallyAddedCustomerTokens: async function(isParent, dialog){
+			let contract = await this.getContractById(this.id);
+			let bhoInputfield = dialog.getContent()[0];
+			if(bhoInputfield){
+				let tokens = bhoInputfield.getTokens();
+				tokens.forEach(token => {
+					let newCustomerObject = {
+						"BHOID": token.getProperty('text'),
+						"ContractID": contract.ID,
+						"IsParent": isParent
+					}
+	
+					this.getOwnerComponent().getModel().createEntry("/ContractCustomersView", {
+						properties: newCustomerObject
+					});
+	
+				});
+
+				if(tokens?.length > 0){
+					return new Promise((resolve, reject) => {
+						this.getModel().submitChanges({
+							error: this.contractSavedError.bind(this)
+						});
+					})
+				}
+			}
+		},
+
+		getContractCustomersById: function(contract){
+			return new Promise((resolve, reject) => {
+				this.getModel().read("/ContractCustomersView", {
+					filters: [
+						new Filter("ContractID", "EQ", contract.ID)
+					],
+					success: function (res) {
+						resolve(res?.results);
+					},
+					error: function (error) {
+						reject(error);
+					}
+				})
+			});
+		},
+
 		onEdit: function () {
 			const editmode = this.getModel("appView").getProperty("/editmode");
 			this.getModel("appView").setProperty("/editmode", !editmode);
+			this.onMainCustomersBindingFinished();
 			this.oDynamicPage.setShowFooter(true);
 		},
-		onFooterCancelPress: function () {
+		onFooterCancelPress: async function () {
+			const savedDiscountType = await this.getSavedDiscountType(this.id);
+			this.getModel("detailView").setProperty("/selectedDiscountType", savedDiscountType);
+			await this.loadDiscountFragment(savedDiscountType);
+			this.getModel().resetChanges();
+			this.filterDiscountsTable();
+			this.bindRebatesTable();
 			const editmode = this.getModel("appView").getProperty("/editmode");
 			this.getModel("appView").setProperty("/editmode", !editmode);
 			this.oDynamicPage.setShowFooter(false);
@@ -144,6 +361,8 @@ sap.ui.define([
 		onCloseDetailPress: function () {
 			this.getModel("appView").setProperty("/actionButtonsInfo/midColumn/fullScreen", false);
 			this.getView().unbindElement();
+			this.masterTable.getBinding("items").aApplicationFilters = this.previousMasterTableApplicationFilters;
+			this.masterTable.getModel("masterView").setProperty("/showHighlight", false);
 			this.getRouter().navTo("master");
 		},
 		toggleFullScreen: function () {
@@ -158,16 +377,65 @@ sap.ui.define([
 				this.getModel("appView").setProperty("/layout", this.getModel("appView").getProperty("/previousLayout"));
 			}
 		},
-		onAddMainCustomerButtonPress: function (event) {
+		onAddMainCustomerButtonPress: async function (event) {
 			const searchWidgetEl = document.getElementById("searchWidget");
+			let contract = await this.getContractById(this.id);
 			searchWidgetEl.start();
 			searchWidgetEl.addEventListener(`veeva-network:CT_SEARCH:select`, (ev) => {
 				const entity = ev.detail.entity;
-				MessageToast.show(`ID of selected customer: ${entity.entityId} - ${entity.entity.whc_legal_name__c}`);//or corporate_name__v instead of whc_legal...
+
+				let newCustomerObject = {
+					"BHOID": entity.entity.Bayer_ID__c,
+					"Name": entity.entity.whc_legal_name__c,
+					"ContractID": contract.ID,
+					"IsParent": true
+				}
+
+				this.getOwnerComponent().getModel().createEntry("/ContractCustomersView", {
+					properties: newCustomerObject
+				});
+
 				searchWidgetEl.close();
+
+				return new Promise((resolve, reject) => {
+					this.getModel().submitChanges({
+						error: this.contractSavedError.bind(this)
+					});
+				})
+
 			}, { once: true });
 
 		},
+
+		onAddCustomerButtonPress: async function (event) {
+			const searchWidgetEl = document.getElementById("searchWidget");
+			let contract = await this.getContractById(this.id);
+			searchWidgetEl.start();
+			searchWidgetEl.addEventListener(`veeva-network:CT_SEARCH:select`, (ev) => {
+				const entity = ev.detail.entity;
+
+				let newCustomerObject = {
+					"BHOID": entity.entity.Bayer_ID__c,
+					"Name": entity.entity.whc_legal_name__c,
+					"ContractID": contract.ID,
+					"IsParent": false
+				}
+
+				this.getOwnerComponent().getModel().createEntry("/ContractCustomersView", {
+					properties: newCustomerObject
+				});
+
+				searchWidgetEl.close();
+
+				return new Promise((resolve, reject) => {
+					this.getModel().submitChanges({
+						error: this.contractSavedError.bind(this)
+					});
+				})
+			}, { once: true });
+
+		},
+
 		onShowWacButtonPress: async function () {
 			let that = this;
 
@@ -206,23 +474,44 @@ sap.ui.define([
 		onProposedContractLengthChange: function (event) {
 			let input = event.getSource(),
 			value = input?.getValue();
-
-			if (value > 6) {
+			if (!value) {
+				this.filterDiscountsTable(value);
+				this.bindRebatesTable(value);
+				return;
+			}
+			if (value < 1 || value > 6) {
 				input.setValueState("Error");
                 input.setValueStateText("Proposed Contract Length should not be greater than 6 years");
                 input.openValueStateMessage();
+				this.filterDiscountsTable("");
+				this.bindRebatesTable("");
 			}else {
 				input.setValueState("None");
                 input.setValueStateText("");
                 input.closeValueStateMessage();
+				this.filterDiscountsTable(value);
+				this.bindRebatesTable(value);
 			}
+		},
+
+		bindAttachments: async function(event){
+			const contract = await this.getContract(this.id);
+			const uploader = this.byId("UploadSet");
+			await uploader.getBinding('items')?.filter(new Filter('Contract_ID', 'EQ', contract.ID));
 		},
 
 		onAfterItemAdded:async function(event){
 			const uploader = this.byId("UploadSet");
-			const item = event.getParameter("item")
-			const id = await this.createAttachmentEntry(this.id,item);
-			item.setUploadUrl(`/catalog/Attachments(${id})/Content`);
+			const item = event.getParameter("item");
+			const contract = await this.getContract(this.id);
+			const id = await this.createAttachmentEntry(contract.ID,item);
+
+			if(window.location.host.search('port4004') === -1){
+				uploader.insertHeaderField(new Item({key: "X-CSRF-Token", text: this.getOwnerComponent().getModel().getSecurityToken()}));
+			}
+			item.setUploadUrl(//window.location.host.search('/app') > -1 ? `/app/whc/v2/catalog/Attachments(ID=${id})/Content` : 
+							  window.location.host.search('port4004') > -1 ? `/v2/catalog/Attachments(ID=${id})/Content` :
+							  `/app/whc/v2/catalog/Attachments(ID=${id})/Content`);
 			uploader.uploadItem(item);
 		},
 		onUploadCompleted: function (event) {
@@ -246,6 +535,20 @@ sap.ui.define([
 	
 			event.preventDefault();
 		},
+
+		onAttachmentDownload: function (event) {
+			const downloadItem = event.getParameter("item");
+			const uploader = this.byId("UploadSet");
+			let item = uploader.getItems()?.find(item => item === downloadItem);
+
+			item?.setUrl(//window.location.host.search('/app') > -1 ? `/app/whc/v2/catalog/Attachments(guid'${item.getBindingContext().getProperty('ID')}')/Content` : 
+						 window.location.host.search('port4004') > -1 ? `/v2/catalog/Attachments(guid'${item.getBindingContext().getProperty('ID')}')/Content` :
+						 `/app/whc/v2/catalog/Attachments(guid'${item.getBindingContext().getProperty('ID')}')/Content`)
+
+			downloadItem.download();
+			event.preventDefault();
+		},
+
 		createAttachmentEntry: async function (id, file) {
 			return new Promise((resolve, reject) => {
 				this.getModel().create("/Attachments", {
@@ -262,17 +565,25 @@ sap.ui.define([
 		submitChanges: function () {
 			return new Promise((resolve, reject) => {
 				this.getModel().submitChanges({
-					success: () => resolve(),
-					error: () => reject()
+					success: this.contractSavedSuccess.bind(this),
+					error: this.contractSavedError.bind(this)
 				});
 			})
 		},
+
+		
+
 		onSave: async function () {
 			try {
+				const draftStatusID = await this.getStatusID('Draft');
+				let contract = await this.getContractById(this.id);
+				const context = this.getView().getBindingContext();
+				this.getView().getModel().setProperty("StatusID",draftStatusID,context);
+				this.calculateDiscountProductsPercentage();
+				if(!(contract.Type === 'New Proposal')){
+					this.mapBHOIdsPendingChanges(contract);
+				}
 				await this.submitChanges();
-				
-				MessageBox.success("Contract created: " + this.getView().getBindingContext().getProperty("ID"));
-				this.getModel().refresh();
 			} catch (error) {
 				console.error(error);
 			}
@@ -292,13 +603,52 @@ sap.ui.define([
 			// }
 
 		},
+		contractSavedSuccess: function (event) {
+			const hasErrorMessages = this.oMessageManager.getMessageModel().getData();
+			if (hasErrorMessages.length < 1) {
+				MessageBox.success("Contract updated successfully");
+				this.getModel("appView").setProperty("/editmode", false);
+				this.oDynamicPage.setShowFooter(false);
+				this.filterDiscountsTable();
+				this.bindRebatesTable();
+				this.onBindTableauSrcURL();
+				this.bindAllContractMembers();
+				this.getModel().resetChanges();
+				this.getModel().refresh();
+			}
+			this.getModel("detailView").setProperty("/busy", false);
 
-		onMenuAction: function (event) {
+			
+		},
+
+		contractSavedError: function (error) {
+
+		},
+
+		onBindTableauSrcURL: function () {
+			let tableau = this.byId("idTableauChart");
+			let contract = this.getOwnerComponent().getModel().getProperty(`/ContractsView('${this.id}')`);
+			if(contract.Type){
+				if(contract.Type === 'New Proposal'){
+					//get parent bho (there's only one)
+					let parentBHO = this.getView().byId('mainCustomersTable').getItems()[0]?.getBindingContext()?.getObject();
+					if(parentBHO)
+						tableau.setSrc(`https://tableau-ncsa.aws.cnb/t/CPROD/views/WHCContractProposal/ContractProposal?ORIGINAL_ORDERING_ACCOUNT_NUM=${parentBHO.BHOID}&amp;:embed=y&amp;:showVizHome=n&amp;:tabs=n&amp;:toolbar=n&amp;:apiID=host1#navType=0&amp;navSrc=Parse%22`);
+				} else {
+					tableau.setSrc(`https://tableau-ncsa.aws.cnb/t/CPROD/views/WHCContractRenewalV1/WHCContractRenewal?Vistex%20ID=${contract.VistexID}&amp;:embed=y&amp;:showVizHome=n&amp;:tabs=n&amp;:toolbar=n&amp;:apiID=host20#navType=0&amp;navSrc=Parse`)
+				}
+			}
+		},
+
+		onMenuAction: async function (event) {
 			let selectedItem = event.getParameter("item");
 			let selectedText = selectedItem.getText();
 		  
 			// Update the "Status" Text element's text property based on the selected menu item
 			let statusText = this.getView().byId("idStatus");
+			let statusButton = this.getView().byId("idButtonAction");
+
+
 			switch (selectedText) {
 				case "Save Draft":
 					statusText.setText("Draft");
@@ -320,38 +670,54 @@ sap.ui.define([
 				  	break;
 				default:
 				  	break;
-			  }
+			}
+
+			const draftStatusID = await this.getStatusID(statusText.getText());
+			const context = this.getView().getBindingContext();
+			this.getView().getModel().setProperty("StatusID",draftStatusID,context);
+			this.getView().getModel().setProperty("Status",statusText.getText(),context);
+			statusButton.setText('Set Status');
+
+			return new Promise((resolve, reject) => {
+				this.getModel().submitChanges({
+					error: this.contractSavedError.bind(this)
+				});
+			});
 		},
 
-		onFormatDiscountTableValues: function (event) {
+		onFormatDiscountTableValues: async function (event) {
+			const contract = this.getView().getBindingContext().getObject();
 			const discountTable = this.byId("discountsTable");
 			const items = discountTable.getItems();
-			const selectedType = event.getParameter("selectedItem").getProperty("text");
-
+			const selectedType = event?.getParameter("selectedItem")?.getProperty("text") || this.getModel("detailView").getProperty("/selectedDiscountType");
+			this.getModel("detailView").setProperty("/selectedDiscountType", selectedType);
 			switch (selectedType) {
 				case "Value":
+					await this.loadDiscountFragment("Value");
+					this.filterDiscountsTable(contract?.ProposedContractLength);
 					items.map(item => {
-						const obj = item.getBindingContext().getObject();
-						const path = item.getBindingContext().getPath();
-						const Mirena = formatter.parsePercentage(obj.Mirena);
-						const Kyleena = formatter.parsePercentage(obj.Kyleena);
-						const Skyla = formatter.parsePercentage(obj.Skyla);
-						this.getModel().setProperty(`${path}/Mirena`, Mirena ? Math.trunc(Mirena * 100) : Mirena);
-						this.getModel().setProperty(`${path}/Kyleena`, Kyleena ? Math.trunc(Kyleena * 100) : Kyleena);
-						this.getModel().setProperty(`${path}/Skyla`, Skyla ? Math.trunc(Skyla * 100) : Skyla);
-					})
+						const context = item.getBindingContext();
+						const obj = context.getObject();
+						const Mirena = parseInt(obj.Mirena * 100);
+						const Kyleena = parseInt(obj.Kyleena * 100);
+						const Skyla = parseInt(obj.Skyla * 100);
+
+						this.getModel().setProperty('Mirena', !Mirena ? "" : Mirena, context);
+						this.getModel().setProperty('Kyleena', !Kyleena ? "" : Kyleena, context);
+						this.getModel().setProperty('Skyla', !Skyla ? "" : Skyla, context);
+					});
 					break;
 				case "Percentage":
+					await this.loadDiscountFragment("Percentage");
+					this.filterDiscountsTable(contract?.ProposedContractLength);
 					items.map(item => {
-						const obj = item.getBindingContext().getObject();
-						const path = item.getBindingContext().getPath();
-						const Mirena = formatter.formatPercentage(obj.Mirena / 100);
-						const Kyleena = formatter.formatPercentage(obj.Kyleena / 100);
-						const Skyla = formatter.formatPercentage(obj.Skyla / 100);
-						this.getModel().setProperty(`${path}/Mirena`, Mirena);
-						this.getModel().setProperty(`${path}/Kyleena`, Kyleena);
-						this.getModel().setProperty(`${path}/Skyla`, Skyla);
-					})
+						const context = item.getBindingContext();
+						const obj = context.getObject();
+
+						this.getModel().setProperty('Mirena', obj.Mirena / 100, context);
+						this.getModel().setProperty('Kyleena', obj.Kyleena / 100, context);
+						this.getModel().setProperty('Skyla', obj.Skyla / 100, context);
+					});
 					break;
 				default:
 					break;
@@ -370,9 +736,15 @@ sap.ui.define([
 			// Get DATA
 			const contract = await this.getContract(this.id);
 			const fileName = `proposal-${contract.Name.replace(/ /g, '-')}-${new Date().toJSON()}.pdf`;
-			const discounts = await this.getDiscounts(this.id, contract.ProposedContractLength);
-			const discountItems = discounts.results.map(item => ["Y"+item.Year, item.Units, item.Myrena, item.Kyleena, item.Skyla]);
-			const rebates = await this.getRebates(this.id, contract.ProposedContractLength);
+			const discounts = await this.getDiscounts(contract);
+			const discountItems = discounts.results.map(item => {
+				const isDiscountTypePercentage = item.SelectedDiscountType === "Percentage";
+				const mirena = isDiscountTypePercentage ? item.Mirena*100+"%" : item.Mirena; 
+				const kyleeena = isDiscountTypePercentage ? item.Kyleena*100+"%" : item.Kyleena; 
+				const skyla = isDiscountTypePercentage ? item.Skyla*100+"%" : item.Skyla; 
+				return ["Y"+item.Year, item.Units, mirena, kyleeena, skyla]
+			});
+			const rebates = await this.getRebates(contract);
 			const sortedRebates = rebates.results.sort((a, b) => {
 				if (a.Year < b.Year) {
 					return -1;
@@ -382,11 +754,11 @@ sap.ui.define([
 				}
 				return 0;
 			});
-			const rebateItems = sortedRebates.map(item => ["Y"+item.Year, item.RebateLevels_Unit_Level_1, item.RebateLevels_Discount_Level_1, item.RebateLevels_Unit_Level_2, item.RebateLevels_Discount_Level_2, item.RebateLevels_Unit_Level_3, item.RebateLevels_Discount_Level_3]);
+			const rebateItems = sortedRebates.map(item => ["Y"+item.Year, item.RebateLevels_Unit_Level_1, item.RebateLevels_Discount_Level_1*100+"%", item.RebateLevels_Unit_Level_2, item.RebateLevels_Discount_Level_2*100+"%", item.RebateLevels_Unit_Level_3, item.RebateLevels_Discount_Level_3*100+"%"]);
 			const mainCustomersTable = this.byId("mainCustomersTable");
-			const mainCustomersTableItemNames = mainCustomersTable.getItems().map(item => [item.getBindingContext().getObject().Name]);
+			const mainCustomersTableItemNames = mainCustomersTable.getItems().map(item => [item.getBindingContext().getObject().BHOID]);
 			const customersTable = this.byId("customersTable");
-			const customersTableItemNames = customersTable.getItems().map(item => [item.getBindingContext().getObject().Name]);
+			const customersTableItemNames = customersTable.getItems().map(item => [item.getBindingContext().getObject().BHOID]);
 			const whcProducts = await this.getWHCProducts();
 			const wacItems = whcProducts.results.map(item => [item.ProductName, item.WAC]);
 
@@ -537,11 +909,45 @@ sap.ui.define([
 
 			// Tableau
 			const tableauChartHtml = this.byId("idTableauChart").getDomRef();
-			const canvasImage = await html2canvas(tableauChartHtml);
+			const iFrameUrl = this.byId("idTableauChart").getSrc();
+			const proxyIframe = await this.printIframe(iFrameUrl);
+			const canvasImage = await html2canvas(proxyIframe);
 			doc.addImage(canvasImage, "PNG", marginLeft, tableHeight, 180, 100); // Adjust the coordinates and size as needed
 
 			// print
 			doc.save(fileName);	
+		},
+
+		/**
+		 * Load iframe from cross-origin via proxy iframe
+		 * and then invokes the print dialog.
+		 * It is not possible to call window.print() on the target iframe directly
+		 * because of cross-origin policy.
+		 * 
+		 * Downside is that the iframe stays loaded. 
+		 */
+		printIframe: function(url) {
+			return new Promise((resolve, reject) => {
+				const proxyIframe = document.createElement('iframe');
+				const body = document.getElementsByTagName('body')[0];
+				const div = document.createElement('div');
+				div.style.width = '500px';
+				div.style.height = '500px';
+				
+				proxyIframe.style.width = '100%';
+				proxyIframe.style.height = '100%';
+				proxyIframe.style.display = 'none';
+
+				div.appendChild(proxyIframe);
+				body.appendChild(div);
+			
+				var contentWindow = proxyIframe.contentWindow;
+				contentWindow.document.open();
+				// Set dimensions according to your needs.
+				// You may need to calculate the dynamically after the content has loaded
+				contentWindow.document.write('<iframe src="' + url + '" onload="' + resolve(div) + '" width="1000" height="1800" frameborder="0" marginheight="0" marginwidth="0">');
+				contentWindow.document.close();
+			});
 		},
 
 
@@ -562,7 +968,7 @@ sap.ui.define([
 
 		getContract: async function (contractId) {
 			const path =this.getModel().createKey("/ContractsView", {
-				ID: contractId
+				ContractsViewID: contractId
             });
             let context = this.getModel().getContext(path);
 			if(!context.getObject()){
@@ -583,14 +989,65 @@ sap.ui.define([
 			return context.getObject();
 		},
 
-		getDiscounts: async function (contractId, contractLength) {
+		getDiscounts: async function (contract) {
 		
             return new Promise((resolve, reject) => {
-				this.getModel().read("/DiscountTableView", {
+				this.getModel().read("/DiscountsView", {
 					filters: [
-						new Filter("Contracts_ID", "EQ", contractId),
-						new Filter("Year", "LE", contractLength),
+						new Filter("ContractID", FilterOperator.EQ, contract?.ID),
+						new Filter("Year", FilterOperator.LE, contract?.ProposedContractLength),
+						new Filter("isCurrent", FilterOperator.EQ, contract?.isCurrent),
+						new Filter("ContractsViewID", FilterOperator.EQ, contract?.ContractsViewID)
 					],
+					success: function (res) {
+						resolve(res)
+					},
+					error: function (err) {
+						reject(err)
+					}
+				});
+			});
+		},
+		getStatusID: async function (statusText) {
+		
+            return new Promise((resolve, reject) => {
+				this.getModel().read("/WHCStatus", {
+					filters: [
+						new Filter("StatusText", FilterOperator.EQ, statusText)
+					],
+					success: function (res) {
+						resolve(res?.results?.[0]?.ID)
+					},
+					error: function (err) {
+						reject(err)
+					}
+				});
+			});
+		},
+
+		getRebates: async function (contract) {
+
+			let oneSecondLaterValidFromDate = new Date(contract?.ValidFrom);
+			oneSecondLaterValidFromDate.setSeconds(oneSecondLaterValidFromDate.getSeconds() + 1);
+
+			const filters = [
+				new Filter("ContractsViewID", "EQ", contract?.ContractsViewID),
+				new Filter("Year", "LE", contract?.ProposedContractLength)
+			];
+
+			// for history data we need additional filter
+			if(!contract.isCurrent){
+				const oFilterStartDate = new Filter("ValidFrom", FilterOperator.GE, contract?.ValidFrom);
+				const oFilterEndDate = new Filter("ValidFrom", FilterOperator.LE, oneSecondLaterValidFromDate);
+				filters.push(new Filter({
+					filters: [oFilterStartDate, oFilterEndDate],
+					and: true
+				}));
+			}
+
+			return new Promise((resolve, reject) => {
+				this.getModel().read("/RebatesView", {
+					filters: filters,
 					success: function (res) {
 						resolve(res)
 					},
@@ -601,13 +1058,46 @@ sap.ui.define([
 			});
 		},
 
-		getRebates: async function (contractId, contractLength) {
+		getSavedDiscountType: async function (contractViewID) {
+			const contract = await this.getContract(contractViewID);
+			const discounts = await this.getDiscounts(contract);
+			return discounts?.results?.[0]?.SelectedDiscountType || "Value";
+		},
+
+		calculateDiscountProductsPercentage: function () {
+			const discountTable = this.byId("discountsTable");
+			const items = discountTable.getItems();
+			const selectedDiscountType = this.getModel("detailView").getProperty("/selectedDiscountType");
+
+			items.map(item => {
+				const context = item.getBindingContext();
+				const obj = context.getObject();
+				if (selectedDiscountType === "Value") {
+					this.getModel().setProperty('Mirena', obj.Mirena / 100, context);
+					this.getModel().setProperty('Kyleena', obj.Kyleena / 100, context);
+					this.getModel().setProperty('Skyla', obj.Skyla / 100, context);
+				}
+				this.getModel().setProperty('SelectedDiscountType', selectedDiscountType, context);
+			})		
+		},
+
+		loadDiscountFragment: function(discountType){
+			const vbox = this.byId("idDiscountVbox");
+			vbox.destroyItems();
+			return Fragment.load({
+				id: this.getView().getId(),
+				name: `com.bayer.tender.whcapp.view.fragments.DiscountType${discountType}`,
+				controller: this
+			}).then(function (table) {
+
+				vbox.addItem(table);
+				return table;
+			}.bind(this));
+		},
+
+		getVistexData: async function () {
 			return new Promise((resolve, reject) => {
-				this.getModel().read("/Rebates", {
-					filters: [
-						new Filter("Contracts_ID", "EQ", contractId),
-						new Filter("Year", "LE", contractLength),
-					],
+				this.getModel().read("/VistexData", {
 					success: function (res) {
 						resolve(res)
 					},
@@ -617,6 +1107,82 @@ sap.ui.define([
 				});
 			});
 		},
+
+		onVistexIdChange: async function(event){
+
+			// Get the user-input VistexId
+			let vistexId = event.getParameter("value");
+			const vistexData = await this.getVistexData();
+			const vistexItems = vistexData.results.filter(item => item.VistexID === vistexId);
+
+			// Update the MultiInput fields with fetched data
+			let mainCustomersTable = this.getView().byId("mainCustomersTable");
+			let customersTable = this.getView().byId("customersTable");
+
+			// Clear the existing items in the tables
+			mainCustomersTable.removeAllItems();
+			customersTable.removeAllItems();
+
+			//  // Clear the existing items in the tables
+			//  mainCustomersTable.unbindItems();
+			//  customersTable.unbindItems();
+			// Create a Set to store unique ParentBHOID values
+			let uniqueParentBHOIDs = new Set();
+		 
+			 // Add tokens for MemberBhoid and ParentBhoid based on vistexItems
+			 vistexItems.forEach(function (vistexItem) {
+				if (!uniqueParentBHOIDs.has(vistexItem.ParentBHOID)) {
+				 mainCustomersTable.addItem(
+					 new sap.m.ColumnListItem({
+						 cells: [
+							 new sap.m.Text({ text: vistexItem.ParentBHOID })
+						 ]
+					 })
+				 );
+					 // Add the ParentBHOID to the Set to avoid duplicates
+					 uniqueParentBHOIDs.add(vistexItem.ParentBHOID);
+				}
+		 
+				 customersTable.addItem(
+					 new sap.m.ColumnListItem({
+						 cells: [
+							 new sap.m.Text({ text: vistexItem.MemberBHOID })
+						 ]
+					 })
+				 );
+			 });
+		
+		},
+
+		mapBHOIdsPendingChanges: function (contract) {
+			const mainCustomersTable = this.getView().byId("mainCustomersTable");
+			const mainCustomerItems = mainCustomersTable.getItems();
+			const customersTable = this.getView().byId("customersTable");
+			const customerItems = customersTable.getItems();
+			let contractcustomer = [];
+			
+			const createContractEntry = (BHOID, IsParent) => {
+				return this.getOwnerComponent().getModel().createEntry("/ContractCustomersView", {
+					properties: {
+						"BHOID": BHOID,
+						"Name": '',
+						"ContractID": contract.ID,
+						"IsParent": IsParent
+					}
+    			});
+  			};
+
+			for (const mainCustomerItem of mainCustomerItems) {
+				contractcustomer.push(createContractEntry(mainCustomerItem?.getAggregation("cells")[0]?.getText(), true));
+			}
+
+			for (const customerItem of customerItems) {
+				contractcustomer.push(createContractEntry(customerItem?.getAggregation("cells")[0]?.getText(), false));
+			}
+
+		}
+
+		
 	});
 
 });

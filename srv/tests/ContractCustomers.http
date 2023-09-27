@@ -1,0 +1,42 @@
+@hostname=localhost
+@port=4004
+@host={{hostname}}:{{port}}
+@service=/v2/catalog
+
+
+### ContractCustomers  - Get All ContractCustomers
+GET http://{{host}}{{service}}/ContractCustomers
+Authorization: Basic YXJ0aW9t
+
+
+### ContractCustomers  - Get Contract by ID - ODATA V2
+GET http://{{host}}{{service}}/ContractCustomers(guid'f6df5ef6-ee78-11ed-a05b-0242ac120003')
+Authorization: Basic YXJ0aW9t
+
+###ContractCustomers  - Create new Contract
+POST http://{{host}}{{service}}/ContractCustomers
+Authorization: Basic YXJ0aW9t
+Content-Type: application/json
+
+{
+    "BHOID"     : "test2 value",
+    "Name"      : "test2 name",
+    "ContractID": "e88f4e1d-9ce0-4f57-846d-a9630463ea63",
+    "IsParent"  : false
+}
+
+###ContractCustomers  - Update Contract
+PUT http://{{host}}{{service}}/ContractCustomers(guid'e88f4e1d-9ce0-4f57-846d-a9630463ea63')
+Authorization: Basic YXJ0aW9t
+Content-Type: application/json
+
+{
+    "BHOID"     : "test value",
+    "Name"      : "test name",
+    "ContractID": "e88f4e1d-9ce0-4f57-846d-a9630463ea63",
+    "IsParent"  : false
+}
+
+### ContractCustomers  - Delete contract by ID
+DELETE http://{{host}}{{service}}/ContractCustomers(guid'8512e1ce-a990-4d90-b958-a5526c08a689')
+Authorization: Basic YXJ0aW9t

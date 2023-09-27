@@ -39,14 +39,14 @@
 
 				<!-- ACTIONS -->
 				<f:actions>
-					<Button id="editButtonId" text="Edit" type="Emphasized" press=".onEdit" enabled="{= !${appView>/editmode}}"/>
+					<Button id="editButtonId" text="Edit" type="Emphasized" press=".onEdit" enabled="{= ${isCurrent} &amp;&amp; !${appView>/editmode}}"/>
 					<Button id="deleteContractButtonId" icon="sap-icon://delete" text="Delete" type="Reject" press="onDeleteContractPress" enabled="true" />
 					<Button id="refreshButtonId" icon="sap-icon://refresh" type="Emphasized" press="onRefresh" enabled="true"/>
 					<Button id="printButtonId" text="Print" type="Emphasized" press=".onPrintButtonPress" enabled="true"/>
-					<MenuButton id="idButtonAction" text="Set Status" buttonMode="Split" useDefaultActionOnly="false" visible="true" type="Emphasized">
+					<MenuButton id="idButtonAction" text="Set Status" buttonMode="Split" useDefaultActionOnly="false" visible="true" type="Emphasized" enabled="{= !${appView>/editmode} &amp;&amp; ${Status} !== 'Approved' }">
 							<menu>
 								<Menu itemSelected="onMenuAction">
-									<MenuItem text="Save Draft" visible="{accessControl>/whcproposalcreator}" press=".onSave"/>
+									<!--<MenuItem text="Save Draft" visible="{accessControl>/whcproposalcreator}" press=".onSave"/>-->
 									<MenuItem text="Submit to Workshop" visible="{accessControl>/whcproposalcreator}" />
 									<MenuItem text="Approve" visible="{accessControl>/whcapprover}" />
 									<MenuItem text="Reject" visible="{accessControl>/whcapprover}" />
@@ -63,7 +63,7 @@
 				<FlexBox justifyContent="Start">
 					<VBox justifyContent="Center">
 						<Label text="Status" textAlign="Center" width="100%"/>
-						<Text id="idStatus" text="{Status/Status}"/>
+						<Text id="idStatus" text="{Status}"/>
 						<Text id="idStatusId" text="{StatusID}" visible="false"/>
                     </VBox>
 				</FlexBox>
@@ -104,51 +104,61 @@
 									<Label text='Proposal Name '/>
 									<Input id="idProposalName" value="{Name}"  enabled="{= ${appView>/editmode}}"/>
 
-									<Label text='Vistex ID ' visible="{= ${TypeID} === 'Amendment' || ${TypeID} === 'Renewal Contract' }"/>
-									<Input id="idVistexInput" value="{VistexID}"  enabled="{= ${appView>/editmode}}" visible="{= ${TypeID} === 'Amendment' || ${TypeID} === 'Renewal Contract' }"/>
+									<Label text='Vistex ID ' visible="{= ${Type} === 'Amendment' || ${Type} === 'Renewal Contract' }"/>
+									<Input id="idVistexInput" value="{VistexID}"  enabled="{= ${appView>/editmode}}" visible="{= ${Type} === 'Amendment' || ${Type} === 'Renewal Contract' }" liveChange="onVistexIdChange"/>
 
 									<Button id="wacButtonId" text="WAC" type="Emphasized" press=".onShowWacButtonPress" />
 								</form:content>
 							</form:SimpleForm>
 						
-							<l:ResponsiveSplitter height="100%">
+							<l:ResponsiveSplitter >
 								<l:PaneContainer>
 								<l:SplitPane requiredParentWidth="200">
 										<Table id="mainCustomersTable" 
-											items="{path:'ContractCustomers'}"
+											items="{
+															path: '/ContractCustomersView',
+															sorter: { path: 'Name' },
+															filters: [
+																{ path : 'ContractID', operator : 'EQ', value1 : '{ID}'},
+																{ path : 'IsParent', operator : 'EQ', value1 : true }
+															]
+														}"
 											growing="true"
 											growingThreshold="15"
 											growingScrollToLoad="false"
 											busyIndicatorDelay="0"
+											updateFinished=".onMainCustomersBindingFinished"
 										>
 										<headerToolbar>
 											<OverflowToolbar>
 												<content>
 													<Title text="Parent BHO ID" level="H2"/>
-													<Button text="+" type="Emphasized" press=".onAddMainCustomerButtonPress" enabled="true"/>
-													<MultiInput width="70%"
-														showClearIcon="true"
-														id="multiInput2"
-														suggestionItems="{
-															path: '/ContractCustomers',
-															sorter: { path: 'Name' }
-														}"
-														showValueHelp="false"
-														enabled="{= ${appView>/editmode}}">
-														<core:Item key="{Name}" text="{Name}" />
-													</MultiInput>
+													<Button id="btnAddBHOParent" text="+" type="Emphasized" press=".onAddMainCustomerButtonPress" enabled="{= ${appView>/editmode}}" />
+													<Button id="btnManualBHOParent" text="Add Manually" type="Emphasized" press=".onAddNonVeevaBHO" enabled="{= ${appView>/editmode}}" />
 												</content>
 											</OverflowToolbar>
 										</headerToolbar>
 											<columns>
-												<Column>
+												<Column width="20%">
+													<Text text="BHO ID" />
+												</Column>
+												<Column width="75%">
 													<Text text="Name" />
+												</Column>
+												<Column width="5%">
+													<Text text="" />
 												</Column>
 											</columns>
 											<items>
 												<ColumnListItem>
 													<cells>
+														<Text text="{BHOID}" />
+													</cells>
+													<cells>
 														<Text text="{Name}" />
+													</cells>
+													<cells>
+														<Button icon="sap-icon://delete" press="onDeleteBHO" visible="{= ${appView>/editmode}}"/>
 													</cells>
 												</ColumnListItem>
 											</items>
@@ -156,42 +166,51 @@
 									</l:SplitPane>
 									<l:SplitPane requiredParentWidth="700">
 										<Table id="customersTable" 
-											items="{path:'ContractCustomers'}"
-											growing="true"
-											growingThreshold="15"
-											growingScrollToLoad="false"
-											busyIndicatorDelay="0"
+											   items = "{
+															path: '/ContractCustomersView',
+															sorter: { path: 'Name' },
+															filters: [
+																{ path : 'ContractID', operator : 'EQ', value1 : '{ID}'},
+																{ path : 'IsParent', operator : 'EQ', value1 : true }
+															]
+														}"
+											   growing="true"
+											   growingThreshold="15"
+											   growingScrollToLoad="false"
+											   busyIndicatorDelay="0"
 										>
 										<headerToolbar>
 											<OverflowToolbar>
 												<content>
 													<Title text="Member BHO ID" level="H2"/>
-													<Button text="+" type="Emphasized" press=".onAddCustomerButtonPress" enabled="true"/>
-													<MultiInput width="70%"
-														showClearIcon="true"
-														id="multiInputMemberBHO"
-														suggestionItems="{
-															path: '/ContractCustomers',
-															sorter: { path: 'Name' }
-														}"
-														showValueHelp="false"
-														enabled="{= ${appView>/editmode}}">
-														<core:Item key="{Name}" text="{Name}" />
-													</MultiInput>
+													<Button text="+" type="Emphasized" press=".onAddCustomerButtonPress" enabled="{= ${appView>/editmode}}" visible="{= ${appView>/editmode}}"/>
+													<Button id="btnManualBHO" text="Add Manually" type="Emphasized" press=".onAddNonVeevaBHO" enabled="{= ${appView>/editmode}}" visible="{= ${appView>/editmode}}"/>
 												</content>
 											</OverflowToolbar>
 										</headerToolbar>
 										<MultiInput id="multiId" showValueHelp="false">
 										</MultiInput>
 											<columns>
-												<Column>
+												<Column width="20%">
+													<Text text="BHO ID" />
+												</Column>
+												<Column width="70%">
 													<Text text="Name" />
+												</Column>
+												<Column width="10%">
+													<Text text="" />
 												</Column>
 											</columns>
 											<items>
 												<ColumnListItem>
 													<cells>
+														<Text text="{BHOID}" />
+													</cells>
+													<cells>
 														<Text text="{Name}" />
+													</cells>
+													<cells>
+														<Button icon="sap-icon://delete" press="onDeleteBHO" visible="{= ${appView>/editmode}}"/>
 													</cells>
 												</ColumnListItem>
 											</items>
@@ -214,7 +233,16 @@
 							<Input id="idBaseLineUnitsInput" value="{BaseLineUnits}"  enabled="{= ${appView>/editmode}}" width='20%' liveChange="onBaseLineUnitChange" type="Number"/>
 
 							<Label text='Base Line Discount '/>
-							<Input id="idBaseLineDiscountInput" value="{BaseLineDiscount}"  enabled="{= ${appView>/editmode}}" type="Number" description="%" width='40%'/>
+							<Input 
+								id="idBaseLineDiscountInput" 
+								value="{
+									path: 'BaseLineDiscount',
+									type: 'com.bayer.tender.whcapp.model.datatypes.CustomPercentageType' 
+								}"  
+								enabled="{= ${appView>/editmode}}" 
+								description="%" 
+								width='40%'
+							/>
 
 							<Label text='Proposed Contract Length '/>
 							<Input id="idProposedContractLengthInput" value="{ProposedContractLength}"  enabled="{= ${appView>/editmode}}" width='20%' liveChange="onProposedContractLengthChange" type="Number"/>
@@ -237,7 +265,7 @@
 							<Title text="Discounts" />
 							<ToolbarSpacer />
 							<Label text='Type:'/>
-							<Select id = "idDiscountType" change="onFormatDiscountTableValues">
+							<Select id = "idDiscountType" change="onFormatDiscountTableValues" selectedKey="{detailView>/selectedDiscountType}" enabled="{= ${appView>/editmode}}">
 								<items>
 									<core:Item key = "Value" text="Value"></core:Item>
 									<core:Item key = "Percentage" text="Percentage"></core:Item>
@@ -245,43 +273,9 @@
 							</Select>
 						</OverflowToolbar>
 					</headerToolbar>
-					<Table id="discountsTable" 
-						items="{
-							path:'/DiscountTableView'
-						}"
-						growing="true"
-						growingThreshold="15"
-						growingScrollToLoad="false"
-						busyIndicatorDelay="0">
-						<columns>
-							<Column>
-								<Text text="Year" />
-							</Column>
-							<Column>
-								<Text text="Units" />
-							</Column>
-							<Column>
-								<Text text="Mirena" />
-							</Column>
-							<Column>
-								<Text text="Kyleena" />
-							</Column>
-							<Column>
-								<Text text="Skyla" />
-							</Column>
-						</columns>
-						<items>
-							<ColumnListItem>
-								<cells>
-									<Text text="Y{Year}" />
-									<Input value="{Units}" enabled="{= ${appView>/editmode}}"/>
-									<Input value="{Mirena}" enabled="{= ${appView>/editmode}}"/>
-									<Input value="{Kyleena}" enabled="{= ${appView>/editmode}}"/>
-									<Input value="{Skyla}" enabled="{= ${appView>/editmode}}"/>
-								</cells>
-							</ColumnListItem>
-						</items>
-					</Table>
+					 <VBox id="idDiscountVbox" class="sapUiNoMargin">
+                        <!-- PriceConditionFragments dynamically loaded from Controller:loadPriceConditionFragment  -->
+                    </VBox>
 					</Panel>
 
 					<Panel expandable="true" width="auto" class="sapUiResponsiveMargin" expanded="true">
@@ -292,7 +286,7 @@
 						</headerToolbar>
 
 						<t:Table id="rebatesTable"
-								rows="{/Rebates}"
+								rows="{/RebatesView}"
 								busyIndicatorDelay="0"
 								selectionMode='None'>
 							<t:columns>
@@ -332,7 +326,7 @@
 									<t:template>
 										<Input value="{
 											path: 'RebateLevels_Discount_Level_1',
-											formatter: '.formatter.formatPercentage'
+											type: 'com.bayer.tender.whcapp.model.datatypes.CustomPercentageType'
 										}" enabled="{= ${appView>/editmode}}"/>
 									</t:template>
 								</t:Column>
@@ -366,7 +360,7 @@
 									<t:template>
 										<Input value="{
 											path: 'RebateLevels_Discount_Level_2',
-											formatter: '.formatter.formatPercentage'
+											type: 'com.bayer.tender.whcapp.model.datatypes.CustomPercentageType'
 										}" enabled="{= ${appView>/editmode}}"/>
 									</t:template>
 								</t:Column>
@@ -400,7 +394,7 @@
 									<t:template>
 										<Input value="{
 											path: 'RebateLevels_Discount_Level_3',
-											formatter: '.formatter.formatPercentage'
+											type: 'com.bayer.tender.whcapp.model.datatypes.CustomPercentageType'
 										}" enabled="{= ${appView>/editmode}}"/>
 									</t:template>
 								</t:Column>
@@ -424,7 +418,7 @@
 								  />
 					</Panel>
 
-					<Panel expandable="true" width="auto" class="sapUiResponsiveMargin" expanded="true">
+				   <Panel expandable="true" width="auto" class="sapUiResponsiveMargin" expanded="true">
 					<headerToolbar>
 						<OverflowToolbar style="Clear">
 							<Title text="Uploaded Files" />
@@ -440,25 +434,25 @@
 								httpRequestMethod="Put"
 								afterItemAdded="onAfterItemAdded"
 								uploadCompleted="onUploadCompleted"
-								items="{path: 'Attachments', templateShareable: false}">
+								items="{path: '/Attachments', templateShareable: false}">
 							<upload:items>
 								<upload:UploadSetItem
 										fileName="{FileName}"
 										mediaType="{MediaType}"
 										visibleEdit="false"
-										url="/catalog/Attachments({ID})/Content"
+										url="/v2/catalog/Attachments({ID})/Content"
 										enabledRemove="{appView>/editmode}"
 										removePressed=".onAttachmentDelete"
+										openPressed=".onAttachmentDownload"
 										uploadState="Complete">
 								</upload:UploadSetItem>
 							</upload:items>
 						</upload:UploadSet>
 					</Panel>
 					<Panel headerText="Tableau test" expandable="true" width="auto" class="sapUiResponsiveMargin" expanded="true">
-						<custom:Tableau id="idTableauChart" src="{= ${TypeID} === 'New Proposal' ? 'https://tableau-ncsa.aws.cnb/t/CPROD/views/WHCContractProposal/ContractProposal?ORIGINAL_ORDERING_ACCOUNT_NUM=BHO3064937&amp;:embed=y&amp;:showVizHome=n&amp;:tabs=n&amp;:toolbar=n&amp;:apiID=host1#navType=0&amp;navSrc=Parse%22' :
-						 													   'https://tableau-ncsa.aws.cnb/t/CPROD/views/WHCContractRenewalV1/WHCContractRenewal?Vistex%20ID=0060062019&amp;:embed=y&amp;:showVizHome=n&amp;:tabs=n&amp;:toolbar=n&amp;:apiID=host20#navType=0&amp;navSrc=Parse' }" 
+						<custom:Tableau id="idTableauChart" 
 										width="100%" 
-										heigth="100%"/>
+										height="1500px"/>
 					</Panel>
 				</IconTabFilter>
 				</items>
@@ -468,7 +462,7 @@
 			<OverflowToolbar>
 				<ToolbarSpacer />
 				<Button type="Accept" text="Save" press="onSave"/>
-				<Button type="Reject" text="Cancel" press="onFooterCancelPress()"/>
+				<Button type="Reject" text="Cancel" press="onFooterCancelPress"/>
 			</OverflowToolbar>
 		</f:footer>
 	</f:DynamicPage>

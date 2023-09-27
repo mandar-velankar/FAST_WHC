@@ -1,5 +1,0 @@
-ID;createdAt;createdBy;modifiedAt;modifiedBy;ValidFrom;ValidTo;Name;BackgroundInfo;VistexID;StatusID;TypeID;Remarks;BaseLineUnits;BaseLineDiscount;ProposedContractLength
-f6df5ef6-ee78-11ed-a05b-0242ac120003;2023-08-07;EHMHV;2023-08-07;EHMHV;2021-01-01;9999-12-31 00:00:00;Test contract 1;background;1;55d97328-2d03-4b1b-b18f-b63ac0259301;d4ec08fe-8d80-4acd-9aa9-396ed718535e;;1000;0.15;4
-f6df5ef6-ee78-11ed-a05b-0242ac120004;2023-08-07;EHMHV;2023-08-07;EHMHV;2021-01-01;9999-12-31 00:00:00;Test contract 2;background;1;55d97328-2d03-4b1b-b18f-b63ac0259301;d4ec08fe-8d80-4acd-9aa9-396ed718535e;;1000;0.15;4
-518c932c-2f73-4003-875d-6ccf96309f56;2023-08-07;EHMHV;2023-08-07;EHMHV;2021-01-01;9999-12-31 00:00:00;NewProposalTestContract;BackgroundTestComments;;55d97328-2d03-4b1b-b18f-b63ac0259301;d4ec08fe-8d80-4acd-9aa9-396ed718535e;;1000;0.15;4
-518c932c-2f73-4003-875d-6ccf96309f57;2023-08-07;EHMHV;2023-08-07;EHMHV;2021-01-01;9999-12-31 00:00:00;NewProposalTestContract;BackgroundTestComments;;55d97328-2d03-4b1b-b18f-b63ac0259301;d4ec08fe-8d80-4acd-9aa9-396ed718535e;;1000;0.15;5

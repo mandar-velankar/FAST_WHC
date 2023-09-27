@@ -3,11 +3,20 @@ sap.ui.define([
 	"sap/ui/core/routing/History",
 	"sap/ui/core/Fragment",
 	"sap/m/MessagePopover",
-	"sap/m/MessageItem"
-], function (Controller, History,MessagePopover, MessageItem) {
+	"sap/m/MessageItem",
+	"../model/datatypes/CustomDecimalType",
+	"../model/datatypes/CustomPercentageType",
+	"../model/datatypes/CustomNumberType"
+], function (Controller, History,MessagePopover, MessageItem, CustomDecimalType, CustomPercentageType, CustomNumberType) {
 	"use strict";
 
 	return Controller.extend("com.bayer.tender.whcapp.controller.BaseController", {
+		
+		customTypes: {
+			persentage: CustomPercentageType,
+			number: CustomNumberType,
+			decimal: CustomDecimalType
+		},
 		getRouter : function () {
 			return this.getOwnerComponent().getRouter();
 		},

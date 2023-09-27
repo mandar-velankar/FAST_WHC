@@ -1,5 +1,0 @@
-ID;ValidFrom;ValidTo;Name;BHOID;IsParent;Contracts_ID
-g6df5ef6-ee78-11ed-a05b-0242ac120002;"2021-01-01 00:00:00";"9999-12-31 00:00:00";Contract customer 11;123;true;f6df5ef6-ee78-11ed-a05b-0242ac120003
-g6df5ef6-ee78-11ed-a05b-0242ac120003;"2021-01-01 00:00:00";"9999-12-31 00:00:00";Contract customer 12;123;false;f6df5ef6-ee78-11ed-a05b-0242ac120003
-g6df5ef6-ee78-11ed-a05b-0242ac120004;"2021-01-01 00:00:00";"9999-12-31 00:00:00";Contract customer 21;123;true;f6df5ef6-ee78-11ed-a05b-0242ac120004
-g6df5ef6-ee78-11ed-a05b-0242ac120005;"2021-01-01 00:00:00";"9999-12-31 00:00:00";Contract customer 22;123;false;f6df5ef6-ee78-11ed-a05b-0242ac120004

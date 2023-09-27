@@ -67,16 +67,16 @@
                     items="{
                         path:'/ContractsView',
                         filters: [
-                        {
-                            path: 'IsParent',
-                            operator: 'EQ',
-                            value1: 'true'
-                        },
-                        {
-                            path: 'IsParent',
-                            operator: 'EQ',
-                            value1: null
-                        }]
+                            {
+                                path: 'isCurrent',
+                                operator: 'EQ',
+                                value1: true
+                            }
+                        ],
+                        sorter: {
+                            path: 'modifiedAt',
+                            descending: true
+                        }
                     }"
                     itemPress=".onSelectionChange"
                     class="sapFDynamicPageAlignContent"
@@ -94,18 +94,18 @@
                     <columns>
                         <Column>
                             <Text text="{i18n>ProposalName}" />
-                        </Column>
-                        <Column>
-                            <Text text="{i18n>ProposalType}" />
-                        </Column>
+                        </Column> 
                         <Column>
                             <Text text="{i18n>Status}" />
+                        </Column>
+                        <Column>
+                            <Text text="{i18n>ModifiedAt}" />
                         </Column>
                         <Column>
                             <Text text="{i18n>ModifiedBy}" />
                         </Column>
                         <Column>
-                            <Text text="{i18n>ModifiedAt}" />
+                            <Text text="{i18n>ProposalType}" />
                         </Column>
                         <Column>
                             <Text text="{i18n>ParentAccountName}" />
@@ -118,12 +118,10 @@
                         </Column>
                     </columns>
                     <items>
-                        <ColumnListItem type="Active">
+                        <ColumnListItem type="Active" highlight="{= ${isCurrent} &amp;&amp; ${masterView>/showHighlight}? 'Indication08' : 'None'}">
                             <cells>
                                 <Text text="{Name}" />
-                                <Text text="{TypeID}" />
                                 <Text text="{Status}" />
-                                <Text text="{modifiedBy}" />
                                 <Text text="{
                                         path: 'modifiedAt',
                                         type: 'sap.ui.model.type.Date',
@@ -133,6 +131,8 @@
                                         }
                                     }"  
                                 />
+                                <Text text="{modifiedBy}" />
+                                <Text text="{Type}" />
                                 <Text text="{ParentAccountName}" />
                                 <Text text="{createdBy}" />
                                 <Text text = "{

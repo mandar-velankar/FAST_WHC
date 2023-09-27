@@ -16,7 +16,8 @@ sap.ui.define([
 			const viewModel = new JSONModel({
 				delay: 0,
 				title: this.getResourceBundle().getText("masterTitleCount", [0]),
-				noDataText: this.getResourceBundle().getText("masterListNoDataText")
+				noDataText: this.getResourceBundle().getText("masterListNoDataText"),
+                showHighlight: false
 			});
 
 			this.setModel(viewModel, "masterView");
@@ -31,7 +32,7 @@ sap.ui.define([
 		},
 		onSelectionChange: function (oEvent) {
 			const data = oEvent.getParameter("listItem").getBindingContext().getObject();
-			data?.ID && this._showDetail(data.ID);
+			data?.ID && this._showDetail(data.ContractsViewID);
 		},
 		_onMasterMatched: async function (event) {
 			//Set the layout property of the FCL control to 'OneColumn'
@@ -65,15 +66,12 @@ sap.ui.define([
 		},
 
 		_bindCreateProposalForm: async function () {
-			const entity = "ContractFormView";
+			const entity = "ContractsView";
 			const form = this.byId("idNewProposalForm");
-			const newEntryContext = this.getOwnerComponent().getModel().createEntry(`/${entity}`, {
-				groupId: "NewProposal"
-			});
+			const newEntryContext = this.getOwnerComponent().getModel().createEntry(`/${entity}`);
 			const path = newEntryContext.getPath();
 			form?.bindElement({
-				path: path,
-				groupId: "NewProposal"
+				path: path
 			});
 		},
 
@@ -250,8 +248,7 @@ sap.ui.define([
 			this.setNewProposalPendingChanges(oNewProposalForm);
 			this.getModel().submitChanges({
 				success: this._onSubmitChangesSuccess.bind(this),
-				error: this._onSubmitChangesFail.bind(this),
-				groupId: "NewProposal"
+				error: this._onSubmitChangesFail.bind(this)
 			});
 		},
 		_onSubmitChangesFail: function (error) {
@@ -259,14 +256,16 @@ sap.ui.define([
 		},
 
 		_onSubmitChangesSuccess: function (res) {
-			const newTenderCtx = this.byId("idNewProposalForm").getElementBinding().getBoundContext();
-			const ctxPath = newTenderCtx.getPath().replace("/", "");
+			const newContractCtx = this.byId("idNewProposalForm").getElementBinding().getBoundContext();
+			const ctxPath = newContractCtx.getPath().replace("/", "");
+            const newContractObj = newContractCtx.getObject();
 			const hasErrorMessages = this.getMessages([ctxPath]).length > 0;
 			//this.setMessageSection([ctxPath], "newProposalMsg");
 			if (!hasErrorMessages) {
 				MessageToast.show("Proposal has been created successfully");
 				this.onCloseCreateProposalPopup();
 				this.byId("masterTable")?.getBinding("items")?.refresh();
+                this._showDetail(newContractObj.ContractsViewID);
 			}
 		},
 		setNewProposalPendingChanges: function (oForm) {
@@ -274,16 +273,12 @@ sap.ui.define([
 			const oBoundContext = oForm.getElementBinding().getBoundContext();
 			const newProposalObj = oBoundContext.getObject();
 
-			newProposalObj.ValidFrom = new Date();
-			newProposalObj.ValidTo = new Date(9999, 11, 31);
-			newProposalObj.TypeID = this.byId('idGroupType').getSelectedButton().getText();
-			const oNewBindingCtx = oDefaultModel.createEntry("/ContractFormView", {
-				properties: newProposalObj,
-				groupId: "NewProposal"
+			newProposalObj.Type = this.byId('idGroupType').getSelectedButton().getText();
+			const oNewBindingCtx = oDefaultModel.createEntry("/ContractsView", {
+				properties: newProposalObj
 			});
 			oForm?.bindElement({
-				path: oNewBindingCtx.getPath(),
-				groupId: "NewProposal"
+				path: oNewBindingCtx.getPath()
 			});
 			oDefaultModel.resetChanges([oBoundContext.getPath()]);
 		},
