@@ -104,6 +104,36 @@ sap.ui.define([
 			});
 		},
 
+		onDeleteContractPress(event){
+			const that = this;
+
+			MessageBox.warning("Are you sure you want to delete this contract?", {
+				actions: [MessageBox.Action.OK, MessageBox.Action.CANCEL],
+				emphasizedAction: MessageBox.Action.OK,
+				onClose: async function(action) {
+					if (action === MessageBox.Action.OK) {
+						const deleteStatusID = await that.getStatusID('Deleted');
+						const context = that.getView().getBindingContext();
+						that.getView().getModel().setProperty("StatusID",deleteStatusID,context);
+						that.getView().getModel().setProperty("Status",'Deleted',context);
+
+						return new Promise((resolve, reject) => {
+							that.getModel().submitChanges({
+								success: that.deleteSuccess.bind(that),
+								error: that.contractSavedError.bind(that)
+							});
+						});
+					}
+				}
+			});
+		},
+
+		deleteSuccess: function(event){
+			this.onCloseDetailPress();
+			this.getModel().resetChanges();
+			this.getModel().refresh();
+		},
+
 		filterDiscountsTable: async function (proposedContractLength) {
 			const discountTable = this.byId("discountsTable");
 			const contract = await this.getContractById();
