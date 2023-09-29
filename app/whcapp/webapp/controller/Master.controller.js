@@ -157,6 +157,9 @@ sap.ui.define([
                 andFilters.push(new Filter("Status", FilterOperator.Contains, selectedItemKeyOfStatus, false));
             }
 
+            //exclude deleted contracts
+            andFilters.push(new Filter("Status", FilterOperator.NE, 'Deleted', false));
+
             // Proposal Type filter
             const selectedItemKeyOfContractType = this.byId("idSlctType").getSelectedItem()?.getKey();
             if (selectedItemKeyOfContractType && !selectedItemKeyOfContractType.toLowerCase().includes('all')) {
