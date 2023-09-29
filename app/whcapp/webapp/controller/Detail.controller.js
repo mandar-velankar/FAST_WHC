@@ -941,7 +941,7 @@ sap.ui.define([
 			const tableauChartHtml = this.byId("idTableauChart").getDomRef();
 			const iFrameUrl = this.byId("idTableauChart").getSrc();
 			const proxyIframe = await this.printIframe(iFrameUrl);
-			const canvasImage = await html2canvas(proxyIframe);
+			const canvasImage = await html2canvas(proxyIframe.firstChild.contentWindow.document.documentElement);
 			doc.addImage(canvasImage, "PNG", marginLeft, tableHeight, 180, 100); // Adjust the coordinates and size as needed
 
 			// print
