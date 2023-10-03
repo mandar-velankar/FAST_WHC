@@ -1093,7 +1093,7 @@ sap.ui.define([
 		getSavedDiscountType: async function (contractViewID) {
 			const contract = await this.getContract(contractViewID);
 			const discounts = await this.getDiscounts(contract);
-			return discounts?.results?.[0]?.SelectedDiscountType || "Value";
+			return discounts?.results?.[0]?.SelectedDiscountType || "Percentage";
 		},
 
 		calculateDiscountProductsPercentage: function () {

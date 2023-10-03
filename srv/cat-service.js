@@ -248,7 +248,7 @@ module.exports = (srv) => {
                 ContractID: contractId,
                 Year: i,
                 Type: 2,
-                SelectedDiscountType: "Value"
+                SelectedDiscountType: "Percentage"
             }
             newDiscounts.push(discount);
 
