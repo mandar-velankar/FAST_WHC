@@ -12,10 +12,12 @@ sap.ui.define([
     return SimpleType.extend("com.bayer.tender.whcapp.model.datatypes.CustomPercentageType", {
 
         formatValue: function(value) {
+            if (!value) return value;
 			return oPercentFormat.format(value);
         },
 
         parseValue: function(oValue) {
+            if (!oValue) return oValue;
             var floatNum = parseFloat(oValue.replace(",","."));
             return (floatNum/100);
 
