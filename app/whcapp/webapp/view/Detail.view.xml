@@ -274,7 +274,7 @@
 						</OverflowToolbar>
 					</headerToolbar>
 					 <VBox id="idDiscountVbox" class="sapUiNoMargin">
-                        <!-- PriceConditionFragments dynamically loaded from Controller:loadPriceConditionFragment  -->
+                        <!-- DiscountType Fragments dynamically loaded from Controller:loadDiscountFragment  -->
                     </VBox>
 					</Panel>
 

@@ -104,6 +104,36 @@ sap.ui.define([
 			});
 		},
 
+		onDeleteContractPress(event){
+			const that = this;
+
+			MessageBox.warning("Are you sure you want to delete this contract?", {
+				actions: [MessageBox.Action.OK, MessageBox.Action.CANCEL],
+				emphasizedAction: MessageBox.Action.OK,
+				onClose: async function(action) {
+					if (action === MessageBox.Action.OK) {
+						const deleteStatusID = await that.getStatusID('Deleted');
+						const context = that.getView().getBindingContext();
+						that.getView().getModel().setProperty("StatusID",deleteStatusID,context);
+						that.getView().getModel().setProperty("Status",'Deleted',context);
+
+						return new Promise((resolve, reject) => {
+							that.getModel().submitChanges({
+								success: that.deleteSuccess.bind(that),
+								error: that.contractSavedError.bind(that)
+							});
+						});
+					}
+				}
+			});
+		},
+
+		deleteSuccess: function(event){
+			this.onCloseDetailPress();
+			this.getModel().resetChanges();
+			this.getModel().refresh();
+		},
+
 		filterDiscountsTable: async function (proposedContractLength) {
 			const discountTable = this.byId("discountsTable");
 			const contract = await this.getContractById();
@@ -911,7 +941,9 @@ sap.ui.define([
 			const tableauChartHtml = this.byId("idTableauChart").getDomRef();
 			const iFrameUrl = this.byId("idTableauChart").getSrc();
 			const proxyIframe = await this.printIframe(iFrameUrl);
-			const canvasImage = await html2canvas(proxyIframe);
+			const canvasImage = await html2canvas(proxyIframe.firstChild.contentWindow.document.documentElement);
+			canvasImage.width = 400;
+			canvasImage.height = 400;
 			doc.addImage(canvasImage, "PNG", marginLeft, tableHeight, 180, 100); // Adjust the coordinates and size as needed
 
 			// print
@@ -1061,7 +1093,7 @@ sap.ui.define([
 		getSavedDiscountType: async function (contractViewID) {
 			const contract = await this.getContract(contractViewID);
 			const discounts = await this.getDiscounts(contract);
-			return discounts?.results?.[0]?.SelectedDiscountType || "Value";
+			return discounts?.results?.[0]?.SelectedDiscountType || "Percentage";
 		},
 
 		calculateDiscountProductsPercentage: function () {

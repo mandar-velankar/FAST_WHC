@@ -182,7 +182,7 @@ module.exports = (srv) => {
     
     srv.on(["CREATE", "UPDATE"], ["ContractCustomersView"], async (req) => {
         const newID = uuidv4();
-        let contractCustomer = await SELECT.one.from(ContractCustomers).where({ID: req.data?.ContractID});
+        let contractCustomer = await SELECT.one.from(ContractCustomers).where({ContractID: req.data?.ContractID, BHOID: req.data?.BHOID, IsParent: req.data?.IsParent});
 
         const mappedContractCustomer = {
             BHOID: req.data.BHOID,
@@ -190,21 +190,22 @@ module.exports = (srv) => {
 			ContractID: req.data.ContractID,
 			IsParent: req.data.IsParent
         }
-        // if (contractCustomer) {
-        //     if (req.data?.isCurrent) {
-        //         await UPDATE(ContractCustomers).with (mappedContractCustomer).where({ID: contractCustomer.ID});
-        //         await createCascadingHistoryData(req);
-        //     }
-        // }else {
-        //     mappedContractCustomer.ID = newID;
-        //     await INSERT.into(ContractCustomers).entries(mappedContractCustomer);
-        //     contractCustomer = await SELECT.one.from(ContractCustomers).where({ID: newID})
-        //     contractCustomer.ContractCustomerViewID = `${contractCustomer.ID}-${contractCustomer.ValidFrom}-${contractCustomer.ValidTo}`;
-        // }
-        mappedContractCustomer.ID = newID;
-        await INSERT.into(ContractCustomers).entries(mappedContractCustomer);
-        contractCustomer = await SELECT.one.from(ContractCustomers).where({ID: newID})
-        contractCustomer.ContractCustomerViewID = `${contractCustomer.ID}-${contractCustomer.ValidFrom}-${contractCustomer.ValidTo}`;
+        if (contractCustomer) {
+           // if (req.data?.isCurrent) {
+               await UPDATE(ContractCustomers).with (mappedContractCustomer).where({ID: contractCustomer.ID , IsParent:contractCustomer.IsParent});
+               contractCustomer.ContractCustomerViewID = `${contractCustomer.ID}-${contractCustomer.ValidFrom}-${contractCustomer.ValidTo}`;
+                //await createCascadingHistoryData(req);
+           //}
+        }else {
+            mappedContractCustomer.ID = newID;
+            await INSERT.into(ContractCustomers).entries(mappedContractCustomer);
+            contractCustomer = await SELECT.one.from(ContractCustomers).where({ID: newID})
+            contractCustomer.ContractCustomerViewID = `${contractCustomer.ID}-${contractCustomer.ValidFrom}-${contractCustomer.ValidTo}`;
+        }
+        // mappedContractCustomer.ID = newID;
+        // await INSERT.into(ContractCustomers).entries(mappedContractCustomer);
+        // contractCustomer = await SELECT.one.from(ContractCustomers).where({ID: newID})
+        // contractCustomer.ContractCustomerViewID = `${contractCustomer.ID}-${contractCustomer.ValidFrom}-${contractCustomer.ValidTo}`;
         
         return contractCustomer;
     })
@@ -247,7 +248,7 @@ module.exports = (srv) => {
                 ContractID: contractId,
                 Year: i,
                 Type: 2,
-                SelectedDiscountType: "Value"
+                SelectedDiscountType: "Percentage"
             }
             newDiscounts.push(discount);
 
