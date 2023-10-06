@@ -606,13 +606,13 @@ sap.ui.define([
 		onSave: async function () {
 			try {
 				const draftStatusID = await this.getStatusID('Draft');
-				let contract = await this.getContractById(this.id);
+				//let contract = await this.getContractById(this.id);
 				const context = this.getView().getBindingContext();
 				this.getView().getModel().setProperty("StatusID",draftStatusID,context);
 				this.calculateDiscountProductsPercentage();
-				if(!(contract.Type === 'New Proposal')){
-					this.mapBHOIdsPendingChanges(contract);
-				}
+				// if(!(contract.Type === 'New Proposal')){
+				// 	this.mapBHOIdsPendingChanges(contract);
+				// }
 				await this.submitChanges();
 			} catch (error) {
 				console.error(error);
@@ -642,7 +642,7 @@ sap.ui.define([
 				this.filterDiscountsTable();
 				this.bindRebatesTable();
 				this.onBindTableauSrcURL();
-				this.bindAllContractMembers();
+				//this.bindAllContractMembers();
 				this.getModel().resetChanges();
 				this.getModel().refresh();
 			}
@@ -1144,6 +1144,7 @@ sap.ui.define([
 
 			// Get the user-input VistexId
 			let vistexId = event.getParameter("value");
+			let contract = await this.getContractById(this.id);
 			const vistexData = await this.getVistexData();
 			const vistexItems = vistexData.results.filter(item => item.VistexID === vistexId);
 
@@ -1183,6 +1184,18 @@ sap.ui.define([
 					 })
 				 );
 			 });
+
+			this.mapBHOIdsPendingChanges(contract);
+
+			// Clear the existing items in the tables
+			mainCustomersTable.removeAllItems();
+			customersTable.removeAllItems();
+
+			return new Promise((resolve, reject) => {
+				this.getModel().submitChanges({
+					error: this.contractSavedError.bind(this)
+				});
+			});
 		
 		},
 
