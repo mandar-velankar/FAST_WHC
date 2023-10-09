@@ -769,9 +769,9 @@ sap.ui.define([
 			const discounts = await this.getDiscounts(contract);
 			const discountItems = discounts.results.map(item => {
 				const isDiscountTypePercentage = item.SelectedDiscountType === "Percentage";
-				const mirena = isDiscountTypePercentage ? item.Mirena*100+"%" : item.Mirena; 
-				const kyleeena = isDiscountTypePercentage ? item.Kyleena*100+"%" : item.Kyleena; 
-				const skyla = isDiscountTypePercentage ? item.Skyla*100+"%" : item.Skyla; 
+				const mirena = isDiscountTypePercentage ? (item.Mirena*100).toFixed(1)+"%" : item.Mirena; 
+				const kyleeena = isDiscountTypePercentage ? (item.Kyleena*100).toFixed(1)+"%" : item.Kyleena; 
+				const skyla = isDiscountTypePercentage ? (item.Skyla*100).toFixed(1)+"%" : item.Skyla; 
 				return ["Y"+item.Year, item.Units, mirena, kyleeena, skyla]
 			});
 			const rebates = await this.getRebates(contract);
