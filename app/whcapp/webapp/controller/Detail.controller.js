@@ -784,7 +784,7 @@ sap.ui.define([
 				}
 				return 0;
 			});
-			const rebateItems = sortedRebates.map(item => ["Y"+item.Year, item.RebateLevels_Unit_Level_1, item.RebateLevels_Discount_Level_1*100+"%", item.RebateLevels_Unit_Level_2, item.RebateLevels_Discount_Level_2*100+"%", item.RebateLevels_Unit_Level_3, item.RebateLevels_Discount_Level_3*100+"%"]);
+			const rebateItems = sortedRebates.map(item => ["Y"+item.Year, item.RebateLevels_Unit_Level_1, (item.RebateLevels_Discount_Level_1*100).toFixed(1)+"%", item.RebateLevels_Unit_Level_2, (item.RebateLevels_Discount_Level_2*100).toFixed(1)+"%", item.RebateLevels_Unit_Level_3, (item.RebateLevels_Discount_Level_3*100).toFixed(1)+"%"]);
 			const mainCustomersTable = this.byId("mainCustomersTable");
 			const mainCustomersTableItemNames = mainCustomersTable.getItems().map(item => [item.getBindingContext().getObject().BHOID]);
 			const customersTable = this.byId("customersTable");
@@ -849,7 +849,7 @@ sap.ui.define([
 					]
 				],
 				body: [
-					[contract.BaseLineUnits, `${contract.BaseLineDiscount*100}%`, contract.ProposedContractLength],
+					[contract.BaseLineUnits, `${(contract.BaseLineDiscount*100).toFixed(1)}%`, contract.ProposedContractLength],
 				],
 				theme: 'grid',
 				headStyles: { halign: 'center', fillColor: [98, 73, 99] }
