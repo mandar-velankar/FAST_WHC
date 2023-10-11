@@ -7,6 +7,13 @@
   "routes": [
     
     {
+      "source": "/t/(.*)$",
+      "target": "/t/$1",
+      "authenticationType": "none",
+      "destination": "tableau",
+      "csrfProtection": false
+    },
+    {
       "source": "/v4/(.*)$",
       "target": "$1",
       "authenticationType": "basic",
