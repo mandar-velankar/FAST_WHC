@@ -131,10 +131,10 @@
                                         }
                                     }"  
                                 />
-                                <Text text="{modifiedBy}" />
+                                <Text text="{modifiedByName}" />
                                 <Text text="{Type}" />
                                 <Text text="{ParentAccountName}" />
-                                <Text text="{createdBy}" />
+                                <Text text="{createdByName}" />
                                 <Text text = "{
                                         path: 'createdAt',
                                         type: 'sap.ui.model.type.Date',

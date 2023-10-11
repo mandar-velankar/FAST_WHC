@@ -1,6 +1,6 @@
 using com.bayer.SXTENDER.whc as whc from '../db/data-model';
 
-service CatalogService {
+service CatalogService @(requires:['authenticated-user', 'f_tndr_cag_admin', 'f_tndr_cag_technical_user']){
     entity Contracts as projection on whc.Contracts;
     entity ContractsHistory as projection on whc.Contracts_History;
     entity Attachments as projection on whc.Attachments;
@@ -12,8 +12,11 @@ service CatalogService {
     entity Rebates as projection on whc.Rebates;
     entity RebatesHistory as projection on whc.Rebates_History;
     entity VistexData as projection on whc.VistexData;
+    entity WHCUsers as projection on whc.WHCUsers;
 
-    entity ContractsView as select from Contracts {
+    entity ContractsView as select from Contracts 
+    inner join WHCUsers as ModifiedByUser on ModifiedByUser.CWID = Contracts.modifiedBy
+    inner join WHCUsers as CreatedByUser on CreatedByUser.CWID = Contracts.createdBy {
         key ID || '-' || replace(TO_NVARCHAR(ValidTo, 'YYYY-MM-DD HH24:MI:SS.FF3') || 'Z', ' ', 'T') as ContractsViewID:String,
         ID,
         ValidFrom,
@@ -36,10 +39,14 @@ service CatalogService {
         createdAt,
         createdBy,
         modifiedAt,
-        modifiedBy
+        modifiedBy,
+        ModifiedByUser.UserName as modifiedByName,
+        CreatedByUser.UserName as createdByName,
     }
     union 
-    select from ContractsHistory {
+    select from ContractsHistory
+    inner join WHCUsers as ModifiedByUser on ModifiedByUser.CWID = ContractsHistory.modifiedBy
+    inner join WHCUsers as CreatedByUser on CreatedByUser.CWID = ContractsHistory.createdBy {
         key ID || '-' || replace(TO_NVARCHAR(ValidFrom, 'YYYY-MM-DD HH24:MI:SS.FF3') || 'Z', ' ', 'T') as ContractsViewID:String,
         ID,
         ValidFrom,
@@ -62,7 +69,9 @@ service CatalogService {
         createdAt,
         createdBy,
         modifiedAt,
-        modifiedBy
+        modifiedBy,
+        ModifiedByUser.UserName as modifiedByName,
+        CreatedByUser.UserName as createdByName,
     } where Status.StatusText = 'Approved';
 
     entity ContractFormView as select from Contracts as contract {
