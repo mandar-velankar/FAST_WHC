@@ -201,3 +201,15 @@ entity VistexData: cuid {
   MemberBHOID       : String;
   ParentAccoutName  : String;
 }
+
+entity WHCUsers {
+    ToolIdentity    : String(20);
+    ToolID          : Integer;
+key UserID          : String(50);
+    UserName        : String(100);
+    LoginTime       : String(255);
+    CWID            : String(12);
+    UserEmail       : String(255);
+    Role            : String(100);
+    ContactNumber   : String(20);
+}

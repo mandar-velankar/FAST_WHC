@@ -939,7 +939,8 @@ sap.ui.define([
 
 			// Tableau
 			const tableauChartHtml = this.byId("idTableauChart").getDomRef();
-			const iFrameUrl = this.byId("idTableauChart").getSrc();
+			const tableauUrl = this.byId("idTableauChart").getSrc();
+			const iFrameUrl = tableauUrl.substring("https://tableau-ncsa.aws.cnb".length);			
 			const proxyIframe = await this.printIframe(iFrameUrl);
 			const canvasImage = await html2canvas(proxyIframe.firstChild.contentWindow.document.documentElement);
 			canvasImage.width = 400;
