@@ -9,9 +9,14 @@ modules:
   requires:
   - name: com-bayer-tender-whcapp-db
   - name: uaa_FAST
+  - name: tableau
   - name: com-bayer-tender-whcapp-destination-service
   provides:
   - name: srv-api
+    public: true
+    properties:
+      srv-url: ${default-url}
+  - name: tableau
     public: true
     properties:
       srv-url: ${default-url}
@@ -39,6 +44,7 @@ modules:
         name: srv-api
         url: '~{srv-url}'
         timeout: 120000
+    - name: tableau
     - name: uaa_FAST
 - name: com-bayer-tender-whcapp-app-content
   type: com.sap.application.content
