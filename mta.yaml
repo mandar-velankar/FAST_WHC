@@ -39,6 +39,7 @@ modules:
         name: srv-api
         url: '~{srv-url}'
         timeout: 120000
+    - name: tableau
     - name: uaa_FAST
 - name: com-bayer-tender-whcapp-app-content
   type: com.sap.application.content
@@ -65,6 +66,12 @@ modules:
     - npm run build:cf
     supported-platforms: []
 resources:
+- name: tableau
+  parameters:
+    service-plan: lite
+    service: destination
+    service-name: tableau
+  type: org.cloudfoundry.managed-service
 - name: com-bayer-tender-whcapp-db
   type: com.sap.xs.hdi-container
   parameters:
