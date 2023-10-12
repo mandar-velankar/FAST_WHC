@@ -9,14 +9,9 @@ modules:
   requires:
   - name: com-bayer-tender-whcapp-db
   - name: uaa_FAST
-  - name: tableau
   - name: com-bayer-tender-whcapp-destination-service
   provides:
   - name: srv-api
-    public: true
-    properties:
-      srv-url: ${default-url}
-  - name: tableau
     public: true
     properties:
       srv-url: ${default-url}
@@ -71,6 +66,12 @@ modules:
     - npm run build:cf
     supported-platforms: []
 resources:
+- name: tableau
+  parameters:
+    service-plan: lite
+    service: destination
+    service-name: tableau
+  type: org.cloudfoundry.managed-service
 - name: com-bayer-tender-whcapp-db
   type: com.sap.xs.hdi-container
   parameters:
