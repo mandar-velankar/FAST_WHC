@@ -939,16 +939,21 @@ sap.ui.define([
 
 			// Tableau
 			const tableauChartHtml = this.byId("idTableauChart").getDomRef();
-			const tableauUrl = this.byId("idTableauChart").getSrc();
-			const iFrameUrl = tableauUrl.substring("https://tableau-ncsa.aws.cnb".length);			
-			const proxyIframe = await this.printIframe(iFrameUrl);
-			const canvasImage = await html2canvas(proxyIframe.firstChild.contentWindow.document.documentElement);
-			canvasImage.width = 400;
-			canvasImage.height = 400;
-			doc.addImage(canvasImage, "PNG", marginLeft, tableHeight, 180, 100); // Adjust the coordinates and size as needed
-
-			// print
-			doc.save(fileName);	
+	 		// const tableauUrl = this.byId("idTableauChart").getSrc();
+			// // const iFrameUrl = tableauUrl.substring("https://tableau-ncsa.aws.cnb".length);			
+			// // const proxyIframe = await this.printIframe(iFrameUrl);
+			// // const canvasImage = await html2canvas(proxyIframe.firstChild.contentWindow.document.documentElement);
+			// // canvasImage.width = 400;
+			// // canvasImage.height = 400;
+			// // doc.addImage(canvasImage, "PNG", marginLeft, tableHeight, 180, 100); // Adjust the coordinates and size as needed
+			html2canvas(tableauChartHtml).then(canvas => {
+				// Convert the canvas to a data URL
+				const imgData = canvas.toDataURL('image/png');
+				
+				// Add the image to the PDF
+				doc.addImage(imgData, 'PNG', 10, 10, 100, 75);
+				doc.save(fileName);	
+			});	
 		},
 
 		/**
