@@ -769,9 +769,9 @@ sap.ui.define([
 			const discounts = await this.getDiscounts(contract);
 			const discountItems = discounts.results.map(item => {
 				const isDiscountTypePercentage = item.SelectedDiscountType === "Percentage";
-				const mirena = isDiscountTypePercentage ? (item.Mirena*100).toFixed(1)+"%" : item.Mirena; 
-				const kyleeena = isDiscountTypePercentage ? (item.Kyleena*100).toFixed(1)+"%" : item.Kyleena; 
-				const skyla = isDiscountTypePercentage ? (item.Skyla*100).toFixed(1)+"%" : item.Skyla; 
+				const mirena = isDiscountTypePercentage ? (item.Mirena === "null" ? 0+"%" : (item.Mirena*100).toFixed(1)+"%") : item.Mirena; 
+				const kyleeena = isDiscountTypePercentage ? (item.Kyleena === "null" ? 0+"%" : (item.Kyleena*100).toFixed(1)+"%") : item.Kyleena; 
+				const skyla = isDiscountTypePercentage ? (item.Skyla === "null" ? 0+"%" : (item.Skyla*100).toFixed(1)+"%") : item.Skyla; 
 				return ["Y"+item.Year, item.Units, mirena, kyleeena, skyla]
 			});
 			const rebates = await this.getRebates(contract);
@@ -939,13 +939,14 @@ sap.ui.define([
 
 			// Tableau
 			const tableauChartHtml = this.byId("idTableauChart").getDomRef();
+			//const imageUrl = 'https://tableau-ncsa.aws.cnb/t/CPROD/views/WHCContractRenewalV1/WHCContractRenewal.png?Vistex%20ID=0060075938&:embed=y&:showVizHome=n&:tabs=n&:toolbar=n&:apiID=host7';
 	 		// const tableauUrl = this.byId("idTableauChart").getSrc();
 			// // const iFrameUrl = tableauUrl.substring("https://tableau-ncsa.aws.cnb".length);			
-			// // const proxyIframe = await this.printIframe(iFrameUrl);
-			// // const canvasImage = await html2canvas(proxyIframe.firstChild.contentWindow.document.documentElement);
-			// // canvasImage.width = 400;
-			// // canvasImage.height = 400;
-			// // doc.addImage(canvasImage, "PNG", marginLeft, tableHeight, 180, 100); // Adjust the coordinates and size as needed
+			// const proxyIframe = await this.printIframe(imageUrl);
+			// const canvasImage = await html2canvas(proxyIframe.firstChild.contentWindow.document.documentElement);
+			// canvasImage.width = 400;
+			// canvasImage.height = 400;
+			// doc.addImage(canvasImage, "PNG", marginLeft, tableHeight, 180, 100); // Adjust the coordinates and size as needed
 			html2canvas(tableauChartHtml).then(canvas => {
 				// Convert the canvas to a data URL
 				const imgData = canvas.toDataURL('image/png');
@@ -954,6 +955,13 @@ sap.ui.define([
 				doc.addImage(imgData, 'PNG', 10, 10, 100, 75);
 				doc.save(fileName);	
 			});	
+			// const img = new Image();
+			// img.src = imageUrl;
+			// 	// Once the image is loaded, you can use it
+			// 	// For example, you can add it to the page or do other operations
+			// 	// Here, I'm just logging the image width and height
+			// 	doc.addImage(img, 'PNG', 10, 10, 100, 75);
+			// doc.save(fileName);
 		},
 
 		/**
