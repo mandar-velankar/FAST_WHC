@@ -939,7 +939,7 @@ sap.ui.define([
 
 			// Tableau
 			const tableauChartHtml = this.byId("idTableauChart").getDomRef();
-			//const imageUrl = 'https://tableau-ncsa.aws.cnb/t/CPROD/views/WHCContractRenewalV1/WHCContractRenewal.png?Vistex%20ID=0060075938&:embed=y&:showVizHome=n&:tabs=n&:toolbar=n&:apiID=host7';
+			const imgUrl = 'https://tableau-ncsa.aws.cnb/t/CPROD/views/WHCContractRenewalV1/WHCContractRenewal.png?Vistex%20ID=0060075938&:embed=y&:showVizHome=n&:tabs=n&:toolbar=n&:apiID=host7';
 	 		// const tableauUrl = this.byId("idTableauChart").getSrc();
 			// // const iFrameUrl = tableauUrl.substring("https://tableau-ncsa.aws.cnb".length);			
 			// const proxyIframe = await this.printIframe(imageUrl);
@@ -947,14 +947,14 @@ sap.ui.define([
 			// canvasImage.width = 400;
 			// canvasImage.height = 400;
 			// doc.addImage(canvasImage, "PNG", marginLeft, tableHeight, 180, 100); // Adjust the coordinates and size as needed
-			html2canvas(tableauChartHtml).then(canvas => {
-				// Convert the canvas to a data URL
-				const imgData = canvas.toDataURL('image/png');
+			// html2canvas(tableauChartHtml).then(canvas => {
+			// 	// Convert the canvas to a data URL
+			// 	const imgData = canvas.toDataURL('image/png');
 				
-				// Add the image to the PDF
-				doc.addImage(imgData, 'PNG', 10, 10, 100, 75);
-				doc.save(fileName);	
-			});	
+			// 	// Add the image to the PDF
+			// 	doc.addImage(imgData, 'PNG', 10, 10, 100, 75);
+			// 	doc.save(fileName);	
+			// });	
 			// const img = new Image();
 			// img.src = imageUrl;
 			// 	// Once the image is loaded, you can use it
@@ -962,6 +962,28 @@ sap.ui.define([
 			// 	// Here, I'm just logging the image width and height
 			// 	doc.addImage(img, 'PNG', 10, 10, 100, 75);
 			// doc.save(fileName);
+			var logo = await this.getDataUri(imgUrl);
+			doc.addImage(logo, 'png', 10, 10, 100, 75);
+			doc.save(fileName);
+		},
+
+		getDataUri: function(url){
+			return new Promise(resolve => {
+				var image = new Image();
+				image.setAttribute('crossOrigin', 'anonymous'); //getting images from external domain
+				image.onload = function () {
+					var canvas = document.createElement('canvas');
+					canvas.width = this.naturalWidth;
+					canvas.height = this.naturalHeight; 
+					//next three lines for white background in case png has a transparent background
+					var ctx = canvas.getContext('2d');
+					ctx.fillStyle = '#fff';  /// set white fill style
+					ctx.fillRect(0, 0, canvas.width, canvas.height);
+					canvas.getContext('2d').drawImage(this, 0, 0);
+					resolve(canvas.toDataURL('image/png'));
+				};
+				image.src = url;
+			})
 		},
 
 		/**
