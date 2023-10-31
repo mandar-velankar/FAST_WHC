@@ -755,10 +755,164 @@ sap.ui.define([
 		},
 
 		onPrintButtonPress: function(event){
-			this.savePDF();	
+			// this.savePDF();	
+			this.printTriggered();
 		},
 
-		savePDF: async function(){
+		printTriggered: async function(){
+			// Get DATA
+			let image;
+			const contract = await this.getContract(this.id);
+			const fileName = `proposal-${contract.Name.replace(/ /g, '-')}-${new Date().toJSON()}.pdf`;
+			const discounts = await this.getDiscounts(contract);
+			const discountItems = discounts.results.map(item => {
+				const isDiscountTypePercentage = item.SelectedDiscountType === "Percentage";
+				const mirena = isDiscountTypePercentage ? (item.Mirena === "null" ? 0+"%" : (item.Mirena*100).toFixed(1)+"%") : item.Mirena; 
+				const kyleeena = isDiscountTypePercentage ? (item.Kyleena === "null" ? 0+"%" : (item.Kyleena*100).toFixed(1)+"%") : item.Kyleena; 
+				const skyla = isDiscountTypePercentage ? (item.Skyla === "null" ? 0+"%" : (item.Skyla*100).toFixed(1)+"%") : item.Skyla; 
+				return ["Y"+item.Year, item.Units, mirena, kyleeena, skyla]
+			});
+			const rebates = await this.getRebates(contract);
+			const sortedRebates = rebates.results.sort((a, b) => {
+				if (a.Year < b.Year) {
+					return -1;
+				}
+				if (a.Year > b.Year) {
+					return 1;
+				}
+				return 0;
+			});
+			const rebateItems = sortedRebates.map(item => ["Y"+item.Year, item.RebateLevels_Unit_Level_1, (item.RebateLevels_Discount_Level_1*100).toFixed(1)+"%", item.RebateLevels_Unit_Level_2, (item.RebateLevels_Discount_Level_2*100).toFixed(1)+"%", item.RebateLevels_Unit_Level_3, (item.RebateLevels_Discount_Level_3*100).toFixed(1)+"%"]);
+			const mainCustomersTable = this.byId("mainCustomersTable");
+			const mainCustomersTableItemNames = mainCustomersTable.getItems().map(item => [item.getBindingContext().getObject().BHOID]);
+			const customersTable = this.byId("customersTable");
+			const customersTableItemNames = customersTable.getItems().map(item => [item.getBindingContext().getObject().BHOID]);
+			const whcProducts = await this.getWHCProducts();
+			const wacItems = whcProducts.results.map(item => [item.ProductName, item.WAC]);
+			// Define CSS styles for the printed page
+			const printStyles = `
+				<style>
+					table {
+						border-collapse: collapse;
+						border: 1px solid black;
+						width: 100%;
+					}
+					th, td {
+						border: 1px solid black;
+						text-align: center;
+					}
+					h3 { 
+						background-color: #0091DF;  
+						color: white;
+					}
+					th {
+						background-color: #D30F4B;
+						color: white;
+					}
+					.page-break-before { 
+						page-break-before: always;
+					} 
+					.page-break-after {
+						page-break-after: always;
+					}
+					* {
+						-webkit-print-color-adjust: exact !important;   /* Chrome, Safari 6 – 15.3, Edge */
+						color-adjust: exact !important;                 /* Firefox 48 – 96 */
+						print-color-adjust: exact !important;           /* Firefox 97+, Safari 15.4+ */
+					}
+				</style>
+			`;
+			let header = "<center><h1>"+ `Proposal ${contract.Name}`+ "</h1></center><hr>"
+			let genInfoSec = "<h3 style='text-align: left;'>General Information</h3>";
+			let proposalInfo = "<table style='border-collapse: collapse;border: 1px solid black;' width='100%' ><tr><th style='border: 1px solid black;'>Proposal Name</th><th style='border: 1px solid black;'>Proposal Type</th><th style='border: 1px solid black;'>Vistext ID</th></tr>";
+			proposalInfo +="<tr><td style='border: 1px solid black; text-align: center;'>"+contract.Name+"</td><td style='border: 1px solid black; text-align: center;'>"+contract.Type+"</td><td style='border: 1px solid black; text-align: center;'>"+(contract.VistexID !== null ? contract.VistexID : '')+"</td>";
+			proposalInfo += "</tr></table><br>";
+			let parentBho = "<table style='border-collapse: collapse;border: 1px solid black;' width='100%' ><tr><th style='border: 1px solid black;'>Parent BHO IDs</th></tr>";
+			for(const mainCustomersTableItemName of mainCustomersTableItemNames){
+				parentBho +="<tr><td style='border: 1px solid black; text-align: center;'>"+mainCustomersTableItemName+"</td></tr>";
+			}
+			parentBho += "</table><br>";
+			let memberBho = "<table style='border-collapse: collapse;border: 1px solid black;' width='100%' ><tr><th style='border: 1px solid black;'>Member BHO IDs</th></tr>";
+			for(const customersTableItemName of customersTableItemNames){
+				memberBho +="<tr><td style='border: 1px solid black; text-align: center;'>"+customersTableItemName+"</td></tr>";
+			}
+			memberBho += "</table><br>";
+			let wacInfo = "<table style='border-collapse: collapse;border: 1px solid black;' width='100%' ><tr><th style='border: 1px solid black;'>Product Name</th><th style='border: 1px solid black;'>WAC</th></tr>";
+			for (const wacItem of wacItems) {
+				wacInfo +="<tr><td style='border: 1px solid black; text-align: center;'>"+wacItem[0]+"</td><td style='border: 1px solid black; text-align: center;'>"+wacItem[1]+"</td></tr>";
+			}
+			wacInfo += "</table><br>";
+			let backInfoSec = "<h3 style='text-align: left;'>Baseline & Background Information</h3>";
+			let baselineInfo = "<table style='border-collapse: collapse;border: 1px solid black;' width='100%' ><tr><th style='border: 1px solid black;'>Baseline unit</th><th style='border: 1px solid black;'>Baseline Discount</th><th style='border: 1px solid black;'>Proposed Contract Length</th></tr>";
+			baselineInfo +="<tr><td style='border: 1px solid black; text-align: center;'>"+contract.BaseLineUnits+"</td><td style='border: 1px solid black; text-align: center;'>"+`${(contract.BaseLineDiscount*100).toFixed(1)}%`+"</td><td style='border: 1px solid black; text-align: center;'>"+contract.ProposedContractLength+"</td>";
+			baselineInfo += "</tr></table><br>";
+			let backgroundInfo = "<table style='border-collapse: collapse;border: 1px solid black;' width='100%' ><tr><th style='border: 1px solid black;'>Background Information</th></tr>";
+			backgroundInfo +="<tr><td style='border: 1px solid black; text-align: center;'>"+(contract.BackgroundInfo !== null ? contract.BackgroundInfo : '')+"</td></tr></table><br>";
+			let discountSec = "<h3 style='text-align: left;'>Discount</h3>";
+			let discountInfo = "<table style='border-collapse: collapse;border: 1px solid black;' width='100%' ><tr><th style='border: 1px solid black;'>Year</th><th style='border: 1px solid black;'>Units</th><th style='border: 1px solid black;'>Mirena</th><th style='border: 1px solid black;'>Kyleena</th><th style='border: 1px solid black;'>Skyla</th></tr>";
+			for(const discountItem of discountItems){
+				discountInfo +="<tr><td style='border: 1px solid black; text-align: center;'>"+discountItem[0]+"</td><td style='border: 1px solid black; text-align: center;'>"+discountItem[1]+"</td><td style='border: 1px solid black; text-align: center;'>"+discountItem[2]+"</td><td style='border: 1px solid black; text-align: center;'>"+discountItem[3]+"</td><td style='border: 1px solid black; text-align: center;'>"+discountItem[4]+"</td>";
+			}
+			discountInfo += "</tr></table><br>";
+			let rebateSec = "<h3 style='text-align: left;'>Rebate</h3>";
+			let rebateInfo = "<table style='border-collapse: collapse;border: 1px solid black;' width='100%' >"
+			rebateInfo += "<tr><th style='border: 1px solid black;' rowspan='2'>Year</th><th style='border: 1px solid black;' colspan='2'>L1</th><th style='border: 1px solid black;' colspan='2'>L2</th><th style='border: 1px solid black;' colspan='2'>L3</th></tr>";
+			rebateInfo += "<tr><th style='border: 1px solid black;'>Unit</th><th style='border: 1px solid black;'>Discount</th><th style='border: 1px solid black;'>Unit</th><th style='border: 1px solid black;'>Discount</th><th style='border: 1px solid black;'>Unit</th><th style='border: 1px solid black;'>Discount</th></tr>";
+			for(const rebateItem of rebateItems){
+				rebateInfo +="<tr><td style='border: 1px solid black; text-align: center;'>"+rebateItem[0]+"</td><td style='border: 1px solid black; text-align: center;'>"+(rebateItem[1] !== null ? rebateItem[1] : '')+"</td><td style='border: 1px solid black; text-align: center;'>"+rebateItem[2]+"</td><td style='border: 1px solid black; text-align: center;'>"+(rebateItem[3] !== null ? rebateItem[3] : '')+"</td><td style='border: 1px solid black; text-align: center;'>"+rebateItem[4]+"</td><td style='border: 1px solid black; text-align: center;'>"+(rebateItem[5] !== null ? rebateItem[5] : '')+"</td><td style='border: 1px solid black; text-align: center;'>"+rebateItem[6]+"</td>";
+			}
+			rebateInfo += "</tr></table><br>";
+			let remarkSec = "<h3 style='text-align: left;'>Remarks</h3>";
+			let remarkTable = "<table style='border-collapse: collapse;border: 1px solid black;' width='100%' ><tr><th style='border: 1px solid black;'>Remarks</th></tr>";
+			remarkTable +="<tr><td style='border: 1px solid black; text-align: center;'>"+(contract.Remarks  !== null ? contract.Remarks : '')+"</td></tr></table><br>"; 
+			let tableauSec = "<h3 style='text-align: left;'>Tableau</h3>";
+			if(contract.Type){
+				if(contract.Type === 'New Proposal'){
+					image = "<img src="+`https://tableau-ncsa.aws.cnb/t/CPROD/views/WHCContractProposal/ContractProposal.png?ORIGINAL_ORDERING_ACCOUNT_NUM=${mainCustomersTableItemNames[0]}&amp;:embed=y&amp;:showVizHome=n&amp;:tabs=n&amp;:toolbar=n&amp;:apiID=host1#navType=0&amp;navSrc=Parse%22`+" width='90%' height='90%'></img>";
+				}
+				else{
+					image = "<img src="+`https://tableau-ncsa.aws.cnb/t/CPROD/views/WHCContractRenewalV1/WHCContractRenewal.png?Vistex%20ID=${contract.VistexID}&amp;:embed=y&amp;:showVizHome=n&amp;:tabs=n&amp;:toolbar=n&amp;:apiID=host20#navType=0&amp;navSrc=Parse`+" width='100%' height='100%'></img>";
+				}
+			}
+			// let finalPage = "<html><head><link rel='stylesheet' type='text/css' media='print' href='css/style.css'><style> th {background-color: #eed6de;} * { -webkit-print-color-adjust: exact !important;} .page-break-before { page-break-before: always;} .page-break-after {page-break-after: always;} </style></head>";
+			// finalPage += "<body><div id='towrite><div>" + header + genInfoSec + proposalInfo + parentBho + memberBho + wacInfo +"</div>";
+			// finalPage +="<div class='page-break-before'>"+ backInfoSec + baselineInfo + backgroundInfo +"</div>";
+			// finalPage +="<div class='page-break-after'>"+ discountSec + discountInfo +"</div>";
+			// finalPage +="<div class='page-break-before'>" + rebateSec + rebateInfo + remarkSec + remarkTable + "</div>";
+			// finalPage +="<div class='page-break-before'>" + tableauSec + image + "</div></div></body></html>";	// win.document.title = fileName;
+			let finalPage = `
+				<html>
+				<head><link rel='stylesheet' type='text/css' media='print'>
+					${printStyles}
+				</head>
+				<body>
+					<div>${header}${genInfoSec}${proposalInfo}${parentBho}${memberBho}${wacInfo}</div>
+					<div class='page-break-before'>${backInfoSec}${baselineInfo}${backgroundInfo}</div>
+					<div class='page-break-after'>${discountSec}${discountInfo}</div>
+					<div class='page-break-before'>${rebateSec}${rebateInfo}${remarkSec}${remarkTable}</div>
+					<div class='page-break-before'>${tableauSec}${image}</div>
+				</body>
+				</html>
+				`;
+			let win = window.open("", "PrintWindow");
+			$.each(document.styleSheets, function(index, oStyleSheet) {
+				if(oStyleSheet.href){
+				  var link = document.createElement("link");
+				  link.type = oStyleSheet.type;
+				  link.rel = "stylesheet";
+				  link.href = oStyleSheet.href;
+				  //win.document.head.appendChild(link); //--> this doesn't work in IE
+				  win.document.getElementsByTagName("head")[0].innerHTML = win.document.getElementsByTagName("head")[0].innerHTML + link.outerHTML;
+				}
+			  });
+			win.document.write(finalPage);
+				 setTimeout(function() {
+					win.print();
+					win.stop();
+				 }, 3500);
+		},
+
+		/*savePDF: async function(){
 			const doc = new jspdf.jsPDF();
 			const marginTop = 15;
 			const marginLeft = 15;
@@ -939,7 +1093,8 @@ sap.ui.define([
 
 			// Tableau
 			const tableauChartHtml = this.byId("idTableauChart").getDomRef();
-			const imgUrl = 'https://tableau-ncsa.aws.cnb/t/CPROD/views/WHCContractRenewalV1/WHCContractRenewal.png?Vistex%20ID=0060075938&:embed=y&:showVizHome=n&:tabs=n&:toolbar=n&:apiID=host7';
+			const image = document.getElementById("tab");
+			//const imgUrl = 'https://tableau-ncsa.aws.cnb/t/CPROD/views/WHCContractRenewalV1/WHCContractRenewal.png?Vistex%20ID=0060075938&:embed=y&:showVizHome=n&:tabs=n&:toolbar=n&:apiID=host7';
 	 		// const tableauUrl = this.byId("idTableauChart").getSrc();
 			// // const iFrameUrl = tableauUrl.substring("https://tableau-ncsa.aws.cnb".length);			
 			// const proxyIframe = await this.printIframe(imageUrl);
@@ -947,14 +1102,14 @@ sap.ui.define([
 			// canvasImage.width = 400;
 			// canvasImage.height = 400;
 			// doc.addImage(canvasImage, "PNG", marginLeft, tableHeight, 180, 100); // Adjust the coordinates and size as needed
-			// html2canvas(tableauChartHtml).then(canvas => {
-			// 	// Convert the canvas to a data URL
-			// 	const imgData = canvas.toDataURL('image/png');
+			html2canvas(image).then(canvas => {
+				// Convert the canvas to a data URL
+				const imgData = canvas.toDataURL('image/png');
 				
-			// 	// Add the image to the PDF
-			// 	doc.addImage(imgData, 'PNG', 10, 10, 100, 75);
-			// 	doc.save(fileName);	
-			// });	
+				// Add the image to the PDF
+				doc.addImage(imgData, 'png', 10, 10, 100, 75);
+				doc.save(fileName);	
+			});	
 			// const img = new Image();
 			// img.src = imageUrl;
 			// 	// Once the image is loaded, you can use it
@@ -962,15 +1117,15 @@ sap.ui.define([
 			// 	// Here, I'm just logging the image width and height
 			// 	doc.addImage(img, 'PNG', 10, 10, 100, 75);
 			// doc.save(fileName);
-			var logo = await this.getDataUri(imgUrl);
 			doc.addImage(logo, 'png', 10, 10, 100, 75);
 			doc.save(fileName);
 		},
 
-		getDataUri: function(url){
+		/*getDataUri: function(url){
 			return new Promise(resolve => {
 				var image = new Image();
 				image.setAttribute('crossOrigin', 'anonymous'); //getting images from external domain
+				
 				image.onload = function () {
 					var canvas = document.createElement('canvas');
 					canvas.width = this.naturalWidth;
@@ -994,7 +1149,7 @@ sap.ui.define([
 		 * 
 		 * Downside is that the iframe stays loaded. 
 		 */
-		printIframe: function(url) {
+		/*printIframe: function(url) {
 			return new Promise((resolve, reject) => {
 				const proxyIframe = document.createElement('iframe');
 				const body = document.getElementsByTagName('body')[0];
@@ -1016,7 +1171,7 @@ sap.ui.define([
 				contentWindow.document.write('<iframe src="' + url + '" onload="' + resolve(div) + '" width="1000" height="1800" frameborder="0" marginheight="0" marginwidth="0">');
 				contentWindow.document.close();
 			});
-		},
+		},*/
 
 
 		getWHCProducts: async function () {
