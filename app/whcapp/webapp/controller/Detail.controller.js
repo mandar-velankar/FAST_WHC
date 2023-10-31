@@ -871,7 +871,7 @@ sap.ui.define([
 					image = "<img src="+`https://tableau-ncsa.aws.cnb/t/CPROD/views/WHCContractProposal/ContractProposal.png?ORIGINAL_ORDERING_ACCOUNT_NUM=${mainCustomersTableItemNames[0]}&amp;:embed=y&amp;:showVizHome=n&amp;:tabs=n&amp;:toolbar=n&amp;:apiID=host1#navType=0&amp;navSrc=Parse%22`+" width='90%' height='90%'></img>";
 				}
 				else{
-					image = "<img src="+`https://tableau-ncsa.aws.cnb/t/CPROD/views/WHCContractRenewalV1/WHCContractRenewal.png?Vistex%20ID=${contract.VistexID}&amp;:embed=y&amp;:showVizHome=n&amp;:tabs=n&amp;:toolbar=n&amp;:apiID=host20#navType=0&amp;navSrc=Parse`+" width='100%' height='100%'></img>";
+					image = "<img src="+`https://tableau-ncsa.aws.cnb/t/CPROD/views/WHCContractRenewalV1/WHCContractRenewal.png?Vistex%20ID=${contract.VistexID}&amp;:embed=y&amp;:showVizHome=n&amp;:tabs=n&amp;:toolbar=n&amp;:apiID=host20#navType=0&amp;navSrc=Parse`+" width='90%' height='90%'></img>";
 				}
 			}
 			// let finalPage = "<html><head><link rel='stylesheet' type='text/css' media='print' href='css/style.css'><style> th {background-color: #eed6de;} * { -webkit-print-color-adjust: exact !important;} .page-break-before { page-break-before: always;} .page-break-after {page-break-after: always;} </style></head>";
