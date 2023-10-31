@@ -844,14 +844,14 @@ sap.ui.define([
 			wacInfo += "</table><br>";
 			let backInfoSec = "<h3 style='text-align: left;'>Baseline & Background Information</h3>";
 			let baselineInfo = "<table style='border-collapse: collapse;border: 1px solid black;' width='100%' ><tr><th style='border: 1px solid black;'>Baseline unit</th><th style='border: 1px solid black;'>Baseline Discount</th><th style='border: 1px solid black;'>Proposed Contract Length</th></tr>";
-			baselineInfo +="<tr><td style='border: 1px solid black; text-align: center;'>"+contract.BaseLineUnits+"</td><td style='border: 1px solid black; text-align: center;'>"+`${(contract.BaseLineDiscount*100).toFixed(1)}%`+"</td><td style='border: 1px solid black; text-align: center;'>"+contract.ProposedContractLength+"</td>";
+			baselineInfo +="<tr><td style='border: 1px solid black; text-align: center;'>"+(contract.BaseLineUnits !==null ? contract.BaseLineUnits : '')+"</td><td style='border: 1px solid black; text-align: center;'>"+`${(contract.BaseLineDiscount*100).toFixed(1)}%`+"</td><td style='border: 1px solid black; text-align: center;'>"+(contract.ProposedContractLength !== null ? contract.ProposedContractLength : '')+"</td>";
 			baselineInfo += "</tr></table><br>";
 			let backgroundInfo = "<table style='border-collapse: collapse;border: 1px solid black;' width='100%' ><tr><th style='border: 1px solid black;'>Background Information</th></tr>";
 			backgroundInfo +="<tr><td style='border: 1px solid black; text-align: center;'>"+(contract.BackgroundInfo !== null ? contract.BackgroundInfo : '')+"</td></tr></table><br>";
 			let discountSec = "<h3 style='text-align: left;'>Discount</h3>";
 			let discountInfo = "<table style='border-collapse: collapse;border: 1px solid black;' width='100%' ><tr><th style='border: 1px solid black;'>Year</th><th style='border: 1px solid black;'>Units</th><th style='border: 1px solid black;'>Mirena</th><th style='border: 1px solid black;'>Kyleena</th><th style='border: 1px solid black;'>Skyla</th></tr>";
 			for(const discountItem of discountItems){
-				discountInfo +="<tr><td style='border: 1px solid black; text-align: center;'>"+discountItem[0]+"</td><td style='border: 1px solid black; text-align: center;'>"+discountItem[1]+"</td><td style='border: 1px solid black; text-align: center;'>"+discountItem[2]+"</td><td style='border: 1px solid black; text-align: center;'>"+discountItem[3]+"</td><td style='border: 1px solid black; text-align: center;'>"+discountItem[4]+"</td>";
+				discountInfo +="<tr><td style='border: 1px solid black; text-align: center;'>"+discountItem[0]+"</td><td style='border: 1px solid black; text-align: center;'>"+(discountItem[1] !== null ? discountItem[1] : '')+"</td><td style='border: 1px solid black; text-align: center;'>"+discountItem[2]+"</td><td style='border: 1px solid black; text-align: center;'>"+discountItem[3]+"</td><td style='border: 1px solid black; text-align: center;'>"+discountItem[4]+"</td>";
 			}
 			discountInfo += "</tr></table><br>";
 			let rebateSec = "<h3 style='text-align: left;'>Rebate</h3>";
@@ -909,7 +909,7 @@ sap.ui.define([
 				 setTimeout(function() {
 					win.print();
 					win.stop();
-				 }, 3500);
+				 }, 5000);
 		},
 
 		/*savePDF: async function(){
