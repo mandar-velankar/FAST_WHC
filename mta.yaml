@@ -40,6 +40,7 @@ modules:
         url: '~{srv-url}'
         timeout: 120000
     - name: uaa_FAST
+    - name: com-bayer-tender-whcapp-destination-service
 - name: com-bayer-tender-whcapp-app-content
   type: com.sap.application.content
   path: .
