@@ -1334,10 +1334,21 @@ sap.ui.define([
 		onVistexIdChange: async function(event){
 
 			// Get the user-input VistexId
+			let source = event.getSource();
 			let vistexId = event.getParameter("value");
 			let contract = await this.getContractById(this.id);
 			const vistexData = await this.getVistexData();
 			const vistexItems = vistexData.results.filter(item => item.VistexID === vistexId);
+
+			if (vistexItems.length < 1) {
+				source.setValueState("Error");
+                source.setValueStateText("No Vistex data were found with following Vistex ID");
+                source.openValueStateMessage();
+			}else {
+				source.setValueState("None");
+                source.setValueStateText("");
+                source.closeValueStateMessage();
+			}
 
 			// Update the MultiInput fields with fetched data
 			let mainCustomersTable = this.getView().byId("mainCustomersTable");
