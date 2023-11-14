@@ -800,14 +800,17 @@ sap.ui.define([
 					th, td {
 						border: 1px solid black;
 						text-align: center;
+						font-size: x-small;
 					}
 					h3 { 
 						background-color: #0091DF;  
 						color: white;
+						font-size: small;
 					}
 					th {
 						background-color: #D30F4B;
 						color: white;
+						font-size: x-small;
 					}
 					.page-break-before { 
 						page-break-before: always;
@@ -822,7 +825,7 @@ sap.ui.define([
 					}
 				</style>
 			`;
-			let header = "<center><h1>"+ `Proposal ${contract.Name}`+ "</h1></center><hr>"
+			let header = "<center><h1 style='font-size: medium;'>"+ `Proposal ${contract.Name}`+ "</h1></center><hr>"
 			let genInfoSec = "<h3 style='text-align: left;'>General Information</h3>";
 			let proposalInfo = "<table style='border-collapse: collapse;border: 1px solid black;' width='100%' ><tr><th style='border: 1px solid black;'>Proposal Name</th><th style='border: 1px solid black;'>Proposal Type</th><th style='border: 1px solid black;'>Vistext ID</th></tr>";
 			proposalInfo +="<tr><td style='border: 1px solid black; text-align: center;'>"+contract.Name+"</td><td style='border: 1px solid black; text-align: center;'>"+contract.Type+"</td><td style='border: 1px solid black; text-align: center;'>"+(contract.VistexID !== null ? contract.VistexID : '')+"</td>";
@@ -832,7 +835,7 @@ sap.ui.define([
 				parentBho +="<tr><td style='border: 1px solid black; text-align: center;'>"+mainCustomersTableItemName+"</td></tr>";
 			}
 			parentBho += "</table><br>";
-			let memberBho = "<table style='border-collapse: collapse;border: 1px solid black;' width='100%' ><tr><th style='border: 1px solid black;'>Member BHO IDs</th></tr>";
+			/*let memberBho = "<table style='border-collapse: collapse;border: 1px solid black;' width='100%' ><tr><th style='border: 1px solid black;'>Member BHO IDs</th></tr>";
 			for(const customersTableItemName of customersTableItemNames){
 				memberBho +="<tr><td style='border: 1px solid black; text-align: center;'>"+customersTableItemName+"</td></tr>";
 			}
@@ -841,7 +844,7 @@ sap.ui.define([
 			for (const wacItem of wacItems) {
 				wacInfo +="<tr><td style='border: 1px solid black; text-align: center;'>"+wacItem[0]+"</td><td style='border: 1px solid black; text-align: center;'>"+wacItem[1]+"</td></tr>";
 			}
-			wacInfo += "</table><br>";
+			wacInfo += "</table><br>";*/
 			let backInfoSec = "<h3 style='text-align: left;'>Baseline & Background Information</h3>";
 			let baselineInfo = "<table style='border-collapse: collapse;border: 1px solid black;' width='100%' ><tr><th style='border: 1px solid black;'>Baseline unit</th><th style='border: 1px solid black;'>Baseline Discount</th><th style='border: 1px solid black;'>Proposed Contract Length</th></tr>";
 			baselineInfo +="<tr><td style='border: 1px solid black; text-align: center;'>"+(contract.BaseLineUnits !==null ? contract.BaseLineUnits : '')+"</td><td style='border: 1px solid black; text-align: center;'>"+`${(contract.BaseLineDiscount*100).toFixed(1)}%`+"</td><td style='border: 1px solid black; text-align: center;'>"+(contract.ProposedContractLength !== null ? contract.ProposedContractLength : '')+"</td>";
@@ -868,10 +871,10 @@ sap.ui.define([
 			let tableauSec = "<h3 style='text-align: left;'>Tableau</h3>";
 			if(contract.Type){
 				if(contract.Type === 'New Proposal'){
-					image = "<img src="+`https://tableau-ncsa.aws.cnb/t/CPROD/views/WHCContractProposal/ContractProposal.png?ORIGINAL_ORDERING_ACCOUNT_NUM=${mainCustomersTableItemNames[0]}&amp;:embed=y&amp;:showVizHome=n&amp;:tabs=n&amp;:toolbar=n&amp;:apiID=host1#navType=0&amp;navSrc=Parse%22`+" width='90%' height='90%'></img>";
+					image = "<img src="+`https://tableau-ncsa.aws.cnb/t/CPROD/views/WHCContractProposal/ContractProposal.png?ORIGINAL_ORDERING_ACCOUNT_NUM=${mainCustomersTableItemNames[0]}&amp;:embed=y&amp;:showVizHome=n&amp;:tabs=n&amp;:toolbar=n&amp;:apiID=host1#navType=0&amp;navSrc=Parse%22`+" width='60%' height='60%'></img>";
 				}
 				else{
-					image = "<img src="+`https://tableau-ncsa.aws.cnb/t/CPROD/views/WHCContractRenewalV1/WHCContractRenewal.png?Vistex%20ID=${contract.VistexID}&amp;:embed=y&amp;:showVizHome=n&amp;:tabs=n&amp;:toolbar=n&amp;:apiID=host20#navType=0&amp;navSrc=Parse`+" width='90%' height='90%'></img>";
+					image = "<img src="+`https://tableau-ncsa.aws.cnb/t/CPROD/views/WHCContractRenewalV1/WHCContractRenewal.png?Vistex%20ID=${contract.VistexID}&amp;:embed=y&amp;:showVizHome=n&amp;:tabs=n&amp;:toolbar=n&amp;:apiID=host20#navType=0&amp;navSrc=Parse`+" width='60%' height='60%'></img>";
 				}
 			}
 			// let finalPage = "<html><head><link rel='stylesheet' type='text/css' media='print' href='css/style.css'><style> th {background-color: #eed6de;} * { -webkit-print-color-adjust: exact !important;} .page-break-before { page-break-before: always;} .page-break-after {page-break-after: always;} </style></head>";
@@ -886,11 +889,11 @@ sap.ui.define([
 					${printStyles}
 				</head>
 				<body>
-					<div>${header}${genInfoSec}${proposalInfo}${parentBho}${memberBho}${wacInfo}</div>
-					<div class='page-break-before'>${backInfoSec}${baselineInfo}${backgroundInfo}</div>
-					<div class='page-break-after'>${discountSec}${discountInfo}</div>
-					<div class='page-break-before'>${rebateSec}${rebateInfo}${remarkSec}${remarkTable}</div>
-					<div class='page-break-before'>${tableauSec}${image}</div>
+					<div>${header}${genInfoSec}${proposalInfo}${parentBho}</div>
+					<div>${backInfoSec}${baselineInfo}${backgroundInfo}</div>
+					<div>${discountSec}${discountInfo}</div>
+					<div>${rebateSec}${rebateInfo}${remarkSec}${remarkTable}</div>
+					<div>${tableauSec}${image}</div>
 				</body>
 				</html>
 				`;
@@ -1334,10 +1337,21 @@ sap.ui.define([
 		onVistexIdChange: async function(event){
 
 			// Get the user-input VistexId
+			let source = event.getSource();
 			let vistexId = event.getParameter("value");
 			let contract = await this.getContractById(this.id);
 			const vistexData = await this.getVistexData();
 			const vistexItems = vistexData.results.filter(item => item.VistexID === vistexId);
+
+			if (vistexItems.length < 1) {
+				source.setValueState("Error");
+                source.setValueStateText("No Vistex data were found with following Vistex ID");
+                source.openValueStateMessage();
+			}else {
+				source.setValueState("None");
+                source.setValueStateText("");
+                source.closeValueStateMessage();
+			}
 
 			// Update the MultiInput fields with fetched data
 			let mainCustomersTable = this.getView().byId("mainCustomersTable");
