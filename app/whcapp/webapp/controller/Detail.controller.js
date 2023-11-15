@@ -1345,7 +1345,7 @@ sap.ui.define([
 
 			if (vistexItems.length < 1) {
 				source.setValueState("Error");
-                source.setValueStateText("No Vistex data were found with following Vistex ID");
+                source.setValueStateText("Invalid Vistex ID");
                 source.openValueStateMessage();
 			}else {
 				source.setValueState("None");
