@@ -126,7 +126,7 @@
                                         path: 'modifiedAt',
                                         type: 'sap.ui.model.type.Date',
                                         formatOptions: { 
-                                            pattern: 'dd.MM.yyyy', 
+                                            pattern: 'MM.dd.yyyy', 
                                             UTC: true 
                                         }
                                     }"  
@@ -139,7 +139,7 @@
                                         path: 'createdAt',
                                         type: 'sap.ui.model.type.Date',
                                         formatOptions: { 
-                                            pattern: 'dd.MM.yyyy', 
+                                            pattern: 'MM.dd.yyyy', 
                                             UTC: true 
                                         }
                                     }"  

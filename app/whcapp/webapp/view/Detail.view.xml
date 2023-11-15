@@ -47,11 +47,11 @@
 							<menu>
 								<Menu itemSelected="onMenuAction">
 									<!--<MenuItem text="Save Draft" visible="{accessControl>/whcproposalcreator}" press=".onSave"/>-->
-									<MenuItem text="Submit to Workshop" visible="{accessControl>/whcproposalcreator}" />
-									<MenuItem text="Approve" visible="{accessControl>/whcapprover}" />
-									<MenuItem text="Reject" visible="{accessControl>/whcapprover}" />
-									<MenuItem text="Cancel Proposal" visible="{accessControl>/whcproposalcreator}" />
-									<MenuItem text="Archive" visible="{accessControl>/whcproposalcreator}" />
+									<MenuItem text="Submit to Workshop" visible="{accessControl>/getAccess/whcproposalcreator}" />
+									<MenuItem text="Approve" visible="{accessControl>/getAccess/whcapprover}" />
+									<MenuItem text="Reject" visible="{accessControl>/getAccess/whcapprover}" />
+									<MenuItem text="Cancel Proposal" visible="{accessControl>/getAccess/whcproposalcreator}" />
+									<MenuItem text="Archive" visible="{accessControl>/getAccess/whcproposalcreator}" />
 								</Menu>
 							</menu>
 						</MenuButton>
