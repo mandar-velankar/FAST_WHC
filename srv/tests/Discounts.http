@@ -1,0 +1,50 @@
+@hostname=localhost
+@port=4004
+@host={{hostname}}:{{port}}
+@service=/v2/catalog
+
+
+### Discounts  - Get All Discounts
+GET http://{{host}}{{service}}/Discounts
+Authorization: Basic YXJ0aW9t
+
+
+### Discounts  - Get Contract by ID - ODATA V2
+GET http://{{host}}{{service}}/Discounts(guid'12946ea7-fb94-4a26-80df-9ecbbd351eea')
+Authorization: Basic YXJ0aW9t
+
+###Discounts  - Create new Contract
+POST http://{{host}}{{service}}/Discounts
+Authorization: Basic YXJ0aW9t
+Content-Type: application/json
+
+{
+    "Year": 3,
+    "Level": 1,
+    "Unit": "",
+    "Discount": null,
+    "RebateLevels_Unit_Level_1": null,
+    "RebateLevels_Discount_Level_1": null,
+    "RebateLevels_Unit_Level_2": null,
+    "RebateLevels_Discount_Level_2": null,
+    "RebateLevels_Unit_Level_3": null,
+    "RebateLevels_Discount_Level_3": null,
+    "ContractID": "e88f4e1d-9ce0-4f57-846d-a9630463ea63"
+}
+
+###Discounts  - Update Contract
+PUT http://{{host}}{{service}}/DiscountsView(ContractsViewID='93902c9a-2217-4e68-b4a5-0fb1e7a281f2-2023-09-14-08:01:07.7729855-9999-12-31-23:59:59.9999999',Year=1,isCurrent=true)
+Authorization: Basic YXJ0aW9t
+Content-Type: application/json
+
+{
+    "Units": 222,
+    "Mirena": "88",
+    "Kyleena": "47",
+    "Skyla": "68",
+    "DiscountID": "c08d4b6a-2f85-4742-8de6-ed7965b20f20"
+}
+
+### Discounts  - Delete contract by ID
+DELETE http://{{host}}{{service}}/Discounts(guid'8512e1ce-a990-4d90-b958-a5526c08a689')
+Authorization: Basic YXJ0aW9t

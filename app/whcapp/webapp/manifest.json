@@ -24,6 +24,14 @@
           "localUri": "localService/metadata.xml",
           "odataVersion": "2.0"
         }
+      },
+      "accessService": {
+				"uri": "/v2/access/",
+				"type": "OData",
+				"settings": {
+					"odataVersion": "2.0",
+					"localUri": "localService/metadata.xml"
+        }
       }
     }
   },
@@ -44,7 +52,10 @@
     }
   },
   "sap.ui5": {
-    "flexEnabled": true,
+    "flexEnabled": false,
+    "resourceRoots":{
+			"com.bayer.tender.uilib": "./libraries/uilib/src/com/bayer/tender/uilib"
+		},
     "dependencies": {
       "minUI5Version": "1.96.23",
       "libs": {
@@ -55,7 +66,8 @@
         "sap.ui.comp": {},
         "sap.ui.generic.app": {},
         "sap.ui.table": {},
-        "sap.ushell": {}
+        "sap.ushell": {},
+        "com.bayer.tender.uilib":{}
       }
     },
     "contentDensities": {
@@ -77,7 +89,11 @@
 					"defaultBindingMode": "TwoWay",
 					"defaultUpdateMethod": "Put"
         }
-      }
+      },
+      "access": {
+				"dataSource": "accessService",
+				"preload": true
+			}
     },
     "resources": {
       "css": [

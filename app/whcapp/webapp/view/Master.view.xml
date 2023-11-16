@@ -17,39 +17,138 @@
 		<f:title>
 			<f:DynamicPageTitle>
 				<f:heading>
-					<Title text="Contracts"/>
+					<Title text="Proposals"/>
 				</f:heading>
 			</f:DynamicPageTitle>
 		</f:title>
+
 		<f:content>
-            <Table id="masterTable" 
-                items="{path:'/Contracts'}"
-                itemPress=".onSelectionChange"
-                class="sapFDynamicPageAlignContent"
-                width="auto"
-                alternateRowColors="true"
-                contextualWidth="Auto" 
-                autoPopinMode="true"
-                hiddenInPopin="None"
-                mode="SingleSelectMaster"
-                growing="true"
-                growingThreshold="15"
-                growingScrollToLoad="false"
-                busyIndicatorDelay="0"
-            >
-                <columns>
-                    <Column>
-                        <Text text="Name" />
-                    </Column>
-                </columns>
-                <items>
-                    <ColumnListItem type="Active">
-                        <cells>
-                            <Text text="{Name}" />
-                        </cells>
-                    </ColumnListItem>
-                </items>
-            </Table>
+            <VBox>
+                <OverflowToolbar class="sapFDynamicPageAlignContent">
+                        <Label
+                            text="{i18n>StatusLabel}"
+                            labelFor="idSlctStatus"
+                        />
+                        <Select 
+                            id="idSlctStatus" 
+                            change=".setFilter" 
+                        >
+                            <!-- items binding see controller -->
+                            <core:Item key="All" text="All"/>
+                            <core:Item key="Approved" text="Approved"/>
+                            <core:Item key="Rejected" text="Rejected"/>
+                            <core:Item key="In Workshop" text="In Workshop"/>
+                            <core:Item key="Draft" text="Draft"/>
+                            <core:Item key="Cancelled" text="Cancelled"/>
+                            <core:Item key="Archived" text="Archived"/>
+                        </Select>
+
+                        <Label
+                            text="{i18n>TypeLabel}"
+                            labelFor="idSlctType"
+                        />
+                        <Select 
+                            id="idSlctType" 
+                            change=".setFilter" 
+                        >
+                            <!-- items binding see controller -->
+                            <core:Item key="All" text="All"/>
+                            <core:Item key="New Proposal" text="New Proposal"/>
+                            <core:Item key="Amendment" text="Amendment"/>
+                            <core:Item key="Renewal" text="Renewal"/>
+                        </Select>
+                        <ToolbarSpacer/>
+
+                        <SearchField id="idSearch" search=".setFilter" width="17.5rem"/>
+                        <Button text = "New Proposal" icon = "sap-icon://add" press="onOpenCreateProposalDialog"/>
+                        <Button icon="sap-icon://sort" text="" press=".onOpenViewSettings"/>
+                </OverflowToolbar>
+                <Table id="masterTable" 
+                    items="{
+                        path:'/ContractsView',
+                        filters: [
+                            {
+                                path: 'isCurrent',
+                                operator: 'EQ',
+                                value1: true
+                            }
+                        ],
+                        sorter: {
+                            path: 'modifiedAt',
+                            descending: true
+                        }
+                    }"
+                    itemPress=".onSelectionChange"
+                    class="sapFDynamicPageAlignContent"
+                    width="auto"
+                    alternateRowColors="true"
+                    contextualWidth="Auto" 
+                    autoPopinMode="true"
+                    hiddenInPopin="None"
+                    mode="SingleSelectMaster"
+                    growing="true"
+                    growingThreshold="15"
+                    growingScrollToLoad="false"
+                    busyIndicatorDelay="0"
+                >
+                    <columns>
+                        <Column>
+                            <Text text="{i18n>ProposalName}" />
+                        </Column> 
+                        <Column>
+                            <Text text="{i18n>Status}" />
+                        </Column>
+                        <Column>
+                            <Text text="{i18n>ModifiedAt}" />
+                        </Column>
+                        <Column>
+                            <Text text="{i18n>ModifiedBy}" />
+                        </Column>
+                        <Column>
+                            <Text text="{i18n>ProposalType}" />
+                        </Column>
+                        <Column>
+                            <Text text="{i18n>ParentAccountName}" />
+                        </Column>
+                        <Column>
+                            <Text text="{i18n>CreatedBy}" />
+                        </Column>
+                        <Column>
+                            <Text text="{i18n>CreatedAt}" />
+                        </Column>
+                    </columns>
+                    <items>
+                        <ColumnListItem type="Active" highlight="{= ${isCurrent} &amp;&amp; ${masterView>/showHighlight}? 'Indication08' : 'None'}">
+                            <cells>
+                                <Text text="{Name}" />
+                                <Text text="{Status}" />
+                                <Text text="{
+                                        path: 'modifiedAt',
+                                        type: 'sap.ui.model.type.Date',
+                                        formatOptions: { 
+                                            pattern: 'MM.dd.yyyy', 
+                                            UTC: true 
+                                        }
+                                    }"  
+                                />
+                                <Text text="{modifiedByName}" />
+                                <Text text="{Type}" />
+                                <Text text="{ParentAccountName}" />
+                                <Text text="{createdByName}" />
+                                <Text text = "{
+                                        path: 'createdAt',
+                                        type: 'sap.ui.model.type.Date',
+                                        formatOptions: { 
+                                            pattern: 'MM.dd.yyyy', 
+                                            UTC: true 
+                                        }
+                                    }"  
+                                />
+                            </cells>
+                        </ColumnListItem>
+                    </items>
+                </Table>
+            </VBox>
         </f:content>
 	</f:DynamicPage>
 </mvc:View>

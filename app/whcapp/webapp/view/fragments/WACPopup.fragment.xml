@@ -1,0 +1,45 @@
+<core:FragmentDefinition 
+	xmlns="sap.m" 
+	xmlns:core="sap.ui.core" 
+	xmlns:up="sap.uxap" 
+	xmlns:form="sap.ui.layout.form" 
+	xmlns:u="sap.uxap"
+	xmlns:t="sap.ui.table" 
+	xmlns:l="sap.ui.layout"
+	xmlns:mvc="sap.ui.core.mvc">
+	
+    <Dialog id = "idProductWacPopup" title="Product WAC Info" contentWidth="400px" contentHeight="200px">
+
+		<content>
+            <Table
+                id="idWHCProductWacInfo"
+                mode="None"
+                items="{/WHCProducts}">
+                <columns>
+                    <Column>
+                        <Label
+                            text="Product"
+                            wrapping="true" />
+                    </Column>
+                    <Column>
+                        <Label
+                            text="WAC"
+                            wrapping="true" />
+                    </Column>
+                </columns>
+                <items>
+                    <ColumnListItem>
+                        <cells>
+                            <Text text="{ProductName}"/>
+                            <Text text="{WAC}"/>
+                        </cells>
+                    </ColumnListItem>
+                </items>
+            </Table>
+        </content>
+
+        <buttons>
+            <Button text="Close" press=".onCloseWACPopup" />
+        </buttons>
+    </Dialog>
+</core:FragmentDefinition>

@@ -4,12 +4,17 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title>App Title</title>
+    <title>WHC Contract Proposal Tool</title>
     <style>
         html, body, body > div, #container, #container-uiarea {
             height: 100%;
         }
     </style>
+	<script type="text/javascript" src="https://widgets.veevanetwork.com/veeva-network-manifest.js"></script>
+	<script type="text/javascript" src="https://widgets.veevanetwork.com/veeva-network-search-widget-loader.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://unpkg.com/jspdf-autotable@3.6.0/dist/jspdf.plugin.autotable.js"></script>
     <script
         id="sap-ui-bootstrap"
         src="https://sapui5.hana.ondemand.com/1.96.23/resources/sap-ui-core.js"
@@ -33,5 +38,11 @@
         data-settings='{"id" : "com.bayer.tender.whcapp"}'
         data-handle-validation="true"
     ></div>
+    <veeva-network-search-widget
+        id="searchWidget"
+        widget-name="CT_SEARCH"
+        auth-domain="bayerus.veevanetwork.com"
+        widget-id="NDEyNzc7OztjdF9zZWFyY2hfX2M="
+        show-in-dialog="true"/>
 </body>
 </html>

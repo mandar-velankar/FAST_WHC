@@ -1,0 +1,38 @@
+{
+  "welcomeFile": "/index.html",
+  "authenticationMethod": "route",
+  "logout": {
+    "logoutEndpoint": "/do/logout"
+  },
+  "routes": [
+    
+    {
+      "source": "/t/(.*)$",
+      "target": "/t/$1",
+      "authenticationType": "none",
+      "destination": "tableau",
+      "csrfProtection": false
+    },
+    {
+      "source": "/v4/(.*)$",
+      "target": "$1",
+      "authenticationType": "basic",
+      "destination": "srv-api",
+      "csrfProtection": false
+    },
+    {
+      "source": "/v2/(.*)$",
+      "target": "/v2/$1",
+      "authenticationType": "basic",
+      "destination": "srv-api",
+      "csrfProtection": false
+    },
+    {
+      "source": "^/(.*)$",
+      "target": "/v2/$1",
+      "authenticationType": "basic",
+      "destination": "srv-api",
+      "csrfProtection": true
+    }
+  ]
+}

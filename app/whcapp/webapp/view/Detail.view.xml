@@ -7,6 +7,8 @@
 	xmlns:l="sap.ui.layout"
 	xmlns:core="sap.ui.core"
 	xmlns:mvc="sap.ui.core.mvc"
+	xmlns:custom="com.bayer.tender.whcapp.control"
+	xmlns:upload="sap.m.upload"
 	xmlns:tnt="sap.tnt">
 	<f:DynamicPage id="detailPage"
 		busy="{detailView>/busy}"
@@ -37,22 +39,33 @@
 
 				<!-- ACTIONS -->
 				<f:actions>
+					<Button id="editButtonId" text="Edit" type="Emphasized" press=".onEdit" enabled="{= ${isCurrent} &amp;&amp; !${appView>/editmode}}"/>
+					<Button id="deleteContractButtonId" icon="sap-icon://delete" text="Delete" type="Reject" press="onDeleteContractPress" enabled="true" />
+					<Button id="refreshButtonId" icon="sap-icon://refresh" type="Emphasized" press="onRefresh" enabled="true"/>
+					<Button id="printButtonId" text="Print" type="Emphasized" press=".onPrintButtonPress" enabled="true"/>
+					<MenuButton id="idButtonAction" text="Set Status" buttonMode="Split" useDefaultActionOnly="false" visible="true" type="Emphasized" enabled="{= !${appView>/editmode} &amp;&amp; ${Status} !== 'Approved' }">
+							<menu>
+								<Menu itemSelected="onMenuAction">
+									<!--<MenuItem text="Save Draft" visible="{accessControl>/whcproposalcreator}" press=".onSave"/>-->
+									<MenuItem text="Submit to Workshop" visible="{accessControl>/getAccess/whcproposalcreator}" />
+									<MenuItem text="Approve" visible="{accessControl>/getAccess/whcapprover}" />
+									<MenuItem text="Reject" visible="{accessControl>/getAccess/whcapprover}" />
+									<MenuItem text="Cancel Proposal" visible="{accessControl>/getAccess/whcproposalcreator}" />
+									<MenuItem text="Archive" visible="{accessControl>/getAccess/whcproposalcreator}" />
+								</Menu>
+							</menu>
+						</MenuButton>
 				</f:actions>
 			</f:DynamicPageTitle>
 		</f:title>
 		<f:header>
 			<f:DynamicPageHeader >
-				<FlexBox wrap="Wrap" fitContainer="true" alignItems="Stretch">
-
-					<VBox justifyContent="Center" class="sapUiSmallMarginEnd">
-						<Label text="Background"/>
-						<Text text="{Background}"/>
-					</VBox>
-					
-					<VBox justifyContent="Center" class="sapUiSmallMarginEnd">
-						<Label text="Status"/>
-						<Text text="{Status}"/>
-					</VBox>		
+				<FlexBox justifyContent="Start">
+					<VBox justifyContent="Center">
+						<Label text="Status" textAlign="Center" width="100%"/>
+						<Text id="idStatus" text="{Status}"/>
+						<Text id="idStatusId" text="{StatusID}" visible="false"/>
+                    </VBox>
 				</FlexBox>
 			</f:DynamicPageHeader>
 		</f:header>
@@ -62,30 +75,395 @@
 				expanded="{device>/isNoPhone}"
 				class="sapUiResponsiveContentPadding">
 				<items>
-					<IconTabFilter text="Customers" key="customers">
-						<Table id="customersTable" 
-                            items="{path:'ContractCustomers'}"
-                            growing="true"
-                            growingThreshold="15"
-                            growingScrollToLoad="false"
-                            busyIndicatorDelay="0"
-                        >
-                            <columns>
-                                <Column>
-                                    <Text text="Name" />
-                                </Column>
-                            </columns>
-                            <items>
-                                <ColumnListItem>
-                                    <cells>
-                                        <Text text="{Name}" />
-                                    </cells>
-                                </ColumnListItem>
-                            </items>
-                        </Table>
-					</IconTabFilter>
+					<IconTabFilter text="Proposal Data" key="proposal">
+
+						<Panel expandable="true" width="auto" class="sapUiResponsiveMargin" expanded="true">
+							<headerToolbar>
+								<OverflowToolbar style="Clear">
+									<Title text="General Info" />
+								</OverflowToolbar>
+							</headerToolbar>
+							<form:SimpleForm
+								editable="true"
+								layout="ResponsiveGridLayout"
+								labelSpanXL="4"
+								labelSpanL="4"
+								labelSpanM="4"
+								labelSpanS="12"
+								adjustLabelSpan="false"
+								emptySpanXL="0"
+								emptySpanL="0"
+								emptySpanM="0"
+								emptySpanS="0"
+								columnsXL="3"
+								columnsL="2"
+								columnsM="2"
+								singleContainerFullSize="false" >
+								<form:content>
+
+									<Label text='Proposal Name '/>
+									<Input id="idProposalName" value="{Name}"  enabled="{= ${appView>/editmode}}"/>
+
+									<Label text='Vistex ID ' visible="{= ${Type} === 'Amendment' || ${Type} === 'Renewal Contract' }"/>
+									<Input id="idVistexInput" value="{VistexID}"  enabled="{= ${appView>/editmode}}" visible="{= ${Type} === 'Amendment' || ${Type} === 'Renewal Contract' }" liveChange="onVistexIdChange"/>
+
+									<Button id="wacButtonId" text="WAC" type="Emphasized" press=".onShowWacButtonPress" />
+								</form:content>
+							</form:SimpleForm>
+						
+							<l:ResponsiveSplitter >
+								<l:PaneContainer>
+								<l:SplitPane requiredParentWidth="200">
+										<Table id="mainCustomersTable" 
+											items="{
+															path: '/ContractCustomersView',
+															sorter: { path: 'Name' },
+															filters: [
+																{ path : 'ContractID', operator : 'EQ', value1 : '{ID}'},
+																{ path : 'IsParent', operator : 'EQ', value1 : true }
+															]
+														}"
+											growing="true"
+											growingThreshold="15"
+											growingScrollToLoad="false"
+											busyIndicatorDelay="0"
+											updateFinished=".onMainCustomersBindingFinished"
+										>
+										<headerToolbar>
+											<OverflowToolbar>
+												<content>
+													<Title text="Parent BHO ID" level="H2"/>
+													<Button id="btnAddBHOParent" text="+" type="Emphasized" press=".onAddMainCustomerButtonPress" enabled="{= ${appView>/editmode}}" />
+													<Button id="btnManualBHOParent" text="Add Manually" type="Emphasized" press=".onAddNonVeevaBHO" enabled="{= ${appView>/editmode}}" />
+												</content>
+											</OverflowToolbar>
+										</headerToolbar>
+											<columns>
+												<Column width="20%">
+													<Text text="BHO ID" />
+												</Column>
+												<Column width="75%">
+													<Text text="Name" />
+												</Column>
+												<Column width="5%">
+													<Text text="" />
+												</Column>
+											</columns>
+											<items>
+												<ColumnListItem>
+													<cells>
+														<Text text="{BHOID}" />
+													</cells>
+													<cells>
+														<Text text="{Name}" />
+													</cells>
+													<cells>
+														<Button icon="sap-icon://delete" press="onDeleteBHO" visible="{= ${appView>/editmode}}"/>
+													</cells>
+												</ColumnListItem>
+											</items>
+										</Table>
+									</l:SplitPane>
+									<l:SplitPane requiredParentWidth="700">
+										<Table id="customersTable" 
+											   items = "{
+															path: '/ContractCustomersView',
+															sorter: { path: 'Name' },
+															filters: [
+																{ path : 'ContractID', operator : 'EQ', value1 : '{ID}'},
+																{ path : 'IsParent', operator : 'EQ', value1 : true }
+															]
+														}"
+											   growing="true"
+											   growingThreshold="15"
+											   growingScrollToLoad="false"
+											   busyIndicatorDelay="0"
+										>
+										<headerToolbar>
+											<OverflowToolbar>
+												<content>
+													<Title text="Member BHO ID" level="H2"/>
+													<Button text="+" type="Emphasized" press=".onAddCustomerButtonPress" enabled="{= ${appView>/editmode}}" visible="{= ${appView>/editmode}}"/>
+													<Button id="btnManualBHO" text="Add Manually" type="Emphasized" press=".onAddNonVeevaBHO" enabled="{= ${appView>/editmode}}" visible="{= ${appView>/editmode}}"/>
+												</content>
+											</OverflowToolbar>
+										</headerToolbar>
+										<MultiInput id="multiId" showValueHelp="false">
+										</MultiInput>
+											<columns>
+												<Column width="20%">
+													<Text text="BHO ID" />
+												</Column>
+												<Column width="70%">
+													<Text text="Name" />
+												</Column>
+												<Column width="10%">
+													<Text text="" />
+												</Column>
+											</columns>
+											<items>
+												<ColumnListItem>
+													<cells>
+														<Text text="{BHOID}" />
+													</cells>
+													<cells>
+														<Text text="{Name}" />
+													</cells>
+													<cells>
+														<Button icon="sap-icon://delete" press="onDeleteBHO" visible="{= ${appView>/editmode}}"/>
+													</cells>
+												</ColumnListItem>
+											</items>
+										</Table>
+									</l:SplitPane>
+								</l:PaneContainer>
+							</l:ResponsiveSplitter>
+						</Panel>
+
+						<Panel expandable="true" width="auto" class="sapUiResponsiveMargin" expanded="true">
+						<headerToolbar>
+							<OverflowToolbar style="Clear">
+								<Title text="Base Line &amp; Background info" />
+							</OverflowToolbar>
+						</headerToolbar>
+						<form:SimpleForm
+							layout="ResponsiveGridLayout"
+							editable="true">
+							<Label text='Base Line Units '/>
+							<Input id="idBaseLineUnitsInput" value="{BaseLineUnits}"  enabled="{= ${appView>/editmode}}" width='20%' liveChange="onBaseLineUnitChange" type="Number"/>
+
+							<Label text='Base Line Discount '/>
+							<Input 
+								id="idBaseLineDiscountInput" 
+								value="{
+									path: 'BaseLineDiscount',
+									type: 'com.bayer.tender.whcapp.model.datatypes.CustomPercentageType' 
+								}"  
+								enabled="{= ${appView>/editmode}}" 
+								description="%" 
+								width='40%'
+							/>
+
+							<Label text='Proposed Contract Length '/>
+							<Input id="idProposedContractLengthInput" value="{ProposedContractLength}"  enabled="{= ${appView>/editmode}}" width='20%' liveChange="onProposedContractLengthChange" type="Number"/>
+						</form:SimpleForm>
+						
+					
+						<Label text='Background Info:'/>
+						<TextArea value="{BackgroundInfo}" 
+							showExceededText="true" 
+							width="100%"
+							growing="true"
+							enabled="{= ${appView>/editmode}}"
+							rows="7"/>
+					</Panel>
+
+
+					<Panel expandable="true" width="auto" class="sapUiResponsiveMargin" expanded="true">
+					<headerToolbar>
+						<OverflowToolbar style="Clear">
+							<Title text="Discounts" />
+							<ToolbarSpacer />
+							<Label text='Type:'/>
+							<Select id = "idDiscountType" change="onFormatDiscountTableValues" selectedKey="{detailView>/selectedDiscountType}" enabled="{= ${appView>/editmode}}">
+								<items>
+									<core:Item key = "Value" text="Value"></core:Item>
+									<core:Item key = "Percentage" text="Percentage"></core:Item>
+								</items>
+							</Select>
+						</OverflowToolbar>
+					</headerToolbar>
+					 <VBox id="idDiscountVbox" class="sapUiNoMargin">
+                        <!-- DiscountType Fragments dynamically loaded from Controller:loadDiscountFragment  -->
+                    </VBox>
+					</Panel>
+
+					<Panel expandable="true" width="auto" class="sapUiResponsiveMargin" expanded="true">
+						<headerToolbar>
+							<OverflowToolbar style="Clear">
+								<Title text="Rebates" />
+							</OverflowToolbar>
+						</headerToolbar>
+
+						<t:Table id="rebatesTable"
+								rows="{/RebatesView}"
+								busyIndicatorDelay="0"
+								selectionMode='None'>
+							<t:columns>
+								<t:Column  sortProperty="Year"
+										filterProperty="Year">
+									<Label text="Year" textAlign="Center" width="100%"/>
+									<t:template>
+										<Text text="Y{Year}"/>
+									</t:template>
+								</t:Column>
+								<t:Column sortProperty="Unit"
+										filterProperty="Unit"
+										headerSpan="2,1">
+									<t:multiLabels>
+										<Label text="L1" textAlign="Center" width="100%"/>
+										<Label text="Unit" textAlign="Center" width="100%"/>
+									</t:multiLabels>
+									<t:template>
+										<Input value="{
+											path: 'RebateLevels_Unit_Level_1',
+											type: 'sap.ui.model.type.Integer',
+											formatOptions: {
+												maxFractionDigits: 0,
+												minFractionDigits: 0,
+												groupingEnabled:true,
+												groupingSeparator: ','
+											}
+										}" enabled="{= ${appView>/editmode}}"/>
+									</t:template>
+								</t:Column>
+								<t:Column sortProperty="Discount"
+										headerSpan="2">
+									<t:multiLabels>
+										<Label text="Discount"/>
+										<Label text="Discount" textAlign="Center" width="100%"/>
+									</t:multiLabels>
+									<t:template>
+										<Input value="{
+											path: 'RebateLevels_Discount_Level_1',
+											type: 'com.bayer.tender.whcapp.model.datatypes.CustomPercentageType'
+										}" enabled="{= ${appView>/editmode}}"/>
+									</t:template>
+								</t:Column>
+
+								<t:Column sortProperty="Unit"
+										filterProperty="Unit"
+										headerSpan="2,1">
+									<t:multiLabels>
+										<Label text="L2" textAlign="Center" width="100%"/>
+										<Label text="Unit" textAlign="Center" width="100%"/>
+									</t:multiLabels>
+									<t:template>
+										<Input value="{
+											path: 'RebateLevels_Unit_Level_2',
+											type: 'sap.ui.model.type.Integer',
+											formatOptions: {
+												maxFractionDigits: 0,
+												minFractionDigits: 0,
+												groupingEnabled:true,
+												groupingSeparator: ','
+											}
+										}" enabled="{= ${appView>/editmode}}"/>
+									</t:template>
+								</t:Column>
+								<t:Column sortProperty="Discount"
+										headerSpan="2">
+									<t:multiLabels>
+										<Label text="Discount"/>
+										<Label text="Discount" textAlign="Center" width="100%"/>
+									</t:multiLabels>
+									<t:template>
+										<Input value="{
+											path: 'RebateLevels_Discount_Level_2',
+											type: 'com.bayer.tender.whcapp.model.datatypes.CustomPercentageType'
+										}" enabled="{= ${appView>/editmode}}"/>
+									</t:template>
+								</t:Column>
+
+								<t:Column sortProperty="Unit"
+										filterProperty="Unit"
+										headerSpan="2,1">
+									<t:multiLabels>
+										<Label text="L3" textAlign="Center" width="100%"/>
+										<Label text="Unit" textAlign="Center" width="100%"/>
+									</t:multiLabels>
+									<t:template>
+										<Input value="{
+											path: 'RebateLevels_Unit_Level_3',
+											type: 'sap.ui.model.type.Integer',
+											formatOptions: {
+												maxFractionDigits: 0,
+												minFractionDigits: 0,
+												groupingEnabled:true,
+												groupingSeparator: ','
+											}
+										}" enabled="{= ${appView>/editmode}}"/>
+									</t:template>
+								</t:Column>
+								<t:Column sortProperty="Discount"
+										headerSpan="2">
+									<t:multiLabels>
+										<Label text="Discount"/>
+										<Label text="Discount" textAlign="Center" width="100%"/>
+									</t:multiLabels>
+									<t:template>
+										<Input value="{
+											path: 'RebateLevels_Discount_Level_3',
+											type: 'com.bayer.tender.whcapp.model.datatypes.CustomPercentageType'
+										}" enabled="{= ${appView>/editmode}}"/>
+									</t:template>
+								</t:Column>
+							</t:columns>
+						</t:Table>
+
+					</Panel>
+
+					<Panel expandable="true" width="auto" class="sapUiResponsiveMargin" expanded="true">
+						<headerToolbar>
+							<OverflowToolbar style="Clear">
+								<Title text="Remarks" />
+							</OverflowToolbar>
+						</headerToolbar>
+						<TextArea id="idRemarksTextArea" value="{Remarks}" 
+								  showExceededText="true" 
+								  width="100%"
+								  growing="true"
+								  enabled="{= ${appView>/editmode}}"
+								  rows="7"
+								  />
+					</Panel>
+
+				   <Panel expandable="true" width="auto" class="sapUiResponsiveMargin" expanded="true">
+					<headerToolbar>
+						<OverflowToolbar style="Clear">
+							<Title text="Uploaded Files" />
+						</OverflowToolbar>
+					</headerToolbar>
+						<upload:UploadSet
+								id="UploadSet"
+								instantUpload="false"
+								showIcons="false"
+								uploadEnabled="{appView>/editmode}"
+								terminationEnabled="false"
+								maxFileNameLength="30"
+								httpRequestMethod="Put"
+								afterItemAdded="onAfterItemAdded"
+								uploadCompleted="onUploadCompleted"
+								items="{path: '/Attachments', templateShareable: false}">
+							<upload:items>
+								<upload:UploadSetItem
+										fileName="{FileName}"
+										mediaType="{MediaType}"
+										visibleEdit="false"
+										url="/v2/catalog/Attachments({ID})/Content"
+										enabledRemove="{appView>/editmode}"
+										removePressed=".onAttachmentDelete"
+										openPressed=".onAttachmentDownload"
+										uploadState="Complete">
+								</upload:UploadSetItem>
+							</upload:items>
+						</upload:UploadSet>
+					</Panel>
+					<Panel headerText="Tableau test" expandable="true" width="auto" class="sapUiResponsiveMargin" expanded="true">
+						<custom:Tableau id="idTableauChart" 
+										width="100%" 
+										height="1500px"/>
+					</Panel>
+				</IconTabFilter>
 				</items>
 			</IconTabBar>
 		</f:content>
+		<f:footer>
+			<OverflowToolbar>
+				<ToolbarSpacer />
+				<Button type="Accept" text="Save" press="onSave"/>
+				<Button type="Reject" text="Cancel" press="onFooterCancelPress"/>
+			</OverflowToolbar>
+		</f:footer>
 	</f:DynamicPage>
 </mvc:View>

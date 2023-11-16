@@ -1,0 +1,44 @@
+<core:FragmentDefinition 
+	xmlns="sap.m" 
+	xmlns:core="sap.ui.core" 
+	xmlns:up="sap.uxap" 
+	xmlns:form="sap.ui.layout.form" 
+	xmlns:u="sap.uxap"
+	xmlns:t="sap.ui.table" 
+	xmlns:l="sap.ui.layout"
+	xmlns:mvc="sap.ui.core.mvc"
+	xmlns:f="sap.f">
+	
+    <Dialog id = "idCreateProposalPopup" title="Create Proposal" contentWidth="600px" contentHeight="150px">
+
+		<content>
+            <form:SimpleForm layout="ResponsiveGridLayout" editable="true" id="idNewProposalForm">
+                <VBox>
+                    <HBox>
+                        <VBox>
+                            <Label text="Type:" class="sapUiSmallMargin" labelFor="idGroupType" />
+                        </VBox>
+                        <VBox>
+                            <RadioButtonGroup id="idGroupType" columns='3'>
+                                <RadioButton text="New Proposal" selected="true" class="sapUiTinyMarginTop sapUiSmallMarginEnd"/>    
+                                <RadioButton text="Amendment" selected="false" class="sapUiTinyMarginTop sapUiSmallMarginEnd" />
+                                <RadioButton text="Renewal Contract" selected="false" class="sapUiTinyMarginTop sapUiSmallMarginEnd"/>
+                            </RadioButtonGroup>
+                        </VBox>
+                    </HBox>
+
+                    <HBox>
+                        <Label text='Proposal Name:' class="sapUiTinyMarginTop sapUiSmallMargin"/>
+                        <Input id="idNewProposalName" value="{Name}"  enabled="true" width="100%" />
+                    </HBox>
+                </VBox>
+                
+            </form:SimpleForm>
+        </content>
+
+        <buttons>
+            <Button text="Save" press=".onSaveProposal" />
+            <Button text="Cancel" press=".onCloseCreateProposalPopup" />
+        </buttons>
+    </Dialog>
+</core:FragmentDefinition>

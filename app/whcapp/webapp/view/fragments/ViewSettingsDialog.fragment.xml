@@ -1,0 +1,50 @@
+<core:FragmentDefinition
+    xmlns="sap.m"
+    xmlns:core="sap.ui.core">
+
+    <ViewSettingsDialog
+        id="viewSettingsDialog"
+        confirm=".onConfirmViewSettingsDialog">
+        <sortItems>
+            <ViewSettingsItem
+                text="{i18n>SortByProposalName}"
+                key="Name"
+                selected="true"/>
+
+            <ViewSettingsItem
+                text="{i18n>SortByProposalType}"
+                key="Type"
+                />
+
+            <ViewSettingsItem
+                text="{i18n>SortByStatus}"
+                key="Status"
+                />
+
+            <ViewSettingsItem
+                text="{i18n>SortByParentAccountName}"
+                key="ParentAccountName"
+                />
+
+            <ViewSettingsItem
+                text="{i18n>SortByModifiedBy}"
+                key="modifiedBy"
+                />
+            
+            <ViewSettingsItem
+                text="{i18n>SortByModifiedAt}"
+                key="modifiedAt"
+                />
+
+            <ViewSettingsItem
+                text="{i18n>SortByCreatedBy}"
+                key="createdBy"
+                />
+            
+            <ViewSettingsItem
+                text="{i18n>SortByCreatedAt}"
+                key="createdAt"
+                />
+        </sortItems>
+    </ViewSettingsDialog>
+</core:FragmentDefinition>

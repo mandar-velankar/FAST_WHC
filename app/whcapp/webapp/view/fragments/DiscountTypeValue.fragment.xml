@@ -1,0 +1,72 @@
+<core:FragmentDefinition 
+	xmlns="sap.m" 
+	xmlns:core="sap.ui.core" 
+	xmlns:up="sap.uxap" 
+	xmlns:form="sap.ui.layout.form" 
+	xmlns:u="sap.uxap"
+	xmlns:t="sap.ui.table" 
+	xmlns:l="sap.ui.layout"
+	xmlns:mvc="sap.ui.core.mvc"
+	xmlns:f="sap.f">
+
+    <Table id="discountsTable" 
+						items="{
+							path:'/DiscountsView'
+						}"
+						growing="true"
+						growingThreshold="15"
+						growingScrollToLoad="false"
+						busyIndicatorDelay="0">
+						<columns>
+							<Column>
+								<Text text="Year" />
+							</Column>
+							<Column>
+								<Text text="Units" />
+							</Column>
+							<Column>
+								<Text text="Mirena" />
+							</Column>
+							<Column>
+								<Text text="Kyleena" />
+							</Column>
+							<Column>
+								<Text text="Skyla" />
+							</Column>
+						</columns>
+						<items>
+							<ColumnListItem>
+								<cells>
+									<Text text="Y{Year}" />
+									<Input 
+										value="{
+                                            path: 'Units',
+                                            type: 'sap.ui.model.type.Integer',
+											formatOptions: {
+												maxFractionDigits: 0,
+												minFractionDigits: 0,
+												groupingEnabled:true,
+												groupingSeparator: ','
+											}    
+                                        }" 
+										enabled="{= ${appView>/editmode}}"
+									/>
+									<Input 
+										value="{Mirena}" 
+										enabled="{= ${appView>/editmode}}"
+									/>
+									<Input 
+										value="{Kyleena}" 
+										enabled="{= ${appView>/editmode}}"
+									/>
+									<Input 
+										value="{Skyla}" 
+										enabled="{= ${appView>/editmode}}"
+									/>
+								</cells>
+							</ColumnListItem>
+						</items>
+					</Table>
+	
+    
+</core:FragmentDefinition>

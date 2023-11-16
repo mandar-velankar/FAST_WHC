@@ -8,19 +8,20 @@
     "dependencies": {
         "@cap-js-community/odata-v2-adapter": "^1.11.4",
         "@sap/cds": "^6.8.2",
-        "express": "^4",
-        "hdb": "^0.19.0",
         "@sap/xsenv": "^3.4.0",
         "@sap/xssec": "^3.2.17",
+        "cors-anywhere": "^0.4.4",
+        "express": "^4",
+        "hdb": "^0.19.0",
         "passport": "^0.6.0"
     },
     "devDependencies": {
-        "sqlite3": "^5",
         "cds-plugin-ui5": "^0.1.4",
-        "rimraf": "^3.0.2"
+        "rimraf": "^3.0.2",
+        "sqlite3": "^5"
     },
     "scripts": {
-        "start": "cds-serve",
+        "start": "cds-serve & node srv/cors-proxy.js",
         "watch": "cds watch",
         "watch:hybrid": "cds bind --exec npm run watch --profile hybrid",
         "watch:as": "cds bind --exec npm run watch --profile artiom",
