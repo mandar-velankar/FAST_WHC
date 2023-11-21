@@ -9,7 +9,7 @@
 	xmlns:mvc="sap.ui.core.mvc"
 	xmlns:f="sap.f">
 	
-    <Dialog id = "idCreateProposalPopup" title="Create Proposal" contentWidth="600px" contentHeight="150px">
+    <Dialog id = "idCreateProposalPopup" title="Create Proposal" contentWidth="600px" contentHeight="200px">
 
 		<content>
             <form:SimpleForm layout="ResponsiveGridLayout" editable="true" id="idNewProposalForm">
