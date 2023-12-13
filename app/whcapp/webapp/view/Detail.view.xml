@@ -430,7 +430,7 @@
 								showIcons="false"
 								uploadEnabled="{appView>/editmode}"
 								terminationEnabled="false"
-								maxFileNameLength="30"
+								maxFileNameLength="0"
 								httpRequestMethod="Put"
 								afterItemAdded="onAfterItemAdded"
 								uploadCompleted="onUploadCompleted"

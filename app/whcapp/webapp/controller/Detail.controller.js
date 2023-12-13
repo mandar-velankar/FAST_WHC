@@ -537,6 +537,7 @@ sap.ui.define([
 			const id = await this.createAttachmentEntry(contract.ID,item);
 
 			if(window.location.host.search('port4004') === -1){
+				uploader.removeHeaderField("X-CSRF-Token");
 				uploader.insertHeaderField(new Item({key: "X-CSRF-Token", text: this.getOwnerComponent().getModel().getSecurityToken()}));
 			}
 			item.setUploadUrl(//window.location.host.search('/app') > -1 ? `/app/whc/v2/catalog/Attachments(ID=${id})/Content` : 
