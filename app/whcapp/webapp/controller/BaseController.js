@@ -21,6 +21,10 @@ sap.ui.define([
 			return this.getOwnerComponent().getRouter();
 		},
 
+		getText: function (key, params) {
+			return this.getResourceBundle().getText(key, params);
+		},
+
 		fieldsFactory: function (id, context) {
 			const control = context.getObject();
 			return control.generateControl();
