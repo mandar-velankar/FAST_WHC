@@ -97,6 +97,10 @@
     {
       "name": "$XSAPPNAME.f_tnndr_cag_standardtenderdownload_user",
       "description": "f_tnndr_cag_standardtenderdownload_user"
+    },
+    {
+      "name": "$XSAPPNAME.f_tnndr_cag_standardtenderzuelligextract_user",
+      "description": "f_tnndr_cag_standardtenderzuelligextract_user"
     }
   ],
   "attributes": [],
@@ -290,6 +294,14 @@
       "description": "generated",
       "scope-references": [
         "$XSAPPNAME.f_tnndr_cag_standardtenderdownload_user"
+      ],
+      "attribute-references": []
+    },
+    {		  
+      "name": "f_tnndr_cag_standardtenderzuelligextract_user",
+      "description": "generated",
+      "scope-references": [
+        "$XSAPPNAME.f_tnndr_cag_standardtenderzuelligextract_user"
       ],
       "attribute-references": []
     }	  
