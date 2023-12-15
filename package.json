@@ -9,7 +9,7 @@
         "@cap-js-community/odata-v2-adapter": "^1.11.4",
         "@sap/cds": "^6.8.2",
         "@sap/xsenv": "^3.4.0",
-        "@sap/xssec": "^3.2.17",
+        "@sap/xssec": "^3.6.0",
         "cors-anywhere": "^0.4.4",
         "express": "^4",
         "hdb": "^0.19.0",
